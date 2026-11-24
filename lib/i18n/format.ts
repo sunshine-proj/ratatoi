@@ -69,3 +69,21 @@ export function formatDate(iso: string, style: DateStyle, locale: Locale = defau
 export function formatDateRange(startIso: string, endIso: string, locale: Locale = defaultLocale): string {
   return dateFormatter("range", locale).formatRange(isoDateToUtc(startIso), isoDateToUtc(endIso));
 }
+
+const timestampFormatters = new Map<string, Intl.DateTimeFormat>();
+
+/** A moment in the user's local time, 24-hour clock: "24 Nov, 14:05". */
+export function formatTimestamp(isoDateTime: string, locale: Locale = defaultLocale): string {
+  let formatter = timestampFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(intlLocales[locale], {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    timestampFormatters.set(locale, formatter);
+  }
+  return formatter.format(new Date(isoDateTime));
+}

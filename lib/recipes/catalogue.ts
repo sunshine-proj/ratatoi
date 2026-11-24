@@ -132,3 +132,19 @@ export function toSummary(detail: RecipeDetail): RecipeSummary {
 export function getRecipeSummaries(): RecipeSummary[] {
   return details.map(toSummary);
 }
+
+/** Ingredient lines per recipe, for shopping-list generation in the browser. */
+export function getRecipeIngredientIndex(): Record<
+  string,
+  { servings: number; ingredients: { ingredient: string; quantity: number; unit: RecipeIngredient["unit"] }[] }
+> {
+  return Object.fromEntries(
+    recipes.map((recipe) => [
+      recipe.slug,
+      {
+        servings: recipe.servings,
+        ingredients: recipe.ingredients.map(({ ingredient, quantity, unit }) => ({ ingredient, quantity, unit })),
+      },
+    ]),
+  );
+}

@@ -112,22 +112,22 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 6 — Shopping list
 
-- [ ] Define `ShoppingList` and `ShoppingListItem` types (canonical key, quantity, unit, category, sources, checked, origin, stable identity key)
-- [ ] Aggregation: collect ingredients in range → scale by servings → normalise via alias map → combine compatible units only → categorise → attach sources
-- [ ] Never convert volume to mass without an ingredient-specific conversion
-- [ ] Generation is deterministic for a given plan
-- [ ] Regeneration keeps manual items and keeps checked state for stable items
-- [ ] `/shopping-list`: date range selector and Generate action with a short explanation
-- [ ] Compact rows grouped by category
-- [ ] Accessible checkboxes to check/uncheck items
-- [ ] Edit quantity and unit; remove items
-- [ ] Add and remove manual items
-- [ ] Empty state when the plan has no meals
-- [ ] Unit tests: same ingredient/unit, aliases, different units, fractional quantities, changed servings, removed recipe, manual items, checked-state preservation, empty plan
+- [x] Define `ShoppingList` and `ShoppingListItem` types (canonical key, quantity, unit, category, sources, checked, origin, stable identity key)
+- [x] Aggregation: collect ingredients in range → scale by servings → normalise via alias map → combine compatible units only → categorise → attach sources
+- [x] Never convert volume to mass without an ingredient-specific conversion
+- [x] Generation is deterministic for a given plan
+- [x] Regeneration keeps manual items and keeps checked state for stable items
+- [x] `/shopping-list`: date range selector and Generate action with a short explanation
+- [x] Compact rows grouped by category
+- [x] Accessible checkboxes to check/uncheck items
+- [x] Edit quantity and unit; remove items
+- [x] Add and remove manual items
+- [x] Empty state when the plan has no meals
+- [x] Unit tests: same ingredient/unit, aliases, different units, fractional quantities, changed servings, removed recipe, manual items, checked-state preservation, empty plan
 
 ## Phase 7 — Persistence, offline, and accessibility
 
-- [ ] Guest-first local persistence for goals, preferences, plans, and shopping lists (goals and preferences done in Phase 2: `lib/settings`)
+- [x] Guest-first local persistence for goals, preferences, plans, and shopping lists (built alongside each feature: settings, plan, shopping documents)
 - [ ] Validate persisted data with schemas on load; add a versioned migration path for local data (validation done for settings; migrations not yet needed)
 - [ ] Decide whether to add optional account sync (Supabase) now or in V1; document the decision
 - [ ] If Supabase is added: auth, schema, row-level security, additive migrations, env vars in `.env.example`

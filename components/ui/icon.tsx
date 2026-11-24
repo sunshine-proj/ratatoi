@@ -46,6 +46,7 @@ const paths = {
   ),
   close: <path d="M6 6l12 12M18 6L6 18" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  pencil: <path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4" />,
   copy: (
     <>
       <rect x="8" y="8" width="12" height="12" rx="2" />

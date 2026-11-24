@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 5 (nutrition summaries and progress) complete.** On top of the app shell, PWA, onboarding and goals, the recipe catalogue (still without photos), and the week planner, users now see their planned intake against their targets: on Today (greeting, date, progress, today's meals including snacks, quick actions) and for every day in the planner, plus a week summary. Per-meal protein and calorie chips appear in the planner and on Today. The shopping list (Phase 6) comes next. See `ROADMAP.md` for progress and next phases.
+**Phase 6 (shopping list) complete. The MVP feature set is now in place.** Users can set goals and preferences, browse recipes (still without photos), plan a week with progress against their targets, and create a shopping list from the plan: combined by ingredient, grouped by aisle, with ticks, edits, their own items, and an update that keeps their changes. Everything is saved in the browser. Phase 7 (persistence, offline, accessibility hardening) is next. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -98,8 +98,8 @@ components/
   recipes/           Recipe card, image/placeholder, browser and filters, detail page
   planner/           Week view, day tabs, slots, meal rows, add/swap/duplicate sheets,
                      Add to plan button, servings stepper
-  storage/           Loading / unreadable-data gate shared by settings and the plan
-  shopping/
+  storage/           Loading / unreadable-data gate shared by settings, plan, and list
+  shopping/          Shopping list view, item rows, item fields, date-range picker
 lib/                 Domain logic, kept free of UI code
   i18n/              Translation-ready UI strings (English; Lithuanian-ready)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
@@ -110,12 +110,12 @@ lib/                 Domain logic, kept free of UI code
   settings/          Saved settings document and the useSettings hook
   storage/           Schema-validated localStorage document and useLocalDocument hook
   planner/           Plan schema, pure plan operations, saved plan document, custom-meal form
+  shopping/          List schema, aggregation, list operations, formatting, date ranges
   dates.ts           Calendar-date helpers (weeks start Monday)
   ingredients/       Ingredient schema, catalogue, alias index, word matching
   recipes/           Recipe schema, catalogue views, nutrition calculation,
                      labels (tags.ts), filters and sorting, quantity formatting
   navigation.ts      Route table and nav configuration
-  shopping/
 data/ingredients.ts  Curated ingredient table (nutrition, allergens, aliases, aisle)
 data/recipes/        Seed recipes
 assets/              Icon source artwork (SVG)
@@ -174,7 +174,7 @@ Keep nutrition calculations and shopping aggregation in testable domain function
 
 Guest mode only; there is no account or server storage yet.
 
-- **Where:** JSON documents in `localStorage`: `protein-plate:settings` (`userSettingsSchema` in `lib/settings/settings.ts`) and `protein-plate:plan` (`mealPlanSchema` in `lib/planner/schema.ts`), each with `version: 1`.
+- **Where:** JSON documents in `localStorage`: `protein-plate:settings` (`userSettingsSchema` in `lib/settings/settings.ts`), `protein-plate:plan` (`mealPlanSchema` in `lib/planner/schema.ts`), and `protein-plate:shopping` (`shoppingListSchema` in `lib/shopping/schema.ts`), each with `version: 1`.
 - **What:** goal type; daily calorie and protein targets; optional carbohydrate and fat targets; whether the targets started from an estimate; food preferences (eating pattern, the 14 EU-declared allergens, other excluded ingredients, cooking confidence, budget, meals and snacks per day); and when onboarding was completed.
 - **What is never saved:** the age, sex, height, weight, and activity level used for estimates. They exist only in component state while the estimate form is open.
 - **Validation:** data is checked against the schema on every read. Damaged or unrecognised data is never trusted: the UI explains the problem and offers to reset. Writes that fail (storage blocked or full) show an error and change nothing.
@@ -201,6 +201,20 @@ The user always reviews and edits the numbers. Manual targets must be between 80
 - **Saving:** a separate browser document, `protein-plate:plan`, validated on every read. If it can't be read, the planner explains, refuses to overwrite it silently, and offers a reset that leaves goals and preferences untouched.
 - **URL:** the selected day is in `?date=YYYY-MM-DD`, so refresh, back/forward, and "View plan" links land on the right day.
 - **Bulk actions** (clear day, clear week) ask for confirmation. Removing one meal or swapping offers "Undo" in a toast.
+
+## Shopping list
+
+- **Generation** (`lib/shopping/aggregate.ts`) is pure and deterministic. For the chosen dates (this week, next week, next 7 days, or up to 31 custom days), every planned recipe's ingredients are scaled by *planned servings ÷ recipe servings* and combined by canonical ingredient and unit family:
+  - **mass:** g, shown as kg from 1,000 g;
+  - **volume:** ml, tsp, and tbsp combine, because a spoon is a fixed volume (5 ml / 15 ml). Lines made only of spoons stay in tsp; otherwise ml, shown as l from 1,000 ml;
+  - **pieces:** eggs, lemons, garlic cloves, slices.
+
+  Families are never converted into each other. There is no reliable per-ingredient density data, so grams and millilitres of the same ingredient stay on separate lines. Lines are sorted by aisle, then name, and record which planned meals they came from ("For Ginger chicken stir-fry, …").
+- **Not guessed:** custom meals have no ingredient list, and the page says how many were left out. The same goes for planned recipes that no longer exist.
+- **Stable identity:** generated lines have ids like `gen:chicken-breast:mass`. **Updating from the plan** recalculates amounts but keeps ticks on lines that still exist, keeps the user's own items, and keeps amounts the user edited (showing "Your plan needs 300 g" beside them). Lines the plan no longer needs are dropped; removed lines come back if the plan still needs them. The page notices when the plan has changed since the list was made and offers an update.
+- **Editing:** tick and untick, untick all, edit amount, unit, and aisle (and the name of your own items), remove with Undo, add your own items (sorted into an aisle automatically when the name matches the ingredient catalogue, including aliases such as "Greek yogurt"), and clear the whole list after confirming.
+- **Accessibility:** each checkbox is named by its line ("300 g Chicken breast"); which recipes need it, and any notes, are its description. Rows are compact, with 44 px targets.
+- **Saved** as a separate browser document, `protein-plate:shopping`, validated on read. An unreadable list is never overwritten silently; resetting it leaves the plan, goals, and preferences alone.
 
 ## Nutrition progress
 

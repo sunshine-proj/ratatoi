@@ -229,6 +229,46 @@ The README has a new "Nutrition progress" section. Phase 6 (the shopping list) i
 ============================
 
 
+Phase 6 is done and every roadmap item is ticked, so the MVP feature set is complete. Lint, typecheck, all 252 unit tests, the build and the 93 end-to-end tests pass. Nothing is committed.
+
+What users can do now (/shopping-list)
+
+Create a list from the plan for this week, next week, the next 7 days, or up to 31 days of their own choosing. An explanation shows exactly what "Create list from plan" will do.
+Ingredients are combined into one line each, grouped by aisle, and each line says which recipes it's for: for example, "300 g Chicken breast", for Ginger chicken stir-fry and Lemon chicken quinoa bowl.
+Manage items:
+tick and untick, or untick all
+edit amount, unit or aisle
+remove, with Undo
+add your own items ("Greek yogurt" is sorted into Dairy and eggs automatically)
+clear the whole list, after confirming
+When the plan changes, the list says so and offers an update. Updating keeps ticks, your own items, and any amounts you edited, showing "Your plan needs 300 g" next to them.
+Empty plan: a "Go to meal plan" link. Once a list exists, it shows first, which is better in a shop.
+How amounts are combined
+
+Scaling: planned servings ÷ the recipe's servings.
+Combining: by ingredient and unit family. Spoons and millilitres combine, because a spoon is a fixed volume; spice-sized amounts stay in teaspoons. Grams and millilitres are never converted into each other, because there's no reliable per-ingredient density data, so they stay on separate lines.
+Display: rounding is only for display. Large amounts show as kg or l, pieces show in quarters, and a small amount never displays as 0.
+Not guessed: custom meals have no ingredient list, so the page says how many were left out rather than estimating.
+Saved separately from the plan and settings. A damaged list is never overwritten without asking, and resetting it leaves everything else alone.
+Bugs found and fixed along the way
+
+Checkbox names ran words together. Screen readers would have heard "300 gChicken breastFor Lemon chicken quinoa bowl". Each checkbox is now named by its line ("300 g Chicken breast"), and the recipe note is read as its description. The same fix applies to aisle headings ("Meat and fish1 item").
+A half-typed custom date crashed the page. It now shows a validation message instead.
+Checks I ran
+
+npm run check: passed, with 252 unit tests. They cover the same ingredient across recipes, aliases, keeping grams and pieces apart, spoons combined with ml, fractional and changed servings, a removed recipe, your own items, ticks surviving an update, edited amounts, an empty plan, date-range limits, and the same result regardless of meal order.
+npm run test:e2e: 93 passed, 9 skipped on purpose. They cover the empty state, creating a list from two planned recipes, ticks surviving a reload, a plan change triggering an update with the tick kept, adding your own item, custom-date validation, and a 320 px phone.
+I also checked screenshots at phone and desktop widths.
+Not done yet
+
+Sharing or exporting the list, and subtracting what's already in your pantry. Both are planned for V1.
+Amounts are shown exactly as needed, such as "½ Carrot" or "75 g Cherry tomatoes". They aren't rounded up to pack sizes.
+Lines you remove come back on the next update if the plan still needs them. The page explains this.
+The README has a new "Shopping list" section. Phase 7 (hardening saved data, offline use and accessibility) is next.
+
+
+
+============================
 
 
 

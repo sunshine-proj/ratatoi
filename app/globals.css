@@ -38,6 +38,10 @@
   --color-accent-strong: #8a3212;
   --color-on-accent: #ffffff;
 
+  /* Butter — decorative tint for illustrations only (no text on it) */
+  --color-butter-soft: #fbefd2;
+  --color-butter-strong: #7a5410;
+
   /* Feedback */
   --color-danger: #a8271b;
   --color-danger-soft: #fbe3e0;

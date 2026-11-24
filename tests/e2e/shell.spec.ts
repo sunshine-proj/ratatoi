@@ -4,7 +4,7 @@ const pages = [
   { path: "/", title: "Protein Plate", heading: "Today" },
   { path: "/onboarding", title: "Set up your plan · Protein Plate", heading: "Set up your plan" },
   { path: "/recipes", title: "Recipes · Protein Plate", heading: "Recipes" },
-  { path: "/recipes/greek-yoghurt-bowl", title: "Protein Plate", heading: "Recipe" },
+  { path: "/recipes/berry-yoghurt-power-bowl", title: "Berry yoghurt power bowl · Protein Plate", heading: "Berry yoghurt power bowl" },
   { path: "/snacks", title: "Snacks · Protein Plate", heading: "Snacks" },
   { path: "/planner", title: "Meal plan · Protein Plate", heading: "Meal plan" },
   { path: "/shopping-list", title: "Shopping list · Protein Plate", heading: "Shopping list" },
@@ -26,9 +26,23 @@ test.describe("routes", () => {
     });
   }
 
-  test("recipe detail shows the slug from the URL", async ({ page }) => {
-    await page.goto("/recipes/greek-yoghurt-bowl");
-    await expect(page.getByRole("main")).toContainText("greek-yoghurt-bowl");
+  test("unknown recipes show the not-found page with a real 404", async ({ page }) => {
+    const response = await page.goto("/recipes/does-not-exist");
+    expect(response?.status()).toBe(404);
+    await expect(page).toHaveURL("/recipes/does-not-exist");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
+  });
+
+  test("unknown recipes reached by client navigation also show not-found", async ({ page }) => {
+    await page.goto("/recipes");
+    await page.evaluate(() => {
+      const link = document.createElement("a");
+      link.href = "/recipes/nope";
+      link.textContent = "test link";
+      document.querySelector("main")?.append(link);
+    });
+    await page.getByRole("link", { name: "test link" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
   });
 
   test("unknown routes show a helpful not-found page", async ({ page }) => {
@@ -69,7 +83,7 @@ test.describe("navigation", () => {
   });
 
   test("main nav is reachable on the recipe detail route (dynamic params)", async ({ page }) => {
-    await page.goto("/recipes/any-recipe");
+    await page.goto("/recipes/lemon-salmon-traybake");
     const nav = page.getByRole("navigation", { name: "Main" });
     await expect(nav.getByRole("link", { name: "Recipes" })).toHaveAttribute("aria-current", "page");
   });
@@ -94,7 +108,7 @@ test.describe("layout", () => {
   });
 
   test("never scrolls horizontally", async ({ page }) => {
-    for (const path of ["/", "/settings/goals", "/recipes/a-very-long-recipe-slug-that-should-wrap-nicely"]) {
+    for (const path of ["/", "/settings/goals", "/recipes", "/snacks", "/recipes/lean-beef-ragu-wholewheat-pasta"]) {
       await page.goto(path);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, path).toBeLessThanOrEqual(0);

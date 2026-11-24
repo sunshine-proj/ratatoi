@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 2 (onboarding and nutrition goals) complete.** On top of the Phase 1 shell and PWA foundation, users can run a 5-step set-up (goal, optional estimate, targets, food preferences, summary), edit targets and preferences in Settings, and see their targets on Today. Settings are saved in the browser (guest mode). Recipes, planning, and shopping arrive from Phase 3 onwards. See `ROADMAP.md` for progress and next phases.
+**Phase 3 (recipe catalogue) complete, except recipe photography.** On top of the app shell, PWA foundation, onboarding, and goals, users can browse 25 original recipes, search by name or ingredient, filter by meal, protein, calories, time, diet, allergens, and ingredients (with their saved preferences applied by default), open a full recipe page, and find snacks with editable presets. Recipes show a designed illustration until licensed photos are added. Planning and shopping arrive from Phase 4 onwards. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -94,7 +94,8 @@ components/
   settings/          Loading / unreadable-data gate for saved settings
   today/             Today overview
   forms/             Field error messages and focus helpers
-  recipes/ planner/ nutrition/ shopping/
+  recipes/           Recipe card, image/placeholder, browser and filters, detail page
+  planner/ nutrition/ shopping/
 lib/                 Domain logic, kept free of UI code
   i18n/              Translation-ready UI strings (English; Lithuanian-ready)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
@@ -103,11 +104,16 @@ lib/                 Domain logic, kept free of UI code
   preferences/       Preference schema, allergens, excluded-ingredient helpers
   settings/          Saved settings document and the useSettings hook
   storage/           Schema-validated localStorage document
+  ingredients/       Ingredient schema, catalogue, alias index, word matching
+  recipes/           Recipe schema, catalogue views, nutrition calculation,
+                     labels (tags.ts), filters and sorting, quantity formatting
   navigation.ts      Route table and nav configuration
-  recipes/ planner/ shopping/
-data/recipes/        Seed recipe data
+  planner/ shopping/
+data/ingredients.ts  Curated ingredient table (nutrition, allergens, aliases, aisle)
+data/recipes/        Seed recipes
 assets/              Icon source artwork (SVG)
 scripts/             Build-time helpers (icon generation)
+proxy.ts             Returns a real 404 for unknown recipe slugs
 public/sw.js         Service worker
 public/icons/        Generated PWA icons
 public/images/       Licensed recipe images
@@ -206,6 +212,21 @@ To test the PWA locally, use a production build (`npm run build && npm run start
 ## Recipe content and images
 
 Use only original, licensed, or explicitly permitted recipe content and photography. Store attribution and licence metadata where required. Do not scrape recipe sites or images without permission. Provide image alt text and a graceful placeholder for missing images.
+
+### Recipe catalogue
+
+- **Recipes** (`data/recipes/index.ts`) are original recipes written for Protein Plate: 6 breakfasts, 5 lunches, 7 dinners, and 7 snacks (some recipes cover more than one meal), including vegan, vegetarian, fish, and meat dishes, quick ones, and batch-cook ones. They are validated against `recipeSchema` at build time; invalid data fails the build.
+- **Ingredients** (`data/ingredients.ts`) are a curated table. Each has a canonical key (used later for shopping-list aggregation), aliases (for search and exclusions, e.g. "zucchini" → courgettes, "shrimp" → prawns), an aisle category, allergens (the 14 EU-declared allergens), what it is made from (plant, dairy, fish…), and approximate nutrition per 100 g.
+- **Derived, not typed in:** a recipe's allergens and its vegan/vegetarian/pescatarian suitability are computed from its ingredients, so they can't contradict the ingredient list.
+- **Nutrition** per serving is calculated from the ingredient table and stored explicitly in each recipe, labelled *estimated* with its source. `tests/unit/lib/recipe-data.test.ts` fails if a stored value drifts from the calculation. **The per-100 g values are approximate typical values compiled for this project, not taken from or verified against a food-composition database.** Check them against an authoritative source before public launch.
+- **Labels** have stated thresholds, shown on each recipe page: *High protein* = at least 20% of energy from protein (the EU condition for the claim); *Under 200 kcal* (snacks) and *Under 450 kcal* (meals) per serving; *Quick* = 15 minutes or less in total; *Batch cook* = marked by the author. Nothing is labelled "low calorie".
+- **Photos:** none yet. `image` is `null` and a designed, decorative illustration (tinted by meal type) fills the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence` for any photo added later, and the source section of each recipe page shows them. Recipe text is English only for now.
+
+### Searching and filtering
+
+Filters are pure functions in `lib/recipes/filter.ts`. They can be combined, are deterministic (ties are broken by name), and use inclusive bounds on per-serving values. Search needs every word to appear in the recipe name or an ingredient name or alias. Ingredient exclusions match whole words, singular or plural, so "tomato" excludes cherry and canned tomatoes. Saved preferences (eating pattern, allergens, excluded ingredients) are applied by default, shown above the results, and can be switched off. `/snacks` offers presets (up to 150/200/250 kcal with at least 15/20/25 g protein) that are never applied automatically and stay editable.
+
+Unknown recipe URLs return a real `404`. With Cache Components the page shell would otherwise be streamed with a `200` before `notFound()` runs, so `proxy.ts` checks the slug first, following the Next.js guidance.
 
 ## Nutrition and safety
 

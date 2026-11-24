@@ -59,6 +59,33 @@ const paths = {
     </>
   ),
   chevronDown: <path d="M6 9l6 6 6-6" />,
+  chevronLeft: <path d="M15 6l-6 6 6 6" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  utensils: (
+    <>
+      <path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10" />
+      <path d="M17 21V3c-2 1.5-3 4-3 7v3h3" />
+    </>
+  ),
+  servings: (
+    <>
+      <circle cx="12" cy="13" r="7" />
+      <circle cx="12" cy="13" r="3.5" />
+      <path d="M4 4v4M2.5 4v2.5a1.5 1.5 0 0 0 3 0V4M20 4v7" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M20 20l-4.2-4.2" />
+    </>
+  ),
+  sliders: <path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4" />,
 } as const;
 
 export type IconName = keyof typeof paths;

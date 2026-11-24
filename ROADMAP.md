@@ -59,23 +59,24 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 3 — Recipe catalogue, detail, search, and filters
 
-- [ ] Define the `Recipe` type and Zod schema (nutrition per serving, servings, times, meal types, allergens, image metadata, `nutrition_source`, `nutrition_is_estimated`)
-- [ ] Create a curated ingredient alias map and category list for shopping aggregation
-- [ ] Write seed recipes: breakfasts, lunches, dinners, several high-protein snacks, vegetarian options, quick and batch-cook dishes
-- [ ] Get licensed, owned, or permitted images only; record attribution and licence for each
-- [ ] Validate all seed data against the schema in a test
-- [ ] Recipe card: image with fixed aspect ratio and placeholder, name, kcal and protein per serving, prep time, tags
-- [ ] Only show a "low calorie" tag when it meets a stated threshold
-- [ ] `/recipes`: photo-led grid/list
-- [ ] Text search by recipe name and ingredient
-- [ ] Filters: meal type, protein minimum, calorie maximum, prep-time maximum, dietary pattern, excluded ingredients/allergens
-- [ ] Filters are composable, deterministic, and use inclusive boundaries
-- [ ] Apply the user's saved exclusions by default, with a way to see them
-- [ ] Empty results state with a reset-filters action
-- [ ] `/recipes/[slug]`: hero image, description, servings, prep/cook time, macro summary, ingredients, steps, allergens, source and nutrition attribution, estimated/verified label
-- [ ] `/snacks`: snack discovery with editable calorie/protein presets
-- [ ] Responsive images with no layout shift
-- [ ] Unit tests: each filter, combined filters, boundary values, zero results, exclusions
+- [x] Define the `Recipe` type and Zod schema (nutrition per serving, servings, times, meal types, allergens, image metadata, `nutrition_source`, `nutrition_is_estimated`)
+- [x] Create a curated ingredient alias map and category list for shopping aggregation (`data/ingredients.ts`)
+- [x] Write seed recipes: breakfasts, lunches, dinners, several high-protein snacks, vegetarian options, quick and batch-cook dishes
+- [ ] Get licensed, owned, or permitted images only; record attribution and licence for each (schema and UI ready; no photos yet, so recipes show a designed placeholder)
+- [x] Validate all seed data against the schema in a test
+- [x] Recipe card: image with fixed aspect ratio and placeholder, name, kcal and protein per serving, prep time, tags
+- [x] Only show a "low calorie" tag when it meets a stated threshold
+- [x] `/recipes`: photo-led grid/list
+- [x] Text search by recipe name and ingredient
+- [x] Filters: meal type, protein minimum, calorie maximum, prep-time maximum, dietary pattern, excluded ingredients/allergens
+- [x] Filters are composable, deterministic, and use inclusive boundaries
+- [x] Apply the user's saved exclusions by default, with a way to see them
+- [x] Empty results state with a reset-filters action
+- [x] `/recipes/[slug]`: hero image, description, servings, prep/cook time, macro summary, ingredients, steps, allergens, source and nutrition attribution, estimated/verified label
+- [x] `/snacks`: snack discovery with editable calorie/protein presets
+- [x] Responsive images with no layout shift
+- [x] Unit tests: each filter, combined filters, boundary values, zero results, exclusions
+- [ ] Verify ingredient nutrition values against an authoritative food-composition source before launch
 
 ## Phase 4 — Meal planner
 

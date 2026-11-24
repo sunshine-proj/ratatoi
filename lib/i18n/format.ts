@@ -1,4 +1,4 @@
-import { defaultLocale, type Locale } from "./index";
+import { defaultLocale, formatMessage, type Locale } from "./index";
 
 const formatters = new Map<string, Intl.NumberFormat>();
 
@@ -11,4 +11,21 @@ export function formatNumber(value: number, locale: Locale = defaultLocale, maxi
     formatters.set(cacheKey, formatter);
   }
   return formatter.format(value);
+}
+
+export type PluralForms = { readonly one: string; readonly other: string };
+
+/**
+ * Pick the plural form for `count` and fill `{count}` (formatted) plus any
+ * other placeholders. Lithuanian needs "few"/"many" forms too; extend
+ * PluralForms when that locale is added.
+ */
+export function formatPlural(
+  forms: PluralForms,
+  count: number,
+  values: Record<string, string | number> = {},
+  locale: Locale = defaultLocale,
+): string {
+  const template = new Intl.PluralRules(locale).select(count) === "one" ? forms.one : forms.other;
+  return formatMessage(template, { count: formatNumber(count, locale), ...values });
 }

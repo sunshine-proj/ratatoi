@@ -127,10 +127,12 @@ export function PreferencesFields({ idPrefix, value, onChange }: {
 }
 
 /** Free-text list with add/remove, announcing changes politely. */
-function ExcludedIngredientsField({ id, value, onChange }: {
+export function ExcludedIngredientsField({ id, value, onChange, label, hint }: {
   id: string;
   value: readonly string[];
   onChange: (value: string[]) => void;
+  label?: string;
+  hint?: string;
 }) {
   const t = getMessages();
   const [text, setText] = useState("");
@@ -175,7 +177,7 @@ function ExcludedIngredientsField({ id, value, onChange }: {
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="font-medium">
-        {t.preferences.excluded.label}
+        {label ?? t.preferences.excluded.label}
       </label>
       <div className="flex gap-2">
         <input
@@ -204,10 +206,10 @@ function ExcludedIngredientsField({ id, value, onChange }: {
           {t.preferences.excluded.add}
         </Button>
       </div>
-      <FieldMessages hint={t.preferences.excluded.hint} error={error} hintId={hintId} errorId={errorId} />
+      <FieldMessages hint={hint ?? t.preferences.excluded.hint} error={error} hintId={hintId} errorId={errorId} />
 
       {value.length > 0 ? (
-        <ul id={listId} aria-label={t.preferences.excluded.listLabel} className="mt-2 flex flex-wrap gap-2">
+        <ul id={listId} aria-label={label ?? t.preferences.excluded.listLabel} className="mt-2 flex flex-wrap gap-2">
           {value.map((name) => (
             <li key={name} className="inline-flex items-center rounded-pill bg-surface-muted pl-3 text-sm font-medium">
               <span>{name}</span>

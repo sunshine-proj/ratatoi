@@ -90,6 +90,95 @@ The README now has "Saved data and privacy", "Suggested targets" and "Forms" sec
 ============================
 
 
+Phase 3 is done except recipe photography, and that roadmap item is still unchecked. Lint, typecheck, the 168 unit tests, the build and the end-to-end tests all pass. Nothing is committed.
+
+What users can do now
+
+Browse /recipes: 25 original recipes covering breakfast, lunch, dinner and snacks, with vegan, vegetarian, fish and meat options and quick and batch-cook dishes.
+Search by recipe name or ingredient, including other names: "shrimp" finds prawns, "zucchini" finds courgettes.
+Filter by meal, minimum protein, maximum calories, time, diet, allergens and ingredients to leave out. On phones the filters open in a bottom sheet; on desktop they sit in a sidebar.
+Sort by most protein, fewest calories, quickest, or name.
+Active filters show as chips you can remove one by one. If nothing matches, the page explains why and offers a reset.
+Saved preferences are applied by default. A note above the results says what's being hidden ("Hiding: Fish") and has a switch to turn it off.
+Recipe pages show:
+nutrition per serving, labelled "Estimated"
+ingredients with metric amounts, such as "2 cloves" and "½ Onion"
+numbered steps
+allergens, with a note to check product labels
+storage notes
+how each label is decided, and where the recipe and nutrition data come from
+Find snacks at /snacks with one-tap presets (up to 150, 200 or 250 kcal, with at least 15, 20 or 25 g protein). They're never applied automatically, and the numbers stay editable.
+Decisions worth knowing
+
+Nutrition is calculated, not typed in. Each recipe's per-serving values come from an ingredient table and are stored in the recipe, and a test fails if they ever drift from the calculation. Allergens and vegan/vegetarian suitability are also derived from the ingredients, so they can't contradict the ingredient list.
+
+Every label has a stated rule:
+
+"High protein" means at least 20% of energy comes from protein (the EU condition for the claim).
+"Under 200 kcal" (snacks) and "Under 450 kcal" (meals) are per serving.
+"Quick" means 15 minutes or less in total.
+Nothing is called "low calorie". As a result, the chickpea, tofu and spinach curry (19% protein) doesn't get the "High protein" label.
+
+Unknown recipe URLs return a real 404. With Next 16's Cache Components, the page starts sending before it can tell the recipe is missing, so it would otherwise return a 200 status. A small proxy.ts checks the recipe name first, as the Next docs recommend.
+
+Issues found and fixed along the way
+
+Counted ingredients read "1 Lemons" and "½ Onions". They now use singular names.
+The hidden results heading reused the "Search recipes" text, so screen readers heard the results area named like the search box. It now has its own "Results" heading.
+Checks I ran
+
+npm run check: passed, with 168 unit tests across 17 files. They cover recipe data integrity, every filter and its exact boundaries, filter combinations, empty results, exclusions, saved preferences, sorting, label thresholds, the nutrition maths, and formatting.
+npm run test:e2e: 73 passed, 9 skipped on purpose. They cover search through to the recipe page, the mobile filter sheet and empty-state reset, saved allergens applied and switched off, snack presets, image frames that don't shift the layout, and 404s for unknown recipes (on direct load and in-app navigation).
+I also checked screenshots at phone and desktop widths.
+Two gaps that need your input
+
+There are no recipe photos. I can't source licensed food photography from here, so every recipe shows a designed illustration in the same 4:3 frame. The data format already requires alt text, credit and licence for any photo you add. Do you have photography, or a budget or source in mind?
+The ingredient nutrition values are approximate figures I compiled. They aren't taken from, or checked against, a food-composition database, and every recipe is labelled "Estimated". They should be verified before launch; I've added that as an open roadmap item.
+Not done yet
+
+Recipe text is English only.
+"Add to plan" and favourites aren't built yet. Add to plan is Phase 4; favourites are planned for V1.
+Recipe pages work offline only after you've opened them once.
+The README has a new "Recipe catalogue" section and the roadmap is updated.
+
+
+
+============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

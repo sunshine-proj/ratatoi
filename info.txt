@@ -36,6 +36,61 @@ Before the first end-to-end run, install the browser once with npx playwright in
 ============================
 
 
+Phase 2 is done and every roadmap item is ticked. Lint, typecheck, all 123 unit and component tests, the build and the end-to-end tests pass. Nothing is committed.
+
+What users can do now
+
+Set up their plan at /onboarding in 5 steps:
+
+Choose a goal.
+Optionally estimate targets, or skip.
+Set calorie and protein targets, with optional carbohydrate and fat.
+Choose food preferences: eating pattern, the 14 EU-declared allergens, other ingredients to avoid, cooking confidence, budget, and meals and snacks per day.
+Check a summary with an Edit link per section, then save.
+Running it again fills in their earlier answers.
+
+Change targets at /settings/goals. They can re-estimate from a dialog, and clearing targets asks for confirmation first. Change food preferences at /settings/preferences.
+
+See their targets on Today, or a "Set up your plan" prompt if they haven't set any.
+
+How the estimate works (your "Estimate now" choice)
+
+Formula: calories use Mifflin-St Jeor. Fat loss takes off a moderate 15%, muscle gain adds 10%. Protein is 1.8 or 1.4 g per kg of body weight.
+Limits: it never suggests below 1,200 kcal, protein is capped at 35% of calories, and it's for adults only.
+"Prefer not to say" for sex uses the midpoint of the formula's two versions.
+The full working is always shown. The user edits the numbers before anything is saved, and a disclaimer appears wherever targets are set.
+Age, sex, height, weight and activity are never saved. Tests check this.
+Decisions worth knowing
+
+Saving: settings are stored in the browser under one key and checked against the schema on every read. If the saved data is damaged, the app explains and offers a reset; if storage is blocked or full, it shows an error and changes nothing. The app tells users that anyone using the same browser can see this data.
+Forms: hand-written rather than React Hook Form. "72,5", "1,900" and "1 900" are all accepted. Errors are specific (for example, "Enter a value from 800 to 6,000"), and the first wrong field gets focus.
+Gentle notices: targets below 1,200 kcal, or macros that add up to more than the calorie target, get a neutral note. They don't block saving.
+Bugs found and fixed along the way
+
+Next 16 keeps up to three recent pages alive in the background, along with their form state. That caused two problems:
+Going back to onboarding after finishing reopened the old summary step. The wizard now resets after a successful save.
+The Goals form could show old targets after they were changed in onboarding, and pressing Save would have overwritten the new ones. The forms now reload whenever the saved data changes.
+Toasts covered the bottom action buttons on phones, so I moved them to the top of the screen.
+I removed a redundant "Estimate added" toast from the wizard.
+Checks I ran
+
+npm run check (lint, typecheck, unit tests, build): passed, with 123 tests across 13 files. They cover the formula worked through by hand, the minimum and protein-cap limits, number parsing, the schemas, storage failures, and the full wizard and settings flows.
+npm run test:e2e: 61 passed, 9 skipped on purpose (desktop-only checks). They cover onboarding with and without the estimate, data surviving a reload, profile details staying out of storage, editing and clearing targets (including Escape on the dialog), error messages, and both background-page cases.
+I also checked screenshots of each step at phone and desktop widths.
+Not done yet
+
+Exporting or deleting all saved data (Phase 8). Only clearing targets exists so far.
+Recipe filtering doesn't use the saved preferences yet (Phase 3).
+/settings/account is still a placeholder.
+The saved data has no migration code yet, because there's only version 1.
+The README now has "Saved data and privacy", "Suggested targets" and "Forms" sections, and the roadmap's Phase 7 notes which saving work is already done.
+
+
+
+============================
+
+
+
 
 
 

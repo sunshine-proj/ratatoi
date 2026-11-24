@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 3 (recipe catalogue) complete, except recipe photography.** On top of the app shell, PWA foundation, onboarding, and goals, users can browse 25 original recipes, search by name or ingredient, filter by meal, protein, calories, time, diet, allergens, and ingredients (with their saved preferences applied by default), open a full recipe page, and find snacks with editable presets. Recipes show a designed illustration until licensed photos are added. Planning and shopping arrive from Phase 4 onwards. See `ROADMAP.md` for progress and next phases.
+**Phase 4 (meal planner) complete.** On top of the app shell, PWA foundation, onboarding and goals, and the recipe catalogue (still without photos), users can plan a week: four slots a day (breakfast, lunch, dinner, and any number of snacks), recipes or their own meals, servings in quarter steps, swap with a preview of the day's totals, duplicate, reorder, remove with undo, and clear a day or week after confirming. Recipes can be added to the plan from their page or card. The plan is saved in the browser. Progress against targets (Phase 5) and the shopping list (Phase 6) come next. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -95,20 +95,26 @@ components/
   today/             Today overview
   forms/             Field error messages and focus helpers
   recipes/           Recipe card, image/placeholder, browser and filters, detail page
-  planner/ nutrition/ shopping/
+  planner/           Week view, day tabs, slots, meal rows, add/swap/duplicate sheets,
+                     Add to plan button, servings stepper
+  storage/           Loading / unreadable-data gate shared by settings and the plan
+  nutrition/ shopping/
 lib/                 Domain logic, kept free of UI code
   i18n/              Translation-ready UI strings (English; Lithuanian-ready)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
   forms/             Numeric input parsing and field error codes
-  nutrition/         Goal schema and target parsing (goal.ts), estimate (estimate.ts)
+  nutrition/         Goal schema and target parsing (goal.ts), estimate (estimate.ts),
+                     planned-meal and day totals (totals.ts)
   preferences/       Preference schema, allergens, excluded-ingredient helpers
   settings/          Saved settings document and the useSettings hook
-  storage/           Schema-validated localStorage document
+  storage/           Schema-validated localStorage document and useLocalDocument hook
+  planner/           Plan schema, pure plan operations, saved plan document, custom-meal form
+  dates.ts           Calendar-date helpers (weeks start Monday)
   ingredients/       Ingredient schema, catalogue, alias index, word matching
   recipes/           Recipe schema, catalogue views, nutrition calculation,
                      labels (tags.ts), filters and sorting, quantity formatting
   navigation.ts      Route table and nav configuration
-  planner/ shopping/
+  shopping/
 data/ingredients.ts  Curated ingredient table (nutrition, allergens, aliases, aisle)
 data/recipes/        Seed recipes
 assets/              Icon source artwork (SVG)
@@ -167,7 +173,7 @@ Keep nutrition calculations and shopping aggregation in testable domain function
 
 Guest mode only; there is no account or server storage yet.
 
-- **Where:** one JSON document in `localStorage` under `protein-plate:settings`, defined by `userSettingsSchema` in `lib/settings/settings.ts` (`version: 1`).
+- **Where:** JSON documents in `localStorage`: `protein-plate:settings` (`userSettingsSchema` in `lib/settings/settings.ts`) and `protein-plate:plan` (`mealPlanSchema` in `lib/planner/schema.ts`), each with `version: 1`.
 - **What:** goal type; daily calorie and protein targets; optional carbohydrate and fat targets; whether the targets started from an estimate; food preferences (eating pattern, the 14 EU-declared allergens, other excluded ingredients, cooking confidence, budget, meals and snacks per day); and when onboarding was completed.
 - **What is never saved:** the age, sex, height, weight, and activity level used for estimates. They exist only in component state while the estimate form is open.
 - **Validation:** data is checked against the schema on every read. Damaged or unrecognised data is never trusted: the UI explains the problem and offers to reset. Writes that fail (storage blocked or full) show an error and change nothing.
@@ -184,6 +190,16 @@ The optional estimate in onboarding and Settings → Goals is a transparent star
 - Safety rails: never below 1,200 kcal; protein capped at 35% of calories; ages 18–100 only.
 
 The user always reviews and edits the numbers. Manual targets must be between 800 and 6,000 kcal and 20 and 400 g protein; below 1,200 kcal, a neutral note suggests checking with a professional. A disclaimer is shown wherever targets are set. The logic is in `lib/nutrition/estimate.ts` and is unit-tested against worked examples.
+
+## Meal planner
+
+- **Data model** (`lib/planner/schema.ts`): a plan is a list of planned meals. Each has an id, a date, a meal type (breakfast, lunch, dinner, snack), a position within its date + meal-type slot, servings (¼ to 20 in quarter steps), and either a recipe slug or a custom meal (name plus user-entered nutrition per serving: calories and protein required, carbohydrate and fat optional). Custom meals are always labelled "Your own meal… not a verified recipe".
+- **Dates:** stored as local calendar dates (`YYYY-MM-DD`) with no time or timezone, meaning "the user's Thursday". "Today" comes from the device clock. Date arithmetic uses UTC internally, so daylight-saving changes never shift a day. Weeks run Monday to Sunday. Dates display in en-GB style ("Thu 26 Nov"). See `lib/dates.ts`.
+- **Operations** (`lib/planner/operations.ts`) are pure functions: add, remove, restore (undo), replace (swap; keeps slot, position, and servings), duplicate, move up/down, set servings, and clear dates. Positions stay contiguous within each slot. They take the clock and id generator as arguments, so tests are deterministic.
+- **Totals** (`lib/nutrition/totals.ts`): per-serving values × planned servings, summed at full precision. Unknown is never zero: a meal whose recipe no longer exists has no nutrition and is counted separately ("Plus 1 meal without nutrition information"), and carbohydrate/fat totals are unknown if any meal's are.
+- **Saving:** a separate browser document, `protein-plate:plan`, validated on every read. If it can't be read, the planner explains, refuses to overwrite it silently, and offers a reset that leaves goals and preferences untouched.
+- **URL:** the selected day is in `?date=YYYY-MM-DD`, so refresh, back/forward, and "View plan" links land on the right day.
+- **Bulk actions** (clear day, clear week) ask for confirmation. Removing one meal or swapping offers "Undo" in a toast.
 
 ## PWA and offline behaviour
 

@@ -16,6 +16,8 @@ export function fieldErrorText(t: Messages, error: FieldError | undefined, kind:
       return formatMessage(t.forms.outOfRange, { min: formatNumber(error.min), max: formatNumber(error.max) });
     case "adultsOnly":
       return t.forms.adultsOnly;
+    case "tooLong":
+      return formatMessage(t.forms.tooLong, { max: error.max });
   }
 }
 

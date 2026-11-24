@@ -80,25 +80,25 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 4 — Meal planner
 
-- [ ] Define `PlannedMeal` type and schema (recipe or custom, date, meal type, servings, position)
-- [ ] Decide date storage format and timezone handling; document it
-- [ ] Domain functions for add, remove, replace, duplicate, reorder, and change servings
-- [ ] `/planner` week view with week navigation
-- [ ] Mobile day tabs with no horizontal scrolling on narrow screens
-- [ ] Day view with breakfast, lunch, dinner, and snack slots
-- [ ] Support multiple snacks per day
-- [ ] Empty slots are shown and can stay empty
-- [ ] Add-to-plan flow from recipe detail and recipe cards (pick date, meal type, servings)
-- [ ] Swap flow showing how the swap changes the day's totals
-- [ ] Custom meals with user-entered nutrition, clearly marked as not a verified recipe
-- [ ] Confirm before bulk destructive actions (e.g. clear day/week)
-- [ ] Plan edits survive navigation and page refresh
-- [ ] Unit tests for every planner operation
+- [x] Define `PlannedMeal` type and schema (recipe or custom, date, meal type, servings, position)
+- [x] Decide date storage format and timezone handling; document it
+- [x] Domain functions for add, remove, replace, duplicate, reorder, and change servings
+- [x] `/planner` week view with week navigation
+- [x] Mobile day tabs with no horizontal scrolling on narrow screens
+- [x] Day view with breakfast, lunch, dinner, and snack slots
+- [x] Support multiple snacks per day
+- [x] Empty slots are shown and can stay empty
+- [x] Add-to-plan flow from recipe detail and recipe cards (pick date, meal type, servings)
+- [x] Swap flow showing how the swap changes the day's totals
+- [x] Custom meals with user-entered nutrition, clearly marked as not a verified recipe
+- [x] Confirm before bulk destructive actions (e.g. clear day/week)
+- [x] Plan edits survive navigation and page refresh
+- [x] Unit tests for every planner operation
 
 ## Phase 5 — Nutrition summaries and target progress
 
-- [ ] Pure functions: scale per-serving nutrition by servings; sum meal, day, and range totals
-- [ ] Treat missing nutrition as unknown, not zero, and show that in the UI
+- [ ] Pure functions: scale per-serving nutrition by servings; sum meal, day, and range totals (meal and day done in Phase 4: `lib/nutrition/totals.ts`; range/weekly still to do)
+- [ ] Treat missing nutrition as unknown, not zero, and show that in the UI (done for planner day totals; extend to Today and progress)
 - [ ] Remaining = target − planned; negative values labelled neutrally
 - [ ] Round only for display; keep full precision internally
 - [ ] Weekly totals and averages use only the selected date range

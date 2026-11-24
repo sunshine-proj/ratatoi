@@ -12,7 +12,8 @@ export type FieldError =
   | { code: "notANumber" }
   | { code: "notWholeNumber" }
   | { code: "outOfRange"; min: number; max: number }
-  | { code: "adultsOnly" };
+  | { code: "adultsOnly" }
+  | { code: "tooLong"; max: number };
 
 export type NumberFieldOptions = {
   min: number;

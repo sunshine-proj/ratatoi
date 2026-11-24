@@ -7,14 +7,22 @@ import { Icon, type IconName } from "./icon";
 
 export type ToastTone = "info" | "success" | "error";
 
+export type ToastAction = { label: string; onClick: () => void };
+
 export type ToastOptions = {
   message: string;
   tone?: ToastTone;
   /** Milliseconds before auto-dismiss; `null` keeps it until dismissed. */
   duration?: number | null;
+  /** One follow-up action, e.g. "Undo". Toasts with an action stay longer. */
+  action?: ToastAction;
 };
 
-type Toast = Required<Omit<ToastOptions, "duration">> & { id: number; duration: number | null };
+type Toast = Required<Omit<ToastOptions, "duration" | "action">> & {
+  id: number;
+  duration: number | null;
+  action?: ToastAction;
+};
 
 type ToastApi = {
   show: (options: ToastOptions) => number;
@@ -24,6 +32,7 @@ type ToastApi = {
 const ToastContext = createContext<ToastApi | null>(null);
 
 const DEFAULT_DURATION = 6000;
+const ACTION_DURATION = 10000;
 const MAX_VISIBLE = 3;
 
 const toneStyles: Record<ToastTone, { icon: IconName; className: string }> = {
@@ -46,7 +55,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       id,
       message: options.message,
       tone: options.tone ?? "info",
-      duration: options.duration === undefined ? DEFAULT_DURATION : options.duration,
+      duration:
+        options.duration === undefined ? (options.action ? ACTION_DURATION : DEFAULT_DURATION) : options.duration,
+      action: options.action,
     };
     setToasts((current) => [...current, toast].slice(-MAX_VISIBLE));
     return id;
@@ -114,6 +125,18 @@ function ToastItem({ toast, onDismiss, dismissLabel }: {
     >
       <Icon name={tone.icon} className="mt-2.5 size-5 shrink-0" />
       <p className="flex-1 py-2">{toast.message}</p>
+      {toast.action ? (
+        <button
+          type="button"
+          onClick={() => {
+            toast.action?.onClick();
+            onDismiss(toast.id);
+          }}
+          className="min-h-11 shrink-0 rounded-control px-3 font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          {toast.action.label}
+        </button>
+      ) : null}
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}

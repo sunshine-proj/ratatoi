@@ -146,6 +146,49 @@ The README has a new "Recipe catalogue" section and the roadmap is updated.
 ============================
 
 
+Phase 4 is finished and every roadmap item is ticked. Lint, typecheck, all 201 unit tests, the build and the 81 end-to-end tests pass. Nothing is committed. As you asked, I paused at 12:31 and resumed at 13:30.
+
+What users can do now
+
+Plan a week at /planner.
+Move between weeks, or jump back with "This week".
+A seven-day tab strip fits a 320 px phone without sideways scrolling. Today is marked with a ring, and dots show how many meals are planned.
+Each day has breakfast, lunch and dinner slots plus any number of snacks. Empty slots show "Nothing planned" with an add button, and can stay empty.
+Add meals: recipes from a searchable sheet (with saved food preferences applied), or your own meal with typed-in nutrition. Your own meals are always labelled "Your own meal… not a verified recipe".
+Edit meals:
+change servings in quarter steps, and the day's totals update straight away
+swap a meal, with each option showing how the day changes (for example "+134 kcal · −8 g protein")
+duplicate to another day or meal, or move up and down within a slot
+remove, with Undo (swaps can be undone too)
+clear a day or the whole week, after confirming
+Add to plan from a recipe: recipe pages have an "Add to plan" button and cards have a "+". You pick the day, meal and servings, and a toast offers View plan, which opens that day.
+Your plan is saved in the browser. It survives refresh and navigation, and the selected day is in the URL.
+Decisions worth knowing
+
+Dates are stored as plain calendar dates with no time zone, meaning "your Thursday". The maths can't be thrown off by daylight-saving changes, and a test covers the EU clock change. Weeks start on Monday, and dates display day-first ("Thu 26 Nov").
+Unknown nutrition is never counted as zero. If a planned recipe no longer exists, the day's total says "Plus 1 meal without nutrition information".
+The plan is saved separately from your settings. If the saved plan is ever damaged, the planner says so, won't overwrite it without asking, and offers a reset that keeps your goals and preferences.
+The day and meal totals Phase 5 needs are already built and tested. The roadmap notes which parts are done.
+Bugs found and fixed along the way
+
+Without an item name, the servings buttons were labelled "More servings of servings". They now read "More servings" and "Fewer servings".
+The recipe-card focus ring would have lit up the whole card whenever its new "+" button had focus. It now appears only when the recipe link is focused.
+Checks I ran
+
+npm run check: passed, with 201 unit tests. They cover every planner operation (including that none of them changes the original plan), the date helpers, totals with fractional servings, multiple snacks, empty days and missing data, custom-meal checks, and the full planner screens.
+npm run test:e2e: 81 passed, 9 skipped on purpose (desktop-only checks). They run with the clock fixed to Thu 26 Nov 2026 and cover adding from a recipe card through to "View plan" and a reload, planning, swapping and clearing a week, week navigation, and 320 px phone width.
+I also checked screenshots of the planner and the swap sheet.
+Not done yet
+
+Progress against your targets in the planner and on Today, and weekly totals. That's Phase 5.
+On phones, the Swap and Remove buttons on each meal show only icons. Screen readers announce them by name, but the icons alone may not be obvious to everyone.
+Your own meals can't be edited after adding: remove and re-add instead. Meals move only within their slot, using menu buttons rather than drag and drop.
+No pre-filled snack slots: the snacks-per-day preference doesn't add empty snack placeholders.
+The README has a new "Meal planner" section.
+
+
+
+============================
 
 
 

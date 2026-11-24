@@ -5,21 +5,26 @@ import { formatMessage, getMessages } from "@/lib/i18n";
 import { formatNumber } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import type { RecipeSummary } from "@/lib/recipes/catalogue";
+import { AddToPlanButton } from "@/components/planner/add-to-plan-button";
 import { RecipeImage } from "./recipe-image";
 
-/** Whole card is one link (the title, stretched), so it is a single tab stop. */
+/** The card is one link (the title, stretched) plus a separate "Add to plan" button. */
 export function RecipeCard({ recipe, priority }: { recipe: RecipeSummary; priority?: boolean }) {
   const t = getMessages();
   const n = recipe.nutritionPerServing;
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card transition-shadow focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-focus hover:shadow-raised">
+    <article className="group relative flex flex-col overflow-hidden rounded-card border border-line bg-surface shadow-card transition-shadow has-[a:focus-visible]:outline-3 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-focus hover:shadow-raised">
       <RecipeImage
         image={recipe.image}
         mealType={recipe.mealTypes[0]!}
         sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 100vw"
         priority={priority}
       />
+      {/* Sits above the card's stretched link, so it is its own tab stop. */}
+      <div className="absolute top-3 right-3">
+        <AddToPlanButton variant="icon" recipe={{ slug: recipe.slug, name: recipe.name, mealTypes: recipe.mealTypes }} />
+      </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <p className="text-xs font-semibold tracking-wide text-ink-muted uppercase">
           {recipe.mealTypes.map((type) => t.mealTypes[type]).join(" · ")}

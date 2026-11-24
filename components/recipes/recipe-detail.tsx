@@ -15,6 +15,7 @@ import {
   SNACK_KCAL_LABEL_MAX,
   type RecipeTag,
 } from "@/lib/recipes/tags";
+import { AddToPlanButton } from "@/components/planner/add-to-plan-button";
 import { RecipeImage } from "./recipe-image";
 
 function tagRule(t: Messages, tag: RecipeTag): string {
@@ -72,6 +73,7 @@ export function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
               ))}
             </ul>
           ) : null}
+          <AddToPlanButton recipe={{ slug: recipe.slug, name: recipe.name, mealTypes: recipe.mealTypes }} />
           <dl aria-label={d.timesLabel} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { label: d.prep, value: formatMessage(d.minutes, { min: recipe.prepMinutes }) },

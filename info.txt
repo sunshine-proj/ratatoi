@@ -1,0 +1,67 @@
+
+
+Phase 0 is done, except choosing a licence. That's your call, so I left it unchecked. All the checks pass, including the end-to-end test in a desktop and a mobile viewport. Nothing is committed yet.
+
+What's set up
+
+App: Next.js 16.4 (App Router), React 19, strict TypeScript, Tailwind 4 and ESLint, using npm with the lockfile included. The home page is a placeholder.
+Scripts: dev, build, start, lint, typecheck, test, test:watch, test:e2e, and check, which runs lint, typecheck, unit tests and build together.
+Tests: Vitest and React Testing Library for unit tests in tests/unit/, and Playwright in tests/e2e/.
+Validation: lib/validation/ has shared Zod rules for non-negative amounts, servings above zero, whole minutes, YYYY-MM-DD dates, slugs and required text. Per-feature schemas will build on these.
+Text: all UI strings live in one typed English file, lib/i18n/messages/en.ts. Adding Lithuanian means adding an lt.ts file, and a missing string becomes a type error.
+Folders and config: the folder layout from the README, .env.example with no required variables (Supabase placeholders are commented out), .nvmrc set to Node 24, and a CI workflow in .github/workflows/ci.yml.
+Docs: README updated with project status, stack, scripts, structure and how to add a language; Phase 0 tasks ticked in ROADMAP.md.
+Decisions worth knowing
+
+End-to-end tests run on port 3210 and never connect to a server that's already running. On your machine, ports 3000 and 3100 are both taken by other apps (one of them a Grafana login page), and the first test run quietly tested Grafana instead of this app. If the port is busy, the run now fails with a clear error. You can change the port with E2E_PORT.
+next dev adds its own rules block to AGENTS.md if the block isn't there. I added it myself, so the file won't keep changing unexpectedly.
+I turned on a stricter TypeScript setting (noUncheckedIndexedAccess). It catches missing array and object entries, which matters for the nutrition and shopping-list maths, and it's easier to adopt now than later.
+I upgraded @types/node to version 24 because the test tooling required it. I left out the separate path-alias plugin because Vite 8 handles that itself.
+I kept Next's default settings and the Geist font. Fonts download from Google at build time, so builds need network access. Phase 1 will settle the fonts and design.
+There's no locale-based routing. Language is planned as a user setting, which fits a guest-first app.
+Checks I ran
+
+npm run lint: no issues.
+npm run typecheck: passed.
+npm run test: 16 unit tests passed.
+npm run build: passed.
+npm run test:e2e: 2 of 2 passed after the port fix. The first two runs failed against the other apps on those ports.
+Still open
+
+Choose a licence; package.json is marked private for now.
+The CI workflow hasn't run on GitHub yet, because I don't know of a remote for this repo.
+Before the first end-to-end run, install the browser once with npx playwright install chromium.
+
+
+============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

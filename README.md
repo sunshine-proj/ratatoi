@@ -20,88 +20,85 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Planning / implementation-ready specification.** The documents define the product and agent workflow. Update this section as implementation progresses.
+**Phase 0 (project foundation) complete.** The app is scaffolded and tooling is in place; the home page is a placeholder. See `ROADMAP.md` for progress and next phases.
 
-## Recommended stack
+## Tech stack
 
-If the repository does not already use a stack, the recommended default is:
-
-- Next.js App Router
-- TypeScript (strict)
-- React
-- Tailwind CSS
-- Zod for validation
-- Supabase for optional authentication and hosted persistence
-- Vitest for unit tests
+- Next.js 16 (App Router, Turbopack, Cache Components enabled)
+- React 19
+- TypeScript (strict, plus `noUncheckedIndexedAccess`)
+- Tailwind CSS 4
+- Zod 4 for validation
+- Vitest + React Testing Library for unit/component tests
 - Playwright for end-to-end tests
-- PWA manifest and service worker
+- npm (lockfile committed), Node.js 24 or newer (see `.nvmrc`)
 
-Keep the stack consistent with the existing repository if implementation has already started.
+Not yet added: Supabase, PWA manifest/service worker (Phase 1), React Hook Form (added when complex forms arrive).
+
+> Next.js 16 differs from older versions. Before writing framework code, read the relevant guide in `node_modules/next/dist/docs/`.
 
 ## Getting started
 
-The exact commands depend on the implementation. For a new Next.js application using npm:
-
 ```bash
-npx create-next-app@latest . --typescript --tailwind --eslint --app
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000` (Next.js picks another port if 3000 is in use; check the terminal output).
 
-After scaffolding, add the scripts and dependencies required by the chosen test and PWA setup. Do not assume Supabase or any third-party API is configured until credentials and schema are supplied.
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint (Next.js core-web-vitals + TypeScript rules) |
+| `npm run typecheck` | Generate route types, then `tsc --noEmit` |
+| `npm run test` | Unit and component tests (Vitest, single run) |
+| `npm run test:watch` | Vitest in watch mode |
+| `npm run test:e2e` | Builds, serves on port 3210, runs Playwright (desktop + mobile Chromium) |
+| `npm run check` | Lint, typecheck, unit tests, and build in sequence |
+
+Before the first e2e run, install the browser: `npx playwright install chromium`. If port 3210 is taken, set `E2E_PORT`. The e2e run will not reuse a server that is already running on that port.
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, build, and e2e on every push and pull request.
 
 ## Environment variables
 
-If Supabase is selected, create `.env.local` and add the values required by the implementation:
+No environment variables are required yet. `.env.example` lists the planned optional Supabase variables (Phase 7) as commented placeholders. To use them later, copy the file to `.env.local`:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-Never place a service-role key or other secret in a `NEXT_PUBLIC_` variable. Add any server-only secrets without the `NEXT_PUBLIC_` prefix and keep `.env.local` out of version control.
+Never place a service-role key or other secret in a `NEXT_PUBLIC_` variable. Add any server-only secrets without the `NEXT_PUBLIC_` prefix. `.env*` files are git-ignored, except `.env.example`.
 
-If no hosted backend is configured, the MVP may begin with local persistence and guest mode, provided the limitations are documented.
+Until a hosted backend is configured, the MVP uses local persistence and guest mode.
 
-## Suggested application structure
-
-Adapt this to the repository rather than forcing a rewrite:
+## Application structure
 
 ```text
-app/
-  page.tsx
-  onboarding/
-  recipes/
-    page.tsx
-    [slug]/
-  snacks/
-  planner/
-  shopping-list/
-  settings/
-components/
-  layout/
-  recipes/
-  planner/
-  nutrition/
-  shopping/
-lib/
-  nutrition/
-  recipes/
-  planner/
-  shopping/
-  validation/
-  storage/
-data/
-  recipes/
-public/
-  icons/
-  images/
-tests/
-  unit/
-  e2e/
+app/                 Routes (App Router)
+components/          UI components, grouped by area
+  layout/ recipes/ planner/ nutrition/ shopping/
+lib/                 Domain logic, kept free of UI code
+  i18n/              Translation-ready UI strings (English; Lithuanian-ready)
+  validation/        Shared Zod primitives (amounts, servings, dates, slugs)
+  nutrition/ recipes/ planner/ shopping/ storage/
+data/recipes/        Seed recipe data
+public/icons/        App and PWA icons
+public/images/       Licensed recipe images
+tests/unit/          Vitest tests (mirrors lib/ and app/)
+tests/e2e/           Playwright tests
 ```
+
+Empty folders contain a `.gitkeep` until they're used.
+
+### Strings and locales
+
+UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages()`. To add Lithuanian, create `messages/lt.ts` typed as `Messages`, then add `"lt"` to `locales` in `lib/i18n/index.ts`. A missing key is a type error.
 
 ## Main routes
 
@@ -163,15 +160,7 @@ Use only original, licensed, or explicitly permitted recipe content and photogra
 6. Add tests for nutrition and shopping-list business logic.
 7. Run checks before handing off.
 
-Suggested scripts once configured:
-
-```bash
-npm run dev
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-```
+Run `npm run check` (and `npm run test:e2e` for UI flows) before handing off.
 
 ## MVP implementation sequence
 
@@ -188,8 +177,9 @@ npm run build
 - `AGENTS.md` — instructions and guardrails for coding agents.
 - `PRD.md` — product vision, requirements, flows, acceptance criteria, and release scope.
 - `SKILLS.md` — repeatable agent workflows for design, implementation, testing, and handoff.
+- `ROADMAP.md` — development phases with checkbox task lists for MVP, V1, and later.
 - `README.md` — project overview and developer setup.
 
 ## License
 
-No license has been selected. Add a `LICENSE` file before distributing or publishing the project.
+No license has been selected yet. `package.json` is marked `private`. Add a `LICENSE` file before distributing or publishing the project.

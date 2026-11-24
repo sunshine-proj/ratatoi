@@ -13,6 +13,7 @@ export const routes = {
   preferences: "/settings/preferences",
   account: "/settings/account",
   offline: "/offline",
+  privacy: "/privacy",
 } as const;
 
 export type NavIcon = "today" | "plan" | "recipes" | "snacks" | "shopping" | "profile";

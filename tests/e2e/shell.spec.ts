@@ -12,6 +12,7 @@ const pages = [
   { path: "/settings/preferences", title: "Preferences · Protein Plate", heading: "Preferences" },
   { path: "/settings/account", title: "Account and data · Protein Plate", heading: "Account and data" },
   { path: "/offline", title: "You're offline · Protein Plate", heading: "You're offline" },
+  { path: "/privacy", title: "Privacy · Protein Plate", heading: "Privacy" },
 ];
 
 test.describe("routes", () => {

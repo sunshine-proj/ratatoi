@@ -31,6 +31,44 @@ export const en = {
     preferences: "Preferences",
     account: "Account",
   },
+  privacy: {
+    title: "Privacy",
+    intro: "Protein Plate is built to keep your information on your own device. This page explains what that means.",
+    updated: "Last updated: 24 November 2026.",
+    summaryTitle: "In short",
+    summary1: "There's no account. Your goals, food preferences, meal plan, and shopping list are saved only in this browser, on this device.",
+    summary2: "Nothing you enter is sent to us or anyone else. There's no analytics, no advertising, no tracking, and no cookies.",
+    summary3: "You can see, download, and delete everything at any time in Settings → Account.",
+    storedTitle: "What is saved, and where",
+    stored:
+      "When you use the app, it saves your goal and daily targets, your food preferences (including any allergens and ingredients to avoid), your meal plan, and your shopping list. They're stored in your browser's local storage on this device. They aren't sent over the internet.",
+    healthTitle: "Health-related information",
+    health:
+      "Targets, allergens, and food preferences can say something about your health. That's why they stay on your device. If you use the optional estimate, the age, sex, height, weight, and activity level you enter are used once to calculate a starting point and are never saved.",
+    notCollectedTitle: "What we don't collect",
+    notCollected:
+      "No account details, no usage analytics, no advertising identifiers, no location, and no cookies. The app doesn't load anything from other companies' servers: fonts and images are served with the app.",
+    serverTitle: "Loading the app",
+    server:
+      "When you open Protein Plate, your browser downloads the app's files from our web server, like any website. The hosting provider may keep standard technical logs (such as IP address and browser type) for security and reliability. These logs don't include anything you enter in the app.",
+    offlineTitle: "Offline copies",
+    offline:
+      "To work offline, your browser keeps copies of the app's pages and files. They're the same for everyone and contain none of your information.",
+    sharedTitle: "Shared devices",
+    shared:
+      "Anyone who uses the same browser on this device can see what's saved. If you share the device, delete your data from Settings → Account when you've finished.",
+    rightsTitle: "Your choices",
+    rights:
+      "Because your information never leaves your device, you're always in control: view it in Settings → Account, download a copy, restore it in another browser, or delete everything. Clearing your browser's site data also removes it.",
+    adviceTitle: "Not medical advice",
+    advice:
+      "Protein Plate is a planning tool. Targets and nutrition values are estimates, not medical advice. If you have a medical condition, are pregnant or breastfeeding, or have a history of disordered eating, please talk to a doctor or registered dietitian.",
+    accountLink: "Go to Settings → Account",
+  },
+  footer: {
+    label: "About this app",
+    privacy: "Privacy",
+  },
   common: {
     close: "Close",
     dismiss: "Dismiss",
@@ -384,6 +422,7 @@ export const en = {
     saved: "Updated {name}.",
     remove: "Remove",
     removeFor: "Remove {name}",
+    actionsFor: "Actions for {name}",
     removed: "Removed {name}.",
     yourItem: "Your item",
     editedNote: "You changed this amount. Your plan needs {amount}.",
@@ -433,6 +472,26 @@ export const en = {
       "This permanently removes your goals, food preferences, meal plan, and shopping list from this browser. It can't be undone.",
     deleteConfirm: "Delete everything",
     deleted: "Everything has been deleted from this device.",
+    exportTitle: "Download or restore your data",
+    exportBody:
+      "Download a copy of everything saved here as a file. You can restore it later, in this browser or another one. The file contains your goals, preferences, plan, and list, so keep it somewhere private.",
+    export: "Download my data",
+    exported: "Your data file has been downloaded.",
+    import: "Restore from a file",
+    importLabel: "Choose a Protein Plate data file",
+    importTitle: "Replace your data with this file?",
+    importBody: "Everything currently saved on this device will be replaced by the contents of the file. This can't be undone.",
+    importConfirm: "Replace my data",
+    imported: "Your data has been restored from the file.",
+    importErrors: {
+      tooLarge: "That file is too large to be a Protein Plate data file.",
+      notJson: "That file isn't a Protein Plate data file.",
+      notBackup: "That file isn't a Protein Plate data file.",
+      newer: "That file was made by a newer version of the app. Reload this page to update, then try again.",
+      damaged: "That file looks damaged, so nothing was changed.",
+      read: "The file couldn't be read. Nothing was changed.",
+    },
+    privacyLink: "How your data is handled",
   },
   goalTypes: {
     legend: "Your main goal",

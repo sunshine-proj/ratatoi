@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useId, type ReactNode } from "react";
+import { Fragment, useId, useRef, type ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
 import { Tag } from "@/components/ui/tag";
 import { cn } from "@/lib/cn";
@@ -23,6 +23,11 @@ export function ShoppingItemRow({ item, recipeName, onToggle, onEdit, onRemove }
   const t = getMessages();
   const s = t.shopping;
   const id = useId();
+  const menu = useRef<HTMLDetailsElement>(null);
+  const runMenu = (action: () => void) => {
+    if (menu.current) menu.current.open = false;
+    action();
+  };
   const ingredient = item.canonicalKey ? getIngredient(item.canonicalKey) : undefined;
   const amount = formatShoppingAmount(item, t, ingredient);
   const name = shoppingItemName(item, ingredient);
@@ -69,22 +74,51 @@ export function ShoppingItemRow({ item, recipeName, onToggle, onEdit, onRemove }
           ) : null}
         </span>
       </div>
-      <button
-        type="button"
-        onClick={onEdit}
-        aria-label={formatMessage(s.editFor, { name: label })}
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink-muted hover:bg-surface-muted hover:text-ink"
-      >
-        <Icon name="pencil" className="size-5" />
-      </button>
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={formatMessage(s.removeFor, { name: label })}
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-control text-ink-muted hover:bg-surface-muted hover:text-ink"
-      >
-        <Icon name="trash" className="size-5" />
-      </button>
+      {/* sm and up: both actions visible. Phones: one menu, leaving room for the item name. */}
+      <div className="hidden shrink-0 sm:flex">
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={formatMessage(s.editFor, { name: label })}
+          className="inline-flex size-11 items-center justify-center rounded-control text-ink-muted hover:bg-surface-muted hover:text-ink"
+        >
+          <Icon name="pencil" className="size-5" />
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={formatMessage(s.removeFor, { name: label })}
+          className="inline-flex size-11 items-center justify-center rounded-control text-ink-muted hover:bg-surface-muted hover:text-ink"
+        >
+          <Icon name="trash" className="size-5" />
+        </button>
+      </div>
+      <details ref={menu} className="relative shrink-0 sm:hidden">
+        <summary
+          aria-label={formatMessage(s.actionsFor, { name: label })}
+          className="inline-flex size-11 cursor-pointer list-none items-center justify-center rounded-control text-ink-muted hover:bg-surface-muted [&::-webkit-details-marker]:hidden"
+        >
+          <Icon name="dots" className="size-5" />
+        </summary>
+        <div className="absolute right-0 z-20 mt-1 flex min-w-36 flex-col rounded-control border border-line bg-surface p-1 shadow-raised">
+          <button
+            type="button"
+            onClick={() => runMenu(onEdit)}
+            className="flex min-h-11 items-center gap-2 rounded-control px-3 text-left text-sm hover:bg-surface-muted"
+          >
+            <Icon name="pencil" className="size-4" />
+            {s.edit}
+          </button>
+          <button
+            type="button"
+            onClick={() => runMenu(onRemove)}
+            className="flex min-h-11 items-center gap-2 rounded-control px-3 text-left text-sm hover:bg-surface-muted"
+          >
+            <Icon name="trash" className="size-4" />
+            {s.remove}
+          </button>
+        </div>
+      </details>
     </li>
   );
 }

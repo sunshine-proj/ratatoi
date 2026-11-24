@@ -9,7 +9,6 @@ export default function TodayPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <PageHeader title={t.pages.today.title} />
       <TodayDashboard recipes={getRecipeSummaries()} />
-      <p className="text-sm text-ink-muted">{t.app.disclaimer}</p>
     </div>
   );
 }

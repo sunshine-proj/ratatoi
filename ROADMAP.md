@@ -145,16 +145,16 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 8 — Polish and launch readiness
 
-- [ ] Visual polish pass on all screens at narrow mobile and desktop widths
-- [ ] Image optimisation and performance check (Lighthouse)
-- [ ] Analytics consent banner, only if analytics is added
-- [ ] Privacy-conscious analytics for the PRD events (`onboarding_completed`, `recipe_added_to_plan`, `shopping_list_generated`, etc.)
-- [ ] Privacy notice and GDPR basics: data minimisation and transparency
-- [ ] Data export and account/data deletion (P1, required before public launch)
-- [ ] Content review: all nutrition has a source and estimated/verified flag; all images have a licence
-- [ ] Safety copy review: no medical claims, no extreme restriction, no weight-loss guarantees
-- [ ] Production deployment over HTTPS
-- [ ] Final README, setup, and route docs update
+- [x] Visual polish pass on all screens at narrow mobile and desktop widths
+- [x] Image optimisation and performance check (Lighthouse): `docs/performance.md`
+- [x] Analytics consent banner, only if analytics is added (no analytics added: decision 0002)
+- [ ] Privacy-conscious analytics for the PRD events (`onboarding_completed`, `recipe_added_to_plan`, `shopping_list_generated`, etc.): deferred until a provider is chosen; rules in decision 0002
+- [x] Privacy notice and GDPR basics: data minimisation and transparency (`/privacy`; operator details still needed: `docs/launch-checklist.md`)
+- [x] Data export and account/data deletion (P1, required before public launch), plus restore from file
+- [x] Content review: all nutrition has a source and estimated/verified flag; all images have a licence (`docs/content-review.md`; no photos yet)
+- [x] Safety copy review: no medical claims, no extreme restriction, no weight-loss guarantees (automated in `tests/unit/content/safety-copy.test.ts`)
+- [ ] Production deployment over HTTPS: ready (`docs/deployment.md`, security headers, CSP); waiting for a hosting decision
+- [x] Final README, setup, and route docs update
 
 ---
 

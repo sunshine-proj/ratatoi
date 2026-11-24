@@ -34,6 +34,7 @@ const routes = [
   "/settings/goals",
   "/settings/preferences",
   "/settings/account",
+  "/privacy",
   "/offline",
   "/does-not-exist",
 ];

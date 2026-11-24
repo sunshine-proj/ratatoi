@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 7 (persistence, offline, accessibility) complete, except the manual screen-reader pass.** All MVP features are in place and hardened: versioned saved data with migrations, core pages that work offline even before they're visited, editing offline, a way to delete everything from a shared device, axe scans with no violations, keyboard-only and touch-target tests, and a full end-to-end journey test. There are no accounts yet ([decision record](docs/decisions/0001-guest-first-no-account-sync-in-mvp.md)). Phase 8 (polish and launch readiness) is next. See `ROADMAP.md` for progress and next phases.
+**MVP complete (Phases 0–8); not yet deployed.** Users can set goals, browse 25 original recipes, plan a week with progress against their targets, and create a shopping list. Everything works offline and stays on their device, with export, import, and delete-everything in Settings → Account. Phase 8 added a privacy notice, security headers and CSP, a visual polish pass, Lighthouse tuning, and automated content and safety-copy reviews. **Before a public launch:** see [docs/launch-checklist.md](docs/launch-checklist.md) (hosting, licence, operator details, verified nutrition data, photos, and real-device and screen-reader checks). See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -159,7 +159,8 @@ UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages
 | `/shopping-list` | Consolidated grocery list |
 | `/settings/goals` | Calorie and macro targets |
 | `/settings/preferences` | Dietary preferences and exclusions |
-| `/settings/account` | What's saved on this device; delete everything |
+| `/settings/account` | What's saved on this device; download, restore, or delete it |
+| `/privacy` | Privacy notice |
 | `/offline` | Shown for pages that aren't available offline |
 
 ## Core domain concepts
@@ -180,7 +181,9 @@ Guest mode only; there is no account or server storage yet.
 - **What:** goal type; daily calorie and protein targets; optional carbohydrate and fat targets; whether the targets started from an estimate; food preferences (eating pattern, the 14 EU-declared allergens, other excluded ingredients, cooking confidence, budget, meals and snacks per day); and when onboarding was completed.
 - **What is never saved:** the age, sex, height, weight, and activity level used for estimates. They exist only in component state while the estimate form is open.
 - **Validation and versions:** every document has a `version` and is checked against its schema on every read. Older versions are upgraded by migrations (`migrations[n]` upgrades n → n+1) and saved in the new shape on the next write. Damaged data is never trusted: the UI explains and offers a reset. Data saved by a **newer** app version (e.g. another tab already updated) is never reset or overwritten: the UI asks for a reload instead. Writes never replace a document that can't be read. Failed writes (storage blocked or full) show an error and change nothing.
-- **Shared devices:** anyone using the same browser can see this data, and the app says so where it saves. **Settings → Account** shows what's stored and deletes everything from the device (it works even if the data can't be read). Exporting data is planned for Phase 8.
+- **Shared devices:** anyone using the same browser can see this data, and the app says so where it saves. **Settings → Account** shows what's stored and deletes everything from the device (it works even if the data can't be read).
+- **Export and import:** Settings → Account downloads everything as one JSON file (`lib/storage/backup.ts`) and can restore it in another browser. An imported file goes through the same schemas and migrations as a normal read, and replaces current data only after confirmation.
+- **Privacy notice:** `/privacy`, linked from every page's footer. No analytics, cookies, or third-party requests ([decision 0002](docs/decisions/0002-no-analytics-in-mvp.md)); `tests/e2e/security.spec.ts` fails if any page loads anything from another origin.
 
 ### Suggested targets
 
@@ -243,6 +246,12 @@ The user always reviews and edits the numbers. Manual targets must be between 80
 **Installable:** web app manifest with 192/512 px and maskable icons, theme colours, `display: standalone`, and shortcuts. Chrome's installability check passes in e2e. It hasn't been tested on real iOS or Android devices yet, and production must be served over HTTPS.
 
 To test locally, use a production build (`npm run build && npm run start`); the worker isn't registered in `npm run dev`.
+
+## Security and performance
+
+- **Headers** (`next.config.ts`): Content Security Policy in production (everything from this origin only; no framing), HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`. Checked by `tests/e2e/security.spec.ts`.
+- **Lighthouse** (mobile, simulated slow 4G): Accessibility, Best Practices, and SEO 100 on every page; CLS 0; Performance 88–100. Details and follow-ups: [docs/performance.md](docs/performance.md).
+- **Deployment:** [docs/deployment.md](docs/deployment.md). HTTPS is required; no environment variables are needed.
 
 ## Accessibility
 
@@ -307,7 +316,9 @@ Run `npm run check` (and `npm run test:e2e` for UI flows) before handing off.
 - `ROADMAP.md` — development phases with checkbox task lists for MVP, V1, and later.
 - `README.md` — project overview and developer setup.
 - `docs/accessibility.md` — automated accessibility coverage and the manual screen-reader checklist.
-- `docs/decisions/` — decision records (e.g. why there are no accounts in the MVP).
+- `docs/decisions/` — decision records (no accounts in the MVP; no analytics in the MVP).
+- `docs/content-review.md` — recipe, nutrition, and safety-copy review.
+- `docs/deployment.md`, `docs/performance.md`, `docs/launch-checklist.md` — going live.
 
 ## License
 

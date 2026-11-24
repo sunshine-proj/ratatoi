@@ -114,7 +114,7 @@ export function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
           ].map((item) => (
             <div key={item.label} className={`rounded-control px-4 py-3 ${item.tone}`}>
               <dt className="text-sm">{item.label}</dt>
-              <dd className="text-2xl font-semibold">{item.value}</dd>
+              <dd className="text-xl font-semibold whitespace-nowrap sm:text-2xl">{item.value}</dd>
             </div>
           ))}
         </dl>

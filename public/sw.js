@@ -24,7 +24,7 @@
  *
  * Bump VERSION whenever the caching rules or the precache list change.
  */
-const VERSION = "v2";
+const VERSION = "v3";
 const PREFIX = "protein-plate-";
 const SHELL_CACHE = `${PREFIX}shell-${VERSION}`;
 const PAGES_CACHE = `${PREFIX}pages-${VERSION}`;
@@ -43,6 +43,7 @@ const CORE_PAGES = [
   "/settings/goals",
   "/settings/preferences",
   "/settings/account",
+  "/privacy",
   OFFLINE_URL,
 ];
 const CORE_FILES = ["/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];

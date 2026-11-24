@@ -320,7 +320,49 @@ Earlier gaps are still open: recipe photos, and checking the ingredient nutritio
 ============================
 
 
+Phase 8 is done apart from two items, both deliberate: deployment, which needs your hosting decision, and analytics, which I didn't add for the reasons below. Lint, typecheck, all 269 unit tests, the build and the 133 end-to-end tests pass. Nothing is committed or deployed.
 
+What's new for users
+
+A privacy page (/privacy) in plain English, linked from a new footer on every page, which also carries "not medical advice". It covers what's saved and where (this browser only), what isn't collected (no account, analytics, cookies, ads or third-party requests), that body details for estimates are never saved, the server-log caveat, and shared devices.
+Download my data and restore from a file on Settings → Account. While there's no sync, this is how you'd move to another browser. A restored file goes through the same checks as normally saved data and only replaces your data after you confirm.
+Polish from 320 px and desktop screenshots:
+compact recipe cards on phones (the list was about 27,000 px long)
+a single "⋯" menu per shopping item on phones, so names have room
+recipe nutrition values no longer wrap
+Performance, measured honestly
+
+My first Lighthouse run showed perfect scores, but it was testing a leftover server with a stale build. After rerunning properly:
+
+Metric (Lighthouse, simulated slow-4G phone)	Before	After
+Layout shift (CLS), worst page	0.118	0
+Recipe page performance	84	92–100
+Accessibility / Best practices / SEO	100 / 100 / 100	100 / 100 / 100 (every page)
+Performance, all pages	83–100	88–100
+The layout shift came from the new footer being pushed down as content loaded. It's fixed by reserving a screen of space.
+Fonts: I removed one that was never used (5 preloaded files down to 2), and fonts no longer swap in late.
+Remaining: LCP still varies between ~0.8 s and ~3.5 s from run to run. That's the simulation counting about 240 KB of JavaScript; on Today, Plan and Shopping the content needs JavaScript because the data lives in the browser. Follow-ups are in docs/performance.md.
+Security: HSTS, plus a Content Security Policy in production that only allows this site's own scripts, styles, fonts, images and connections, and blocks framing. A test fails if any page breaks the policy or contacts another site. One fix along the way: a CSP rule (upgrade-insecure-requests) stopped the app noticing it was back online. HSTS already covers the job that rule would have done, so I removed it.
+
+Reviews: a written content review, plus an automated safety-copy test. It fails on promises of results ("guarantee", "detox", "rapid"), shaming food words ("cheat", "guilt", "junk", "good/bad food"), medical claims or punitive wording, and checks the key disclaimers stay in place. No problems were found; the only matches were two deliberate negations ("not a prescription", "we can't guarantee… free from an allergen"), which the test allows.
+
+New documents:
+
+docs/decisions/0002-no-analytics-in-mvp.md
+docs/deployment.md
+docs/performance.md
+docs/content-review.md
+docs/launch-checklist.md
+Decisions I need from you
+
+Hosting: where should it run? A managed Next.js host such as Vercel (ideally in an EU region), or your own Node server behind HTTPS? Both are covered in docs/deployment.md, and no environment variables are needed. I'll deploy only once you confirm.
+Analytics: none were added. There's no provider, and a consent banner for analytics that don't exist would mislead people. The opt-in rules for adding them later are in decision 0002. Do you want a provider chosen now, or after launch?
+The privacy notice needs who runs the app and how to contact them, ideally with a legal review, before it goes public.
+Still blocking a public launch (listed in docs/launch-checklist.md): a code licence, checking nutrition values against a food database, recipe photos, a dietitian review, installing on real phones, and the screen-reader pass.
+
+
+
+============================
 
 
 

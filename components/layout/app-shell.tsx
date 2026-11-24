@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getMessages } from "@/lib/i18n";
-import { primaryNav, profileNavItem, sidebarNav } from "@/lib/navigation";
+import { primaryNav, profileNavItem, routes, sidebarNav } from "@/lib/navigation";
 import { ActiveNavList } from "./active-nav-list";
 import { BrandLink } from "./brand";
 import { OfflineIndicator } from "./offline-indicator";
@@ -53,7 +53,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             tabIndex={-1}
             className="flex w-full flex-1 flex-col px-4 pt-6 pb-[calc(var(--spacing-bottom-nav)+env(safe-area-inset-bottom)+1.5rem)] focus:outline-none sm:px-6 md:px-8 md:pt-10 md:pb-12"
           >
-            {children}
+            {/*
+              At least one screen tall, so the footer always starts below the
+              first view. Content rendered in the browser (plan, list, progress)
+              then grows without moving anything visible: no layout shift.
+            */}
+            <div className="flex min-h-dvh flex-col">{children}</div>
+            <footer aria-label={t.footer.label} className="mx-auto mt-auto w-full max-w-5xl pt-12">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-sm text-ink-muted">
+                <span>{t.app.disclaimer}</span>
+                <Link href={routes.privacy} className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-2">
+                  {t.footer.privacy}
+                </Link>
+              </div>
+            </footer>
           </main>
         </div>
       </div>

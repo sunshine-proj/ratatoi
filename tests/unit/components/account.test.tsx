@@ -84,3 +84,32 @@ describe("saved data safety", () => {
     expect(screen.queryByRole("button", { name: "Reset" })).not.toBeInTheDocument();
   });
 });
+
+describe("restore from a file", () => {
+  it("validates the file and asks before replacing data", async () => {
+    settingsDocument.write(emptySettings);
+    const user = userEvent.setup();
+    render(
+      <ToastProvider>
+        <AccountSettings />
+      </ToastProvider>,
+    );
+    await screen.findByRole("region", { name: "Saved on this device" });
+    const input = screen.getByLabelText("Choose a Protein Plate data file");
+
+    await user.upload(input, new File(["nonsense"], "x.json", { type: "application/json" }));
+    expect(await screen.findByText("That file isn't a Protein Plate data file.")).toBeInTheDocument();
+
+    const { buildBackup } = await import("@/lib/storage/backup");
+    let plan = emptyPlan;
+    plan = addMeal(plan, { kind: "recipe", recipeSlug: "chocolate-skyr-pot", date: "2026-11-26", mealType: "snack", servings: 1 }, { now: new Date(), newId: () => "r1" });
+    const file = new File([JSON.stringify(buildBackup({ settings: null, plan, shopping: null }))], "backup.json", { type: "application/json" });
+    await user.upload(input, file);
+    const dialog = await screen.findByRole("dialog", { name: "Replace your data with this file?" });
+    await user.click(within(dialog).getByRole("button", { name: "Replace my data" }));
+
+    expect(JSON.parse(localStorage.getItem(PLAN_STORAGE_KEY)!).meals).toHaveLength(1);
+    expect(localStorage.getItem(SETTINGS_STORAGE_KEY)).toBeNull(); // file had no settings
+    expect(screen.getByText("Your data has been restored from the file.")).toBeInTheDocument();
+  });
+});

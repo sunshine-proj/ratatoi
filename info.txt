@@ -191,6 +191,45 @@ The README has a new "Meal planner" section.
 ============================
 
 
+Phase 5 is done and every roadmap item is ticked. Lint, typecheck, all 219 unit tests, the build and the 85 end-to-end tests pass. Nothing is committed.
+
+What users see now
+
+Today (/) is now a dashboard:
+a greeting by time of day (24-hour clock) and the full date
+the set-up prompt for new users
+Today's progress: calories and protein, plus carbohydrate and fat if those targets are set, with an "Edit targets" link
+today's meals, snacks included, with servings and protein and calorie chips
+quick actions: Add a meal, Find a snack, Shopping list
+an empty state with a Plan today button
+Planner: each day shows a progress panel against your targets, every meal shows chips for its planned servings, and a Week summary gives the week's total and a daily average.
+Without targets, both screens show planned totals and a "Set targets" link.
+How progress is worded and calculated
+
+Neutral wording: "200 kcal remaining", "0 g remaining", "150 kcal above target". There's no red, no warning colours and no "over budget" language. Each panel carries the PRD line "Planning figures, not a judgement or medical assessment."
+Numbers always add up. Values are kept precise, and planned is rounded once for display, with remaining worked out from that rounded figure. So 1,699.5 kcal shows as 1,700 planned and 200 remaining, never 1,700 and 201.
+Unknown stays unknown. If any meal lacks carbohydrate information, that row says "Unknown" rather than showing a partial number.
+The weekly average covers only the selected Monday to Sunday and is averaged over days with meals planned. The summary says so, so an unplanned weekend doesn't halve the figure.
+Screen readers: the bars are decorative, because the text beside them carries the meaning. Day totals are announced only after changes settle, so tapping "+" four times gives one announcement, not four.
+A layout issue found and fixed: on phones, Today's meal rows squeezed recipe names into a narrow column. They now stack on small screens.
+
+Checks I ran
+
+npm run check: passed, with 219 unit tests. They include the PRD's example (1,900 kcal and 150 g targets, four meals: 1,700 kcal and 150 g planned, 200 kcal and 0 g remaining), plus the rounding case, above/equal/below target, negative values rejected, unknown values, optional macros, a week that ignores meals outside it, fractional servings, multiple snacks, empty days, the delayed announcement, and the Today dashboard.
+npm run test:e2e: 85 passed, 9 skipped on purpose. New tests cover planner progress going above target with neutral wording and the matching figures on Today, and a week summary that ignores other weeks. I updated one Phase 2 test that checked the old targets card on Today.
+I also checked screenshots of Today and the planner on a phone.
+Not done yet
+
+No week-level progress against targets: the week summary shows your daily targets next to the average, without a progress bar.
+No progress history or charts. That's deliberate, since the PRD warns against defining success by restriction.
+The README has a new "Nutrition progress" section. Phase 6 (the shopping list) is next.
+
+
+
+============================
+
+
+
 
 
 

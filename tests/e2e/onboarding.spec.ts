@@ -23,12 +23,12 @@ test.describe("onboarding and goals", () => {
     await expect(page).toHaveURL("/");
     await expect(page.getByText("You're all set. Your targets are saved.")).toBeVisible();
     // Scope to the accessible tree: Next keeps the previous page mounted but hidden.
-    const targets = page.getByRole("list", { name: "Daily targets" });
-    await expect(targets).toContainText("1,900 kcal");
-    await expect(targets).toContainText("150 g protein");
+    const progress = page.getByRole("region", { name: "Today's progress" });
+    await expect(progress).toContainText("0 of 1,900 kcal");
+    await expect(progress).toContainText("0 of 150 g");
 
     await page.reload();
-    await expect(page.getByRole("list", { name: "Daily targets" })).toContainText("1,900 kcal");
+    await expect(page.getByRole("region", { name: "Today's progress" })).toContainText("1,900 kcal remaining");
 
     await page.goto("/settings/preferences");
     await expect(page.getByRole("checkbox", { name: "Milk" })).toBeChecked();

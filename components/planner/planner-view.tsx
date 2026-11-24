@@ -20,6 +20,8 @@ import { DuplicateMealDialog } from "./duplicate-meal-dialog";
 import { RecipeLookupProvider } from "./recipe-lookup";
 import { SwapMealDialog } from "./swap-meal-dialog";
 import { usePlanActions } from "./use-plan-actions";
+import { WeekSummary } from "./week-summary";
+import { useSettings } from "@/lib/settings/use-settings";
 
 /**
  * Week planner. The selected day lives in the URL (`?date=YYYY-MM-DD`) so
@@ -70,6 +72,8 @@ function Planner({ plan }: { plan: MealPlan }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { apply } = usePlanActions();
+  const { state: settings } = useSettings();
+  const targets = settings.status === "ready" ? settings.value.goal : null;
 
   const today = toLocalIsoDate();
   const requested = searchParams.get("date");
@@ -126,10 +130,13 @@ function Planner({ plan }: { plan: MealPlan }) {
 
       <DayTabs dates={week} selected={selected} today={today} mealCounts={mealCounts} onSelect={select} />
 
+      <WeekSummary plan={plan} week={week} targets={targets} />
+
       <DayPlan
         plan={plan}
         date={selected}
         today={today}
+        targets={targets}
         onAdd={(mealType) => setAddTarget({ date: selected, mealType })}
         onSwap={setSwapId}
         onDuplicate={setDuplicateId}

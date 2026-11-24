@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRef } from "react";
+import { MealNutritionChips } from "@/components/nutrition/meal-nutrition-chips";
 import { RecipeImage } from "@/components/recipes/recipe-image";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { Tag } from "@/components/ui/tag";
 import { useToast } from "@/components/ui/toast";
 import { formatMessage, getMessages, type Messages } from "@/lib/i18n";
-import { formatNumber } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import { plannedMealNutrition } from "@/lib/nutrition/totals";
 import { moveMeal, removeMeal, restoreMeal, setServings } from "@/lib/planner/operations";
@@ -86,14 +86,7 @@ export function PlannedMealItem({ meal, isFirst, isLast, onSwap, onDuplicate }: 
               {t.planner.customNote}
             </p>
           ) : null}
-          <p className="text-sm text-ink-muted">
-            {nutrition
-              ? formatMessage(t.planner.mealNutrition, {
-                  kcal: formatNumber(nutrition.kcal),
-                  protein: formatNumber(nutrition.proteinG),
-                })
-              : t.planner.noNutrition}
-          </p>
+          <MealNutritionChips nutrition={nutrition} />
         </div>
       </div>
 

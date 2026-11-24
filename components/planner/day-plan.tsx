@@ -1,9 +1,12 @@
 "use client";
 
+import { ProgressPanel } from "@/components/nutrition/progress-panel";
 import { Button } from "@/components/ui/button";
+import { DelayedAnnouncement } from "@/components/ui/delayed-announcement";
 import { Icon } from "@/components/ui/icon";
 import { formatMessage, getMessages } from "@/lib/i18n";
-import { formatDate, formatNumber, formatPlural } from "@/lib/i18n/format";
+import { formatDate, formatNumber } from "@/lib/i18n/format";
+import type { DailyTargets } from "@/lib/nutrition/goal";
 import { sumNutrition } from "@/lib/nutrition/totals";
 import { mealsInSlot, mealsOn } from "@/lib/planner/operations";
 import type { MealPlan } from "@/lib/planner/schema";
@@ -12,8 +15,9 @@ import { DAY_PANEL_ID, dayTabId } from "./day-tabs";
 import { PlannedMealItem } from "./planned-meal-item";
 import { useRecipeLookup } from "./recipe-lookup";
 
-export function DayPlan({ plan, date, today, onAdd, onSwap, onDuplicate, onClearDay }: {
+export function DayPlan({ plan, date, today, targets, onAdd, onSwap, onDuplicate, onClearDay }: {
   plan: MealPlan;
+  targets: DailyTargets | null;
   date: string;
   today: string;
   onAdd: (mealType: MealType) => void;
@@ -29,33 +33,30 @@ export function DayPlan({ plan, date, today, onAdd, onSwap, onDuplicate, onClear
   return (
     <section id={DAY_PANEL_ID} role="tabpanel" aria-labelledby={dayTabId(date)} className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-semibold">
-            {formatDate(date, "dayLong")}
-            {date === today ? <span className="ml-2 align-middle text-sm font-medium text-primary">· {t.planner.today}</span> : null}
-          </h2>
-          {meals.length > 0 ? (
-            <>
-              <p aria-live="polite" className="font-medium">
-                {formatMessage(t.planner.dayTotals, {
-                  kcal: formatNumber(totals.kcal),
-                  protein: formatNumber(totals.proteinG),
-                })}
-              </p>
-              {totals.unknownMeals > 0 ? (
-                <p className="text-sm text-ink-muted">{formatPlural(t.planner.unknownMeals, totals.unknownMeals)}</p>
-              ) : null}
-            </>
-          ) : (
-            <p className="text-ink-muted">{t.planner.emptyDay}</p>
-          )}
-        </div>
+        <h2 className="text-2xl font-semibold">
+          {formatDate(date, "dayLong")}
+          {date === today ? <span className="ml-2 align-middle text-sm font-medium text-primary">· {t.planner.today}</span> : null}
+        </h2>
         {meals.length > 0 ? (
           <Button variant="secondary" size="sm" onClick={onClearDay}>
             {t.planner.clearDay}
           </Button>
         ) : null}
       </header>
+
+      {meals.length > 0 ? (
+        <ProgressPanel
+          totals={totals}
+          targets={targets}
+          headingId={`progress-${date}`}
+          heading={t.progress.title}
+        />
+      ) : (
+        <p className="text-ink-muted">{t.planner.emptyDay}</p>
+      )}
+      <DelayedAnnouncement
+        message={formatMessage(t.progress.announce, { kcal: formatNumber(totals.kcal), protein: formatNumber(totals.proteinG) })}
+      />
 
       {mealTypes.map((mealType) => {
         const slot = mealsInSlot(plan, date, mealType);

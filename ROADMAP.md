@@ -97,18 +97,18 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 5 — Nutrition summaries and target progress
 
-- [ ] Pure functions: scale per-serving nutrition by servings; sum meal, day, and range totals (meal and day done in Phase 4: `lib/nutrition/totals.ts`; range/weekly still to do)
-- [ ] Treat missing nutrition as unknown, not zero, and show that in the UI (done for planner day totals; extend to Today and progress)
-- [ ] Remaining = target − planned; negative values labelled neutrally
-- [ ] Round only for display; keep full precision internally
-- [ ] Weekly totals and averages use only the selected date range
-- [ ] Per-meal nutrition chips in the planner and Today views
-- [ ] Daily calorie and protein progress in the planner
-- [ ] Progress status uses text/icons as well as colour; no shaming language or red warnings for ordinary differences
-- [ ] Announce total changes to screen readers without excess chatter
-- [ ] Today dashboard (`/`): date, greeting, calorie/protein progress, planned meals incl. snacks, quick actions, empty state
-- [ ] Unit tests: one serving, fractional servings, multiple meals, multiple snacks, empty day, missing values, negative values rejected, target above/equal/below
-- [ ] Unit test for the PRD example scenario (1,700 kcal / 150 g, 200 kcal and 0 g remaining)
+- [x] Pure functions: scale per-serving nutrition by servings; sum meal, day, and range totals
+- [x] Treat missing nutrition as unknown, not zero, and show that in the UI
+- [x] Remaining = target − planned; negative values labelled neutrally
+- [x] Round only for display; keep full precision internally
+- [x] Weekly totals and averages use only the selected date range
+- [x] Per-meal nutrition chips in the planner and Today views
+- [x] Daily calorie and protein progress in the planner
+- [x] Progress status uses text/icons as well as colour; no shaming language or red warnings for ordinary differences
+- [x] Announce total changes to screen readers without excess chatter
+- [x] Today dashboard (`/`): date, greeting, calorie/protein progress, planned meals incl. snacks, quick actions, empty state
+- [x] Unit tests: one serving, fractional servings, multiple meals, multiple snacks, empty day, missing values, negative values rejected, target above/equal/below
+- [x] Unit test for the PRD example scenario (1,700 kcal / 150 g, 200 kcal and 0 g remaining)
 
 ## Phase 6 — Shopping list
 

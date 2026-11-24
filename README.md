@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 4 (meal planner) complete.** On top of the app shell, PWA foundation, onboarding and goals, and the recipe catalogue (still without photos), users can plan a week: four slots a day (breakfast, lunch, dinner, and any number of snacks), recipes or their own meals, servings in quarter steps, swap with a preview of the day's totals, duplicate, reorder, remove with undo, and clear a day or week after confirming. Recipes can be added to the plan from their page or card. The plan is saved in the browser. Progress against targets (Phase 5) and the shopping list (Phase 6) come next. See `ROADMAP.md` for progress and next phases.
+**Phase 5 (nutrition summaries and progress) complete.** On top of the app shell, PWA, onboarding and goals, the recipe catalogue (still without photos), and the week planner, users now see their planned intake against their targets: on Today (greeting, date, progress, today's meals including snacks, quick actions) and for every day in the planner, plus a week summary. Per-meal protein and calorie chips appear in the planner and on Today. The shopping list (Phase 6) comes next. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -92,19 +92,20 @@ components/
   goals/             Goal type, targets, estimate, and Goals settings
   preferences/       Preference fields and Preferences settings
   settings/          Loading / unreadable-data gate for saved settings
-  today/             Today overview
+  today/             Today dashboard
+  nutrition/         Progress panel, per-meal nutrition chips
   forms/             Field error messages and focus helpers
   recipes/           Recipe card, image/placeholder, browser and filters, detail page
   planner/           Week view, day tabs, slots, meal rows, add/swap/duplicate sheets,
                      Add to plan button, servings stepper
   storage/           Loading / unreadable-data gate shared by settings and the plan
-  nutrition/ shopping/
+  shopping/
 lib/                 Domain logic, kept free of UI code
   i18n/              Translation-ready UI strings (English; Lithuanian-ready)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
   forms/             Numeric input parsing and field error codes
   nutrition/         Goal schema and target parsing (goal.ts), estimate (estimate.ts),
-                     planned-meal and day totals (totals.ts)
+                     planned-meal, day, and range totals (totals.ts), target progress (progress.ts)
   preferences/       Preference schema, allergens, excluded-ingredient helpers
   settings/          Saved settings document and the useSettings hook
   storage/           Schema-validated localStorage document and useLocalDocument hook
@@ -200,6 +201,16 @@ The user always reviews and edits the numbers. Manual targets must be between 80
 - **Saving:** a separate browser document, `protein-plate:plan`, validated on every read. If it can't be read, the planner explains, refuses to overwrite it silently, and offers a reset that leaves goals and preferences untouched.
 - **URL:** the selected day is in `?date=YYYY-MM-DD`, so refresh, back/forward, and "View plan" links land on the right day.
 - **Bulk actions** (clear day, clear week) ask for confirmation. Removing one meal or swapping offers "Undo" in a toast.
+
+## Nutrition progress
+
+- **Logic** (`lib/nutrition/progress.ts`, `lib/nutrition/totals.ts`) is pure and unit-tested, including the PRD scenario (1,900 kcal / 150 g targets, four meals → 1,700 kcal and 150 g planned, 200 kcal and 0 g remaining).
+- **Remaining = target − planned.** Negative values are allowed and worded neutrally ("150 kcal above target"); there is no red, no warning styling, and no "over budget" language. A line reads "Planning figures, not a judgement or medical assessment."
+- **Rounding:** values are summed at full precision. For display, planned is rounded once and remaining is derived from that rounded figure, so the two numbers shown always add up to the target.
+- **Optional targets:** carbohydrate and fat rows appear only if the user set those targets. If any meal lacks that information, the row says "Unknown" instead of showing a partial number.
+- **Weekly summary** (planner) covers exactly the selected Monday–Sunday: the week's total and the daily average over *planned* days (days with nothing planned are left out, and the summary says so).
+- **Accessibility:** progress bars are decorative; the text beside each bar carries the meaning. Day totals are announced to screen readers through a polite live region that waits until changes settle (`components/ui/delayed-announcement.tsx`), so repeated servings taps produce one announcement.
+- **Without targets,** Today and the planner show planned totals and a link to set targets.
 
 ## PWA and offline behaviour
 

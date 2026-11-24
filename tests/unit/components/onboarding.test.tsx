@@ -5,7 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GoalsSettings } from "@/components/goals/goals-settings";
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
 import { PreferencesSettings } from "@/components/preferences/preferences-settings";
-import { TodayOverview } from "@/components/today/today-overview";
+import { TodayDashboard } from "@/components/today/today-dashboard";
+import { getRecipeSummaries } from "@/lib/recipes/catalogue";
 import { ToastProvider } from "@/components/ui/toast";
 import { buildGoal } from "@/lib/nutrition/goal";
 import { defaultPreferences } from "@/lib/preferences/preferences";
@@ -227,17 +228,20 @@ describe("PreferencesSettings", () => {
   });
 });
 
-describe("TodayOverview and saved-data states", () => {
+const TodayOverview = () => <TodayDashboard recipes={getRecipeSummaries()} />;
+
+describe("Today dashboard and saved-data states", () => {
   it("invites new users to set up", async () => {
     wrap(<TodayOverview />);
     expect(await screen.findByRole("link", { name: "Set up your plan" })).toHaveAttribute("href", "/onboarding");
   });
 
-  it("shows saved targets", async () => {
+  it("shows progress against saved targets", async () => {
     seed(completeOnboarding(emptySettings, { goal, preferences: defaultPreferences }));
     wrap(<TodayOverview />);
-    expect(await screen.findByText("1,900 kcal")).toBeInTheDocument();
-    expect(screen.getByText("150 g protein")).toBeInTheDocument();
+    expect(await screen.findByText("0 of 1,900 kcal")).toBeInTheDocument();
+    expect(screen.getByText("0 of 150 g")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Set up your plan" })).not.toBeInTheDocument();
   });
 
   it("explains unreadable saved data and offers a reset", async () => {

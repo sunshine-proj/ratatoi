@@ -63,3 +63,54 @@ export function sumNutrition(meals: readonly PlannedMeal[], lookup: RecipeNutrit
   }
   return totals;
 }
+
+export type DayTotals = { date: string; totals: NutritionTotals };
+
+export type RangeSummary = {
+  dates: readonly string[];
+  /** Sum over every date in the range. */
+  totals: NutritionTotals;
+  days: DayTotals[];
+  /** Days in the range with at least one planned meal. */
+  plannedDays: number;
+  /**
+   * Average per planned day (days with nothing planned are left out, so an
+   * unplanned weekend doesn't halve the average). Null when nothing is planned.
+   */
+  dailyAverage: Pick<NutritionTotals, "kcal" | "proteinG" | "carbsG" | "fatG"> | null;
+};
+
+/** Totals and averages for exactly the given dates (e.g. the selected week). */
+export function summarizeRange(
+  meals: readonly PlannedMeal[],
+  dates: readonly string[],
+  lookup: RecipeNutritionLookup,
+): RangeSummary {
+  const inRange = new Set(dates);
+  const selected = meals.filter((meal) => inRange.has(meal.date));
+  const days = dates.map((date) => ({
+    date,
+    totals: sumNutrition(
+      selected.filter((meal) => meal.date === date),
+      lookup,
+    ),
+  }));
+  const totals = sumNutrition(selected, lookup);
+  const plannedDays = days.filter((day) => day.totals.mealCount > 0).length;
+  const average = (value: number | null) => (value === null ? null : value / plannedDays);
+  return {
+    dates,
+    totals,
+    days,
+    plannedDays,
+    dailyAverage:
+      plannedDays === 0
+        ? null
+        : {
+            kcal: totals.kcal / plannedDays,
+            proteinG: totals.proteinG / plannedDays,
+            carbsG: average(totals.carbsG),
+            fatG: average(totals.fatG),
+          },
+  };
+}

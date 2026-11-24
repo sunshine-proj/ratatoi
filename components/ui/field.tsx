@@ -15,7 +15,7 @@ type FieldChrome = {
 };
 
 /** Wires label, hint, and error to a control with the right ARIA attributes. */
-function useFieldIds(id: string | undefined, hint: unknown, error: unknown) {
+export function useFieldIds(id: string | undefined, hint: unknown, error: unknown) {
   const generated = useId();
   const controlId = id ?? generated;
   const hintId = hint ? `${controlId}-hint` : undefined;
@@ -24,7 +24,7 @@ function useFieldIds(id: string | undefined, hint: unknown, error: unknown) {
   return { controlId, hintId, errorId, describedBy };
 }
 
-function FieldMessages({ hint, error, hintId, errorId }: {
+export function FieldMessages({ hint, error, hintId, errorId }: {
   hint?: ReactNode;
   error?: ReactNode;
   hintId?: string;
@@ -48,23 +48,37 @@ function FieldMessages({ hint, error, hintId, errorId }: {
 }
 
 type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> &
-  FieldChrome & { type?: "text" | "number" | "email" | "search" | "date" | "password" };
+  FieldChrome & {
+    type?: "text" | "number" | "email" | "search" | "date" | "password";
+    /** Visual unit shown inside the input (e.g. "kcal"). Put the unit in the label too, for screen readers. */
+    suffix?: ReactNode;
+  };
 
-export function TextField({ label, hint, error, id, className, type = "text", ...rest }: TextFieldProps) {
+export function TextField({ label, hint, error, id, className, type = "text", suffix, ...rest }: TextFieldProps) {
   const { controlId, hintId, errorId, describedBy } = useFieldIds(id, hint, error);
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label htmlFor={controlId} className="font-medium">
         {label}
       </label>
-      <input
-        id={controlId}
-        type={type}
-        aria-describedby={describedBy}
-        aria-invalid={error ? true : undefined}
-        className={cn(controlClasses, error ? "border-danger" : "border-line-strong")}
-        {...rest}
-      />
+      <div className="relative">
+        <input
+          id={controlId}
+          type={type}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
+          className={cn(controlClasses, error ? "border-danger" : "border-line-strong", suffix ? "pr-14" : null)}
+          {...rest}
+        />
+        {suffix ? (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-ink-muted"
+          >
+            {suffix}
+          </span>
+        ) : null}
+      </div>
       <FieldMessages hint={hint} error={error} hintId={hintId} errorId={errorId} />
     </div>
   );

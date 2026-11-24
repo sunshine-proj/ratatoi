@@ -43,19 +43,19 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 2 — Onboarding and nutrition goals
 
-- [ ] Define domain types and Zod schemas for `NutritionGoal` and `UserPreference`
-- [ ] Onboarding step: pick a goal (fat loss while keeping muscle, muscle gain, higher-protein healthy eating)
-- [ ] Onboarding step: optional profile details (age, height, weight, activity), each with a short "why we ask" note
-- [ ] Let users skip profile details and enter targets by hand (P0)
-- [ ] Manual entry of daily calorie (kcal) and protein (g) targets (P0)
-- [ ] Optional carbohydrate and fat targets (P1)
-- [ ] Onboarding step: dietary preferences, allergens/intolerances, excluded ingredients, cooking skill, budget, number of meals/snacks
-- [ ] Summary step with editable targets before saving
-- [ ] Show the disclaimer: targets are estimates, not medical advice; see a professional for medical needs, pregnancy, or eating-disorder history
-- [ ] `/settings/goals`: edit or clear targets
-- [ ] `/settings/preferences`: edit preferences and exclusions
-- [ ] Clear validation messages for every field
-- [ ] Unit tests for goal and preference schemas
+- [x] Define domain types and Zod schemas for `NutritionGoal` and `UserPreference`
+- [x] Onboarding step: pick a goal (fat loss while keeping muscle, muscle gain, higher-protein healthy eating)
+- [x] Onboarding step: optional profile details (age, height, weight, activity), each with a short "why we ask" note
+- [x] Let users skip profile details and enter targets by hand (P0)
+- [x] Manual entry of daily calorie (kcal) and protein (g) targets (P0)
+- [x] Optional carbohydrate and fat targets (P1)
+- [x] Onboarding step: dietary preferences, allergens/intolerances, excluded ingredients, cooking skill, budget, number of meals/snacks
+- [x] Summary step with editable targets before saving
+- [x] Show the disclaimer: targets are estimates, not medical advice; see a professional for medical needs, pregnancy, or eating-disorder history
+- [x] `/settings/goals`: edit or clear targets
+- [x] `/settings/preferences`: edit preferences and exclusions
+- [x] Clear validation messages for every field
+- [x] Unit tests for goal and preference schemas
 
 ## Phase 3 — Recipe catalogue, detail, search, and filters
 
@@ -126,8 +126,8 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 7 — Persistence, offline, and accessibility
 
-- [ ] Guest-first local persistence for goals, preferences, plans, and shopping lists
-- [ ] Validate persisted data with schemas on load; add a versioned migration path for local data
+- [ ] Guest-first local persistence for goals, preferences, plans, and shopping lists (goals and preferences done in Phase 2: `lib/settings`)
+- [ ] Validate persisted data with schemas on load; add a versioned migration path for local data (validation done for settings; migrations not yet needed)
 - [ ] Decide whether to add optional account sync (Supabase) now or in V1; document the decision
 - [ ] If Supabase is added: auth, schema, row-level security, additive migrations, env vars in `.env.example`
 - [ ] Cache recently viewed and saved recipes according to freshness and licence rules

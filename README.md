@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 1 (app shell and PWA foundation) complete.** The responsive shell, design tokens, base components, every MVP route (as a placeholder), web app manifest, icons, and an app-shell service worker are in place. Features arrive from Phase 2 onwards. See `ROADMAP.md` for progress and next phases.
+**Phase 2 (onboarding and nutrition goals) complete.** On top of the Phase 1 shell and PWA foundation, users can run a 5-step set-up (goal, optional estimate, targets, food preferences, summary), edit targets and preferences in Settings, and see their targets on Today. Settings are saved in the browser (guest mode). Recipes, planning, and shopping arrive from Phase 3 onwards. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -33,7 +33,7 @@ This is a meal-planning tool, not medical advice.
 - Playwright for end-to-end tests
 - npm (lockfile committed), Node.js 24 or newer (see `.nvmrc`)
 
-Not yet added: Supabase (Phase 7), React Hook Form (added when complex forms arrive). UI components are hand-written in `components/ui/` rather than pulled from a library.
+Not yet added: Supabase (Phase 7). React Hook Form was considered for onboarding but not needed (see Forms). UI components are hand-written in `components/ui/` rather than pulled from a library.
 
 > Next.js 16 differs from older versions. Before writing framework code, read the relevant guide in `node_modules/next/dist/docs/`.
 
@@ -88,12 +88,23 @@ components/
                      Dialog (native <dialog>, optional bottom-sheet), Tabs, Toast, Icon
   layout/            App shell, navigation, page header, offline banner
   pwa/               Service worker registration
+  onboarding/        Set-up wizard and summaries
+  goals/             Goal type, targets, estimate, and Goals settings
+  preferences/       Preference fields and Preferences settings
+  settings/          Loading / unreadable-data gate for saved settings
+  today/             Today overview
+  forms/             Field error messages and focus helpers
   recipes/ planner/ nutrition/ shopping/
 lib/                 Domain logic, kept free of UI code
   i18n/              Translation-ready UI strings (English; Lithuanian-ready)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
+  forms/             Numeric input parsing and field error codes
+  nutrition/         Goal schema and target parsing (goal.ts), estimate (estimate.ts)
+  preferences/       Preference schema, allergens, excluded-ingredient helpers
+  settings/          Saved settings document and the useSettings hook
+  storage/           Schema-validated localStorage document
   navigation.ts      Route table and nav configuration
-  nutrition/ recipes/ planner/ shopping/ storage/
+  recipes/ planner/ shopping/
 data/recipes/        Seed recipe data
 assets/              Icon source artwork (SVG)
 scripts/             Build-time helpers (icon generation)
@@ -111,6 +122,12 @@ Empty folders contain a `.gitkeep` until they're used.
 Colours, radii, shadows, and fonts are defined once in `app/globals.css` (`@theme`) and used as Tailwind utilities (`bg-canvas`, `text-ink-muted`, `bg-primary`, `rounded-card`, `font-display`, …). `tests/unit/design/tokens.test.ts` reads that file and checks every text and control colour pair against WCAG 2.2 AA. Add a pair to the test whenever you combine colours in a new way.
 
 Conventions: one global `:focus-visible` outline; interactive elements are at least 44×44 px; `prefers-reduced-motion` disables animation; status is never shown by colour alone. Light theme only for now.
+
+### Forms
+
+Forms are hand-written with small helpers rather than a form library. Validation lives in `lib/` as pure functions that return error codes (`required`, `notANumber`, `outOfRange`, …); `components/forms/field-error.ts` turns codes into translated messages, and the first invalid field receives focus. Numeric inputs are text inputs with `inputMode`, so EU decimal commas (`72,5`) and grouped thousands (`1,900`, `1 900`) are accepted. Values are validated again with Zod before they are saved.
+
+**Next.js keeps recently visited pages mounted.** With Cache Components, up to three routes stay alive (hidden with React `<Activity>`) with their state. Forms that edit saved data are keyed by that data, so they re-initialise if it changes elsewhere, and the onboarding wizard resets after a successful save. In e2e tests, prefer role queries (`getByRole`), which ignore hidden pages, over `getByLabel`/`getByText`.
 
 ### Strings and locales
 
@@ -139,6 +156,28 @@ UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages
 - **Shopping list item:** normalized ingredient, quantity, unit, category, checked state, and source references.
 
 Keep nutrition calculations and shopping aggregation in testable domain functions rather than embedding them in UI components.
+
+## Saved data and privacy
+
+Guest mode only; there is no account or server storage yet.
+
+- **Where:** one JSON document in `localStorage` under `protein-plate:settings`, defined by `userSettingsSchema` in `lib/settings/settings.ts` (`version: 1`).
+- **What:** goal type; daily calorie and protein targets; optional carbohydrate and fat targets; whether the targets started from an estimate; food preferences (eating pattern, the 14 EU-declared allergens, other excluded ingredients, cooking confidence, budget, meals and snacks per day); and when onboarding was completed.
+- **What is never saved:** the age, sex, height, weight, and activity level used for estimates. They exist only in component state while the estimate form is open.
+- **Validation:** data is checked against the schema on every read. Damaged or unrecognised data is never trusted: the UI explains the problem and offers to reset. Writes that fail (storage blocked or full) show an error and change nothing.
+- **Shared devices:** anyone using the same browser can see this data, and the app says so where it saves. Clearing targets is available in Settings → Goals; export and deletion of all data are planned (Phase 8).
+
+### Suggested targets
+
+The optional estimate in onboarding and Settings → Goals is a transparent starting point, shown with its full working:
+
+- Resting energy uses the Mifflin–St Jeor formula. "Prefer not to say" uses the midpoint of the female and male constants.
+- Maintenance is resting energy × a standard activity factor (1.2–1.9).
+- Goal adjustment: −15% for fat loss, +10% for muscle gain, none for eating more protein.
+- Protein: 1.8 g/kg for fat loss or muscle gain, 1.4 g/kg otherwise.
+- Safety rails: never below 1,200 kcal; protein capped at 35% of calories; ages 18–100 only.
+
+The user always reviews and edits the numbers. Manual targets must be between 800 and 6,000 kcal and 20 and 400 g protein; below 1,200 kcal, a neutral note suggests checking with a professional. A disclaimer is shown wherever targets are set. The logic is in `lib/nutrition/estimate.ts` and is unit-tested against worked examples.
 
 ## PWA and offline behaviour
 

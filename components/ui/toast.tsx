@@ -74,7 +74,9 @@ function Toaster({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: numbe
     // The live region is always mounted so screen readers announce new toasts.
     <section
       aria-label={t.a11y.notifications}
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--spacing-bottom-nav)+env(safe-area-inset-bottom)+0.75rem)] z-50 flex flex-col items-center gap-2 px-4 md:bottom-6 md:items-end"
+      // Top of the screen, so toasts never cover the primary actions and bottom
+      // navigation that sit within thumb reach on phones.
+      className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] z-50 flex flex-col items-center gap-2 px-4 md:top-6 md:items-end md:px-6"
     >
       <ol role="status" aria-live="polite" className="flex w-full max-w-sm flex-col gap-2">
         {toasts.map((toast) => (

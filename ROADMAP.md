@@ -25,20 +25,21 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 
 ## Phase 1 — App shell, design tokens, and PWA foundation
 
-- [ ] Define design tokens: colours, type scale, spacing, radii, shadows (warm, food-focused, non-clinical)
-- [ ] Check token colour pairs against WCAG 2.2 AA contrast
-- [ ] Build base components: Button, Card, Chip/Tag, Input, Select, Checkbox, Dialog/Sheet, Tabs, Toast
-- [ ] Add a visible focus style and respect `prefers-reduced-motion`
-- [ ] Build the responsive layout: bottom nav on mobile (Today, Plan, Recipes, Shopping), sidebar/top nav on desktop
-- [ ] Add a persistent path to Profile/Goals
-- [ ] Add semantic landmarks, a skip link, and correct heading order in the shell
-- [ ] Create placeholder routes: `/`, `/onboarding`, `/recipes`, `/recipes/[slug]`, `/snacks`, `/planner`, `/shopping-list`, `/settings/goals`, `/settings/preferences`, `/settings/account`
-- [ ] Add global error, not-found, and loading boundaries
-- [ ] Add a web app manifest: name, short name, icons (incl. maskable), theme/background colours, `display: standalone`
-- [ ] Create app icons at the required sizes
-- [ ] Register a service worker that caches the app shell and static assets
-- [ ] Add an offline indicator component
-- [ ] Verify installability in Chrome/Edge (Lighthouse) and with "Add to Home Screen" on iOS Safari
+- [x] Define design tokens: colours, type scale, spacing, radii, shadows (warm, food-focused, non-clinical)
+- [x] Check token colour pairs against WCAG 2.2 AA contrast
+- [x] Build base components: Button, Card, Chip/Tag, Input, Select, Checkbox, Dialog/Sheet, Tabs, Toast
+- [x] Add a visible focus style and respect `prefers-reduced-motion`
+- [x] Build the responsive layout: bottom nav on mobile (Today, Plan, Recipes, Shopping), sidebar/top nav on desktop
+- [x] Add a persistent path to Profile/Goals
+- [x] Add semantic landmarks, a skip link, and correct heading order in the shell
+- [x] Create placeholder routes: `/`, `/onboarding`, `/recipes`, `/recipes/[slug]`, `/snacks`, `/planner`, `/shopping-list`, `/settings/goals`, `/settings/preferences`, `/settings/account`
+- [x] Add global error, not-found, and loading boundaries
+- [x] Add a web app manifest: name, short name, icons (incl. maskable), theme/background colours, `display: standalone`
+- [x] Create app icons at the required sizes
+- [x] Register a service worker that caches the app shell and static assets
+- [x] Add an offline indicator component
+- [x] Verify installability in Chromium (automated: `Page.getInstallabilityErrors` in e2e)
+- [ ] Manually verify install on Android Chrome, desktop Edge, and "Add to Home Screen" on iOS Safari over HTTPS
 
 ## Phase 2 — Onboarding and nutrition goals
 

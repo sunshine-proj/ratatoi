@@ -22,4 +22,14 @@ export function getMessages(locale: Locale = defaultLocale): Messages {
   return catalogue[locale];
 }
 
+/**
+ * Fill `{name}` placeholders. Unknown placeholders are left as-is so a
+ * missing value is visible rather than silently blank.
+ */
+export function formatMessage(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) =>
+    key in values ? String(values[key]) : whole,
+  );
+}
+
 export type { Messages };

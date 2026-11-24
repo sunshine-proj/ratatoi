@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 0 (project foundation) complete.** The app is scaffolded and tooling is in place; the home page is a placeholder. See `ROADMAP.md` for progress and next phases.
+**Phase 1 (app shell and PWA foundation) complete.** The responsive shell, design tokens, base components, every MVP route (as a placeholder), web app manifest, icons, and an app-shell service worker are in place. Features arrive from Phase 2 onwards. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -33,7 +33,7 @@ This is a meal-planning tool, not medical advice.
 - Playwright for end-to-end tests
 - npm (lockfile committed), Node.js 24 or newer (see `.nvmrc`)
 
-Not yet added: Supabase, PWA manifest/service worker (Phase 1), React Hook Form (added when complex forms arrive).
+Not yet added: Supabase (Phase 7), React Hook Form (added when complex forms arrive). UI components are hand-written in `components/ui/` rather than pulled from a library.
 
 > Next.js 16 differs from older versions. Before writing framework code, read the relevant guide in `node_modules/next/dist/docs/`.
 
@@ -58,6 +58,7 @@ Open `http://localhost:3000` (Next.js picks another port if 3000 is in use; chec
 | `npm run test` | Unit and component tests (Vitest, single run) |
 | `npm run test:watch` | Vitest in watch mode |
 | `npm run test:e2e` | Builds, serves on port 3210, runs Playwright (desktop + mobile Chromium) |
+| `npm run icons` | Regenerate PNG icons and favicons from `assets/*.svg` (commit the output) |
 | `npm run check` | Lint, typecheck, unit tests, and build in sequence |
 
 Before the first e2e run, install the browser: `npx playwright install chromium`. If port 3210 is taken, set `E2E_PORT`. The e2e run will not reuse a server that is already running on that port.
@@ -80,21 +81,36 @@ Until a hosted backend is configured, the MVP uses local persistence and guest m
 ## Application structure
 
 ```text
-app/                 Routes (App Router)
-components/          UI components, grouped by area
-  layout/ recipes/ planner/ nutrition/ shopping/
+app/                 Routes (App Router), manifest.ts, icon.svg, apple-icon.png
+  error.tsx, global-error.tsx, not-found.tsx, loading.tsx   Route boundaries
+components/
+  ui/                Base components: Button, Card, Tag, TextField/SelectField/Checkbox,
+                     Dialog (native <dialog>, optional bottom-sheet), Tabs, Toast, Icon
+  layout/            App shell, navigation, page header, offline banner
+  pwa/               Service worker registration
+  recipes/ planner/ nutrition/ shopping/
 lib/                 Domain logic, kept free of UI code
   i18n/              Translation-ready UI strings (English; Lithuanian-ready)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
+  navigation.ts      Route table and nav configuration
   nutrition/ recipes/ planner/ shopping/ storage/
 data/recipes/        Seed recipe data
-public/icons/        App and PWA icons
+assets/              Icon source artwork (SVG)
+scripts/             Build-time helpers (icon generation)
+public/sw.js         Service worker
+public/icons/        Generated PWA icons
 public/images/       Licensed recipe images
-tests/unit/          Vitest tests (mirrors lib/ and app/)
+tests/unit/          Vitest tests
 tests/e2e/           Playwright tests
 ```
 
 Empty folders contain a `.gitkeep` until they're used.
+
+### Design tokens
+
+Colours, radii, shadows, and fonts are defined once in `app/globals.css` (`@theme`) and used as Tailwind utilities (`bg-canvas`, `text-ink-muted`, `bg-primary`, `rounded-card`, `font-display`, …). `tests/unit/design/tokens.test.ts` reads that file and checks every text and control colour pair against WCAG 2.2 AA. Add a pair to the test whenever you combine colours in a new way.
+
+Conventions: one global `:focus-visible` outline; interactive elements are at least 44×44 px; `prefers-reduced-motion` disables animation; status is never shown by colour alone. Light theme only for now.
 
 ### Strings and locales
 
@@ -124,17 +140,29 @@ UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages
 
 Keep nutrition calculations and shopping aggregation in testable domain functions rather than embedding them in UI components.
 
-## PWA requirements
+## PWA and offline behaviour
 
-Before calling the app installable or offline-capable, verify:
+**What's in place (Phase 1):**
 
-- A valid web app manifest exists.
-- App icons and theme colours are configured.
-- The app is served over HTTPS in production.
-- A service worker registers successfully.
-- The app shell works offline.
-- Offline edits are persisted and synchronized safely, or the UI clearly explains which actions require a connection.
-- Private data is not exposed on shared devices.
+- `app/manifest.ts`: name, start URL, `display: standalone`, theme/background colours, 192/512 px icons plus a 512 px maskable icon, and Plan/Shopping shortcuts.
+- `public/sw.js`, registered in production builds only:
+  - Pages: network-first. A cached copy is served when offline, and `/offline` is shown for pages that were never cached.
+  - Hashed `/_next/static/` assets: cache-first. Icons and images: stale-while-revalidate.
+  - Never cached: non-GET requests, `/api/*`, cross-origin requests, and React Server Component/prefetch requests.
+  - On first load, the page sends the worker the assets it has already loaded, so the first visit also works offline.
+  - Bump `VERSION` in `sw.js` when you change the caching rules; old caches are deleted when the new worker activates.
+- `experimental.useOffline` in `next.config.ts`: Next keeps failed navigations pending and retries them when the connection returns. The offline banner combines Next's `useOffline()` with `navigator.onLine`.
+- Security headers on all routes; `/sw.js` is served with `no-cache`.
+
+**Verified by the e2e tests (Chromium):** the manifest and icons are valid and the PNG sizes match, the worker registers and controls the page, Chrome's `Page.getInstallabilityErrors` returns no errors, a visited page reloads offline, and an unvisited page falls back to `/offline`.
+
+**Not yet true, so don't claim it:**
+
+- Only the app shell and pages you've visited are available offline. There are no offline edits yet; persistence and sync come in Phase 7.
+- Installation hasn't been tested on iOS Safari or real Android devices. Production must be served over HTTPS (`localhost` is exempt for testing).
+- Private data: every route currently renders the same public HTML, and guest data will live in browser storage. If authenticated, user-specific pages are added, they must be excluded from the worker's cache and caches must be cleared on sign-out (see the comment at the top of `sw.js`).
+
+To test the PWA locally, use a production build (`npm run build && npm run start`); the worker isn't registered in `npm run dev`.
 
 ## Recipe content and images
 

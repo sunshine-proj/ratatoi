@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design tokens — Protein Plate
+ *
+ * Warm, fresh, food-focused palette: cream canvas, basil green primary,
+ * terracotta accent. Every text/background and control/background pair
+ * used in the UI is checked against WCAG 2.2 AA in
+ * tests/unit/design/tokens.test.ts — update that test when adding pairs.
+ *
+ * Tokens are exposed as Tailwind utilities, e.g. `bg-canvas`, `text-ink`,
+ * `border-line-strong`, `rounded-card`, `shadow-card`, `font-display`.
+ */
+@theme {
+  /* Surfaces */
+  --color-canvas: #fbf7f0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4ede3;
+
+  /* Text */
+  --color-ink: #231e19;
+  --color-ink-muted: #5f564c;
+
+  /* Lines: `line` is decorative only; `line-strong` meets 3:1 for control borders */
+  --color-line: #e7ddcf;
+  --color-line-strong: #8a7d6e;
+
+  /* Primary — basil green */
+  --color-primary: #2f6b45;
+  --color-primary-hover: #25573a;
+  --color-primary-soft: #e2efe5;
+  --color-primary-strong: #1f4d32;
+  --color-on-primary: #ffffff;
+
+  /* Accent — terracotta */
+  --color-accent: #b5441d;
+  --color-accent-soft: #fbe5d8;
+  --color-accent-strong: #8a3212;
+  --color-on-accent: #ffffff;
+
+  /* Feedback */
+  --color-danger: #a8271b;
+  --color-danger-soft: #fbe3e0;
+  --color-on-danger: #ffffff;
+
+  /* Focus ring */
+  --color-focus: #1f4fb5;
+
+  /* Nutrition chips (semantic aliases) */
+  --color-protein-bg: var(--color-primary-soft);
+  --color-protein-fg: var(--color-primary-strong);
+  --color-energy-bg: var(--color-accent-soft);
+  --color-energy-fg: var(--color-accent-strong);
+
+  /* Typography */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Radii */
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgb(35 30 25 / 0.06), 0 4px 16px rgb(35 30 25 / 0.06);
+  --shadow-raised: 0 8px 32px rgb(35 30 25 / 0.16);
+
+  /* Layout */
+  --spacing-bottom-nav: 4rem;
+  --spacing-sidebar: 15rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 4.5rem;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* One visible, consistent focus style for every interactive element. */
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-primary-soft);
+    color: var(--color-ink);
+  }
+
+  dialog::backdrop {
+    background: rgb(35 30 25 / 0.45);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

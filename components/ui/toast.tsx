@@ -89,11 +89,13 @@ function Toaster({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: numbe
       // navigation that sit within thumb reach on phones.
       className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] z-50 flex flex-col items-center gap-2 px-4 md:top-6 md:items-end md:px-6"
     >
-      <ol role="status" aria-live="polite" className="flex w-full max-w-sm flex-col gap-2">
+      <div role="status" aria-live="polite" className="flex w-full max-w-sm flex-col">
+        <ol className="flex flex-col gap-2">
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} dismissLabel={t.common.dismiss} />
         ))}
-      </ol>
+        </ol>
+      </div>
     </section>
   );
 }

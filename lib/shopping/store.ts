@@ -7,4 +7,4 @@ import { shoppingListSchema } from "./schema";
  */
 export const SHOPPING_STORAGE_KEY = "protein-plate:shopping";
 
-export const shoppingDocument = createLocalDocument(SHOPPING_STORAGE_KEY, shoppingListSchema);
+export const shoppingDocument = createLocalDocument(SHOPPING_STORAGE_KEY, shoppingListSchema, { version: 1 });

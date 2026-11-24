@@ -36,6 +36,20 @@ export function DocumentGate<T>({ state, reset, copy, children, loading }: {
     );
   }
 
+  if (state.status === "invalid" && state.reason === "newer") {
+    // Never offer to reset here: the data is fine, this tab is just out of date.
+    return (
+      <Card role="alert" className="flex flex-col items-start gap-3">
+        <h2 className="flex items-center gap-2 text-xl font-semibold">
+          <Icon name="info" className="size-5" />
+          {t.storage.newerTitle}
+        </h2>
+        <p>{t.storage.newerBody}</p>
+        <Button onClick={() => window.location.reload()}>{t.storage.reload}</Button>
+      </Card>
+    );
+  }
+
   if (state.status === "invalid") {
     return (
       <Card role="alert" className="flex flex-col items-start gap-3 border-danger">

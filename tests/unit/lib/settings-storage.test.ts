@@ -41,9 +41,12 @@ describe("settings document", () => {
 
   it("reports damaged or unknown data as invalid instead of trusting it", () => {
     localStorage.setItem(SETTINGS_STORAGE_KEY, "{not json");
-    expect(settingsDocument.read()).toEqual({ status: "invalid" });
+    expect(settingsDocument.read()).toEqual({ status: "invalid", reason: "damaged" });
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ version: 1, goal: "nope" }));
+    expect(settingsDocument.read()).toEqual({ status: "invalid", reason: "damaged" });
+    // From a newer app version: reported separately so it is never reset.
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ version: 99 }));
-    expect(settingsDocument.read()).toEqual({ status: "invalid" });
+    expect(settingsDocument.read()).toEqual({ status: "invalid", reason: "newer" });
   });
 
   it("refuses to write values that fail validation", () => {

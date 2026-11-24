@@ -13,6 +13,7 @@ import type { MealPlan } from "@/lib/planner/schema";
 import { mealTypes, type MealType } from "@/lib/recipes/schema";
 import { DAY_PANEL_ID, dayTabId } from "./day-tabs";
 import { PlannedMealItem } from "./planned-meal-item";
+import { slotAddButtonId } from "./slot-focus";
 import { useRecipeLookup } from "./recipe-lookup";
 
 export function DayPlan({ plan, date, today, targets, onAdd, onSwap, onDuplicate, onClearDay }: {
@@ -35,7 +36,12 @@ export function DayPlan({ plan, date, today, targets, onAdd, onSwap, onDuplicate
       <header className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-2xl font-semibold">
           {formatDate(date, "dayLong")}
-          {date === today ? <span className="ml-2 align-middle text-sm font-medium text-primary">· {t.planner.today}</span> : null}
+          {date === today ? (
+            <>
+              {" "}
+              <span className="ml-1 align-middle text-sm font-medium text-primary">· {t.planner.today}</span>
+            </>
+          ) : null}
         </h2>
         {meals.length > 0 ? (
           <Button variant="secondary" size="sm" onClick={onClearDay}>
@@ -68,7 +74,7 @@ export function DayPlan({ plan, date, today, targets, onAdd, onSwap, onDuplicate
                 {mealType === "snack" ? t.planner.snacksTitle : t.mealTypes[mealType]}
               </h3>
               {slot.length > 0 ? (
-                <Button variant="ghost" size="sm" onClick={() => onAdd(mealType)}>
+                <Button id={slotAddButtonId(date, mealType)} variant="ghost" size="sm" onClick={() => onAdd(mealType)}>
                   <Icon name="plus" className="size-4" />
                   {t.planner.add[mealType]}
                 </Button>
@@ -91,7 +97,7 @@ export function DayPlan({ plan, date, today, targets, onAdd, onSwap, onDuplicate
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-card border-2 border-dashed border-line px-4 py-3">
                 <p className="text-ink-muted">{t.planner.emptySlot}</p>
-                <Button variant="secondary" size="sm" onClick={() => onAdd(mealType)}>
+                <Button id={slotAddButtonId(date, mealType)} variant="secondary" size="sm" onClick={() => onAdd(mealType)}>
                   <Icon name="plus" className="size-4" />
                   {t.planner.add[mealType]}
                 </Button>

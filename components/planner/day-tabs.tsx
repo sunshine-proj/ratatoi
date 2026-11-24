@@ -63,11 +63,13 @@ export function DayTabs({ dates, selected, today, mealCounts, onSelect }: {
               isSelected ? "bg-primary text-on-primary shadow-card" : "text-ink hover:bg-surface",
             )}
           >
-            <span className={cn("text-xs", isSelected ? "font-semibold" : "text-ink-muted")}>
+            {/* Visual short labels; the sr-only text below is the tab's full name. */}
+            <span aria-hidden="true" className={cn("text-xs", isSelected ? "font-semibold" : "text-ink-muted")}>
               {formatDate(date, "weekdayShort")}
             </span>
             {/* Today: a ring around the date (shape, not just colour). */}
             <span
+              aria-hidden="true"
               className={cn(
                 "inline-flex size-8 items-center justify-center rounded-pill text-base font-semibold",
                 isToday && (isSelected ? "ring-2 ring-on-primary" : "ring-2 ring-primary"),

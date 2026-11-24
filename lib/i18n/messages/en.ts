@@ -406,6 +406,34 @@ export const en = {
     preset: "Up to {kcal} kcal, {g} g+ protein",
     allSnacks: "All snacks",
   },
+  storage: {
+    newerTitle: "Saved by a newer version of the app",
+    newerBody:
+      "Another tab or window has already updated Protein Plate. Reload to use the latest version. Your data is safe and hasn't been changed.",
+    reload: "Reload",
+  },
+  account: {
+    storedTitle: "Saved on this device",
+    noAccount: "There's no account: nothing is stored on a server. Everything lives only in this browser.",
+    goals: "Goals and food preferences",
+    goalsSet: "Saved",
+    plan: "Meal plan",
+    planCount: { one: "{count} planned meal", other: "{count} planned meals" },
+    list: "Shopping list",
+    listCount: { one: "{count} item", other: "{count} items" },
+    nothing: "Nothing saved",
+    unreadable: "Can't be read",
+    size: "About {kb} KB in total.",
+    sharedTitle: "Using a shared device?",
+    sharedBody:
+      "Anyone who uses this browser can see what's saved here. If other people use this device, delete your data when you've finished.",
+    delete: "Delete everything from this device",
+    deleteTitle: "Delete everything from this device?",
+    deleteBody:
+      "This permanently removes your goals, food preferences, meal plan, and shopping list from this browser. It can't be undone.",
+    deleteConfirm: "Delete everything",
+    deleted: "Everything has been deleted from this device.",
+  },
   goalTypes: {
     legend: "Your main goal",
     fat_loss: {
@@ -596,7 +624,8 @@ export const en = {
     resetDone: "Saved settings removed.",
   },
   offline: {
-    banner: "You're offline. Pages you've opened before still work; others will load when you reconnect.",
+    banner:
+      "You're offline. Your plan, shopping list, and settings are saved on this device, so you can keep using them. Recipe pages you haven't opened yet will load when you reconnect.",
   },
   pages: {
     today: {
@@ -644,7 +673,7 @@ export const en = {
     },
     account: {
       title: "Account and data",
-      intro: "Manage what's stored on this device, and export or delete your data.",
+      intro: "See what is saved on this device, and delete it.",
     },
     offline: {
       title: "You're offline",

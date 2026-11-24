@@ -271,6 +271,56 @@ The README has a new "Shopping list" section. Phase 7 (hardening saved data, off
 ============================
 
 
+Phase 7 is done, apart from two items. Account sync is deferred to V1, which is my default call: tell me if you want it now. The manual screen-reader pass is something I can't run from here. Lint, typecheck, all 261 unit tests, the build and the 127 end-to-end tests pass. Nothing is committed.
+
+What changed for users
+
+Works offline from the first visit. Today, Plan, Recipes, Snacks, Shopping, set-up and Settings now open offline even if you've never visited them. Recipe pages work offline once opened.
+Editing offline works. Adding meals, creating the list and ticking items all work offline and are still there after reconnecting. There's nothing to sync, because all data is local.
+Clearer offline banner: "Your plan, shopping list, and settings are saved on this device… Recipe pages you haven't opened yet will load when you reconnect."
+Settings → Account (/settings/account) shows what's saved in this browser and has Delete everything from this device, with a confirmation step. It works even when saved data is damaged, so it doubles as a recovery path.
+Saved data is safer
+
+Versioned with migrations. Every saved document has a version, older formats are upgraded as they're read, and the upgraded form is saved on the next change.
+Data from a newer app version is protected. If another tab already has a newer app version, an older cached tab now says "Saved by a newer version… Reload" instead of offering a reset that would have destroyed the data.
+Unreadable data is never overwritten silently by any screen.
+Accessibility
+
+axe (WCAG 2.2 A/AA plus best practice) runs on every page, plus open sheets, error states, a filled planner and list, and onboarding steps. No violations remain. It found one, now fixed: the notification list had the wrong role.
+Keyboard-only tests cover the full set-up, day tabs, adding a meal, and ticking a shopping item. Focus stays in open sheets, and Escape closes them and puts focus back. 44 px touch targets are checked on every page.
+Bugs found and fixed along the way:
+after adding or removing a meal, keyboard focus was lost; it now returns to the slot's "Add" button
+screen readers heard day tabs twice ("Thu 26 Thursday 26 November…")
+the day heading read "26 November· Today", with no space
+New documents
+
+docs/decisions/0001-… records why there are no accounts in the MVP and what adding sync in V1 will involve (sign-in, data-access rules, retries, conflicts). Optional account sync is now a V1 roadmap item.
+docs/accessibility.md describes the automated coverage and a manual screen-reader checklist with a results table, currently "Not yet run".
+Checks I ran
+
+npm run check: passed, with 261 unit tests. New ones cover migrations (upgrades, newer, damaged, failed upgrades), refusing to overwrite unreadable data, the newer-version Reload prompt, and the Account page and deletion.
+
+npm run test:e2e: 127 passed, 13 skipped on purpose. New tests:
+
+the full journey (set-up, plan, add a snack, Today's progress, shopping list)
+core pages offline without a prior visit
+editing offline, reloading offline, then reconnecting
+keyboard-only flows and the focus trap
+touch targets and axe scans
+I updated one old offline test, because /snacks now correctly opens offline.
+
+Still open
+
+Screen-reader testing with VoiceOver, TalkBack and NVDA. The checklist is in docs/accessibility.md.
+Installation on real phones over HTTPS, and exporting your data. Both are Phase 8.
+Earlier gaps are still open: recipe photos, and checking the ingredient nutrition values against a food database.
+
+
+
+============================
+
+
+
 
 
 

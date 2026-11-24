@@ -15,6 +15,7 @@ import { emptyPlan, type MealPlan } from "@/lib/planner/schema";
 import type { RecipeSummary } from "@/lib/recipes/catalogue";
 import { AddMealDialog, type AddMealTarget } from "./add-meal-dialog";
 import { DayPlan } from "./day-plan";
+import { focusSlotAddButton } from "./slot-focus";
 import { DayTabs } from "./day-tabs";
 import { DuplicateMealDialog } from "./duplicate-meal-dialog";
 import { RecipeLookupProvider } from "./recipe-lookup";
@@ -143,7 +144,13 @@ function Planner({ plan }: { plan: MealPlan }) {
         onClearDay={() => setConfirm({ kind: "day", date: selected })}
       />
 
-      <AddMealDialog target={addTarget} onClose={() => setAddTarget(null)} />
+      <AddMealDialog
+        target={addTarget}
+        onClose={() => {
+          if (addTarget) focusSlotAddButton(addTarget.date, addTarget.mealType);
+          setAddTarget(null);
+        }}
+      />
       <SwapMealDialog mealId={swapId} onClose={() => setSwapId(null)} />
       <DuplicateMealDialog mealId={duplicateId} onClose={() => setDuplicateId(null)} />
       <Dialog

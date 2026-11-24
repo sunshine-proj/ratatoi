@@ -28,7 +28,7 @@ export const emptySettings: UserSettings = {
   onboardingCompletedAt: null,
 };
 
-export const settingsDocument = createLocalDocument(SETTINGS_STORAGE_KEY, userSettingsSchema);
+export const settingsDocument = createLocalDocument(SETTINGS_STORAGE_KEY, userSettingsSchema, { version: 1 });
 
 export function withGoal(settings: UserSettings, goal: NutritionGoal | null): UserSettings {
   return { ...settings, goal };

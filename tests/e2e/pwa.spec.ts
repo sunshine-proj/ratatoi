@@ -112,7 +112,8 @@ test.describe("offline", () => {
     await page.waitForTimeout(500);
 
     await context.setOffline(true);
-    await page.goto("/snacks");
+    // Core pages are precached; an unvisited recipe page is not.
+    await page.goto("/recipes/berry-whey-smoothie");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("You're offline");
     await context.setOffline(false);
   });

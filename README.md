@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**Phase 6 (shopping list) complete. The MVP feature set is now in place.** Users can set goals and preferences, browse recipes (still without photos), plan a week with progress against their targets, and create a shopping list from the plan: combined by ingredient, grouped by aisle, with ticks, edits, their own items, and an update that keeps their changes. Everything is saved in the browser. Phase 7 (persistence, offline, accessibility hardening) is next. See `ROADMAP.md` for progress and next phases.
+**Phase 7 (persistence, offline, accessibility) complete, except the manual screen-reader pass.** All MVP features are in place and hardened: versioned saved data with migrations, core pages that work offline even before they're visited, editing offline, a way to delete everything from a shared device, axe scans with no violations, keyboard-only and touch-target tests, and a full end-to-end journey test. There are no accounts yet ([decision record](docs/decisions/0001-guest-first-no-account-sync-in-mvp.md)). Phase 8 (polish and launch readiness) is next. See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -159,6 +159,8 @@ UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages
 | `/shopping-list` | Consolidated grocery list |
 | `/settings/goals` | Calorie and macro targets |
 | `/settings/preferences` | Dietary preferences and exclusions |
+| `/settings/account` | What's saved on this device; delete everything |
+| `/offline` | Shown for pages that aren't available offline |
 
 ## Core domain concepts
 
@@ -177,8 +179,8 @@ Guest mode only; there is no account or server storage yet.
 - **Where:** JSON documents in `localStorage`: `protein-plate:settings` (`userSettingsSchema` in `lib/settings/settings.ts`), `protein-plate:plan` (`mealPlanSchema` in `lib/planner/schema.ts`), and `protein-plate:shopping` (`shoppingListSchema` in `lib/shopping/schema.ts`), each with `version: 1`.
 - **What:** goal type; daily calorie and protein targets; optional carbohydrate and fat targets; whether the targets started from an estimate; food preferences (eating pattern, the 14 EU-declared allergens, other excluded ingredients, cooking confidence, budget, meals and snacks per day); and when onboarding was completed.
 - **What is never saved:** the age, sex, height, weight, and activity level used for estimates. They exist only in component state while the estimate form is open.
-- **Validation:** data is checked against the schema on every read. Damaged or unrecognised data is never trusted: the UI explains the problem and offers to reset. Writes that fail (storage blocked or full) show an error and change nothing.
-- **Shared devices:** anyone using the same browser can see this data, and the app says so where it saves. Clearing targets is available in Settings → Goals; export and deletion of all data are planned (Phase 8).
+- **Validation and versions:** every document has a `version` and is checked against its schema on every read. Older versions are upgraded by migrations (`migrations[n]` upgrades n → n+1) and saved in the new shape on the next write. Damaged data is never trusted: the UI explains and offers a reset. Data saved by a **newer** app version (e.g. another tab already updated) is never reset or overwritten: the UI asks for a reload instead. Writes never replace a document that can't be read. Failed writes (storage blocked or full) show an error and change nothing.
+- **Shared devices:** anyone using the same browser can see this data, and the app says so where it saves. **Settings → Account** shows what's stored and deletes everything from the device (it works even if the data can't be read). Exporting data is planned for Phase 8.
 
 ### Suggested targets
 
@@ -228,27 +230,23 @@ The user always reviews and edits the numbers. Manual targets must be between 80
 
 ## PWA and offline behaviour
 
-**What's in place (Phase 1):**
+**What works offline** (verified by `tests/e2e/pwa.spec.ts` and `tests/e2e/offline-edit.spec.ts`):
 
-- `app/manifest.ts`: name, start URL, `display: standalone`, theme/background colours, 192/512 px icons plus a 512 px maskable icon, and Plan/Shopping shortcuts.
-- `public/sw.js`, registered in production builds only:
-  - Pages: network-first. A cached copy is served when offline, and `/offline` is shown for pages that were never cached.
-  - Hashed `/_next/static/` assets: cache-first. Icons and images: stale-while-revalidate.
-  - Never cached: non-GET requests, `/api/*`, cross-origin requests, and React Server Component/prefetch requests.
-  - On first load, the page sends the worker the assets it has already loaded, so the first visit also works offline.
-  - Bump `VERSION` in `sw.js` when you change the caching rules; old caches are deleted when the new worker activates.
-- `experimental.useOffline` in `next.config.ts`: Next keeps failed navigations pending and retries them when the connection returns. The offline banner combines Next's `useOffline()` with `navigator.onLine`.
-- Security headers on all routes; `/sw.js` is served with `no-cache`.
+- **Core pages open offline even if you never visited them:** Today, Plan, Recipes, Snacks, Shopping list, set-up, and every Settings page. The service worker precaches them at install, with the build assets their HTML references.
+- **Everything you can edit works offline:** goals, preferences, the meal plan, and the shopping list are stored in the browser, so adding meals, changing servings, creating the list, and ticking items all work without a connection and are still there after reloading. There is no server, so there is nothing to sync (see [decision 0001](docs/decisions/0001-guest-first-no-account-sync-in-mvp.md)).
+- **Recipe pages** work offline once opened (network-first, so they're fresh when online). Up to 60 are kept, oldest first out. Unvisited recipe pages show a friendly `/offline` page. Recipes are original content, so caching them raises no licensing issue.
+- **Moving between pages** while offline works through Next.js's prefetched pages and `experimental.useOffline`. A full reload is served from the cache.
+- **The offline banner** says what still works: "Your plan, shopping list, and settings are saved on this device… Recipe pages you haven't opened yet will load when you reconnect."
 
-**Verified by the e2e tests (Chromium):** the manifest and icons are valid and the PNG sizes match, the worker registers and controls the page, Chrome's `Page.getInstallabilityErrors` returns no errors, a visited page reloads offline, and an unvisited page falls back to `/offline`.
+**Service worker** (`public/sw.js`, production builds only): pages are network-first with a cache fallback; hashed `/_next/static/` assets are cache-first; icons are stale-while-revalidate. It never caches non-GET requests, `/api/*`, other origins, or React Server Component and prefetch requests. Bump `VERSION` when caching rules or the precache list change; old caches are deleted when the new worker activates. Personal data is never in these caches: every page is the same public HTML for everyone.
 
-**Not yet true, so don't claim it:**
+**Installable:** web app manifest with 192/512 px and maskable icons, theme colours, `display: standalone`, and shortcuts. Chrome's installability check passes in e2e. It hasn't been tested on real iOS or Android devices yet, and production must be served over HTTPS.
 
-- Only the app shell and pages you've visited are available offline. There are no offline edits yet; persistence and sync come in Phase 7.
-- Installation hasn't been tested on iOS Safari or real Android devices. Production must be served over HTTPS (`localhost` is exempt for testing).
-- Private data: every route currently renders the same public HTML, and guest data will live in browser storage. If authenticated, user-specific pages are added, they must be excluded from the worker's cache and caches must be cleared on sign-out (see the comment at the top of `sw.js`).
+To test locally, use a production build (`npm run build && npm run start`); the worker isn't registered in `npm run dev`.
 
-To test the PWA locally, use a production build (`npm run build && npm run start`); the worker isn't registered in `npm run dev`.
+## Accessibility
+
+Automated: axe scans (WCAG 2.2 A/AA) on every route and key state, contrast tests for design tokens, keyboard-only flows, focus management, and 44 px touch targets. See [docs/accessibility.md](docs/accessibility.md) for coverage and the **manual screen-reader checklist**, which has not been run yet.
 
 ## Recipe content and images
 
@@ -308,6 +306,8 @@ Run `npm run check` (and `npm run test:e2e` for UI flows) before handing off.
 - `SKILLS.md` — repeatable agent workflows for design, implementation, testing, and handoff.
 - `ROADMAP.md` — development phases with checkbox task lists for MVP, V1, and later.
 - `README.md` — project overview and developer setup.
+- `docs/accessibility.md` — automated accessibility coverage and the manual screen-reader checklist.
+- `docs/decisions/` — decision records (e.g. why there are no accounts in the MVP).
 
 ## License
 

@@ -13,6 +13,7 @@ import { plannedMealNutrition } from "@/lib/nutrition/totals";
 import { moveMeal, removeMeal, restoreMeal, setServings } from "@/lib/planner/operations";
 import type { PlannedMeal } from "@/lib/planner/schema";
 import type { RecipeSummary } from "@/lib/recipes/catalogue";
+import { focusSlotAddButton } from "./slot-focus";
 import { useRecipeLookup } from "./recipe-lookup";
 import { ServingsStepper } from "./servings-stepper";
 import { usePlanActions } from "./use-plan-actions";
@@ -46,6 +47,8 @@ export function PlannedMealItem({ meal, isFirst, isLast, onSwap, onDuplicate }: 
   function remove() {
     const removed = meal;
     if (!apply((plan) => removeMeal(plan, meal.id))) return;
+    // This row (and its focused Remove button) is gone; keep keyboard users in the slot.
+    focusSlotAddButton(meal.date, meal.mealType);
     toast.show({
       message: formatMessage(t.planner.removed, { name }),
       action: { label: t.planner.undo, onClick: () => apply((plan) => restoreMeal(plan, removed)) },

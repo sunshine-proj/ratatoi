@@ -8,4 +8,4 @@ import { mealPlanSchema } from "./schema";
  */
 export const PLAN_STORAGE_KEY = "protein-plate:plan";
 
-export const planDocument = createLocalDocument(PLAN_STORAGE_KEY, mealPlanSchema);
+export const planDocument = createLocalDocument(PLAN_STORAGE_KEY, mealPlanSchema, { version: 1 });

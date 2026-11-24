@@ -128,20 +128,20 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 ## Phase 7 — Persistence, offline, and accessibility
 
 - [x] Guest-first local persistence for goals, preferences, plans, and shopping lists (built alongside each feature: settings, plan, shopping documents)
-- [ ] Validate persisted data with schemas on load; add a versioned migration path for local data (validation done for settings; migrations not yet needed)
-- [ ] Decide whether to add optional account sync (Supabase) now or in V1; document the decision
-- [ ] If Supabase is added: auth, schema, row-level security, additive migrations, env vars in `.env.example`
-- [ ] Cache recently viewed and saved recipes according to freshness and licence rules
-- [ ] Save edits locally while offline; sync with retry and backoff when back online
-- [ ] Clearly tell users which actions need a connection
-- [ ] Make sure private data is not exposed to other users on a shared device (e.g. clear on sign-out)
-- [ ] Document what works offline; don't claim full offline support if only the shell is cached
-- [ ] Keyboard-only pass through all core flows
-- [ ] Screen-reader pass (VoiceOver and NVDA or TalkBack)
-- [ ] Automated accessibility scans (e.g. axe in Playwright)
-- [ ] Touch target and contrast checks
-- [ ] E2E test: onboarding → plan meals → add snack → generate shopping list
-- [ ] E2E tests: offline shell, offline edit then sync
+- [x] Validate persisted data with schemas on load; add a versioned migration path for local data
+- [x] Decide whether to add optional account sync (Supabase) now or in V1; document the decision (V1: `docs/decisions/0001-…`)
+- [ ] If Supabase is added: auth, schema, row-level security, additive migrations, env vars in `.env.example` (not added in the MVP; moved to V1)
+- [x] Cache recently viewed and saved recipes according to freshness and licence rules
+- [x] Save edits locally while offline; sync with retry and backoff when back online (all data is local, so edits work offline; sync arrives with accounts in V1)
+- [x] Clearly tell users which actions need a connection
+- [x] Make sure private data is not exposed to other users on a shared device (Settings → Account: delete everything from this device)
+- [x] Document what works offline; don't claim full offline support if only the shell is cached
+- [x] Keyboard-only pass through all core flows (automated in `tests/e2e/journey.spec.ts`)
+- [ ] Screen-reader pass (VoiceOver and NVDA or TalkBack): checklist ready in `docs/accessibility.md`, not yet run
+- [x] Automated accessibility scans (e.g. axe in Playwright)
+- [x] Touch target and contrast checks
+- [x] E2E test: onboarding → plan meals → add snack → generate shopping list
+- [x] E2E tests: offline shell, offline edit then sync (offline edits persist after reconnecting; no server sync yet)
 
 ## Phase 8 — Polish and launch readiness
 
@@ -168,6 +168,7 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [ ] Lithuanian localisation
 - [ ] Pantry inventory and subtract-on-hand quantities
 - [ ] Share/export shopping list
+- [ ] Optional account sync (Supabase: auth, RLS, sync queue with retry/backoff), see `docs/decisions/0001-…`
 - [ ] Better offline sync and conflict handling across devices
 - [ ] Multiple household members
 

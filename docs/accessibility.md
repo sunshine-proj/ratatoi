@@ -15,6 +15,18 @@ Target: WCAG 2.2 AA for core flows (`PRD.md` §11).
 
 Automated checks catch a useful subset of problems. They do not prove the app works well with a screen reader.
 
+## Accessibility-tree review (2026-11-24)
+
+The accessibility tree is what browsers give screen readers. It was captured with Playwright at phone size for Today, Set up your plan, Recipes, a recipe page, Meal plan, Shopping list, Account and data, and Privacy, then read through by hand. This shows what a screen reader is given, but not how a particular one reads it, so it doesn't replace the manual pass below.
+
+Found and fixed:
+
+- **Account and data:** the hidden file input was a second "Choose a Protein Plate data file" control next to "Restore from a file". It's now `hidden`, so only the visible button is exposed.
+- **Phone top bar:** the profile link's icon repeated the link's name ("Profile and goals" twice). The name is now on the link and the icon is decorative.
+- **Recipes:** the intro said "photo-led recipes", but recipes show illustrations (decision 0003). Reworded.
+
+Checked and fine: one `h1` per page with a logical heading order; landmarks (banner, main, Main navigation, Notifications); planner tabs announce the full date and meal count; nutrition is in term and definition pairs; radio groups and form fields have names; disabled buttons are exposed as disabled; the footer disclaimer is reachable.
+
 ## Manual screen-reader checklist
 
 **Status: not yet run.** Run before public launch, on at least VoiceOver (iOS Safari), TalkBack (Android Chrome), and NVDA (Windows, Firefox or Chrome). Record results in the table below.

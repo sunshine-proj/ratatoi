@@ -14,11 +14,15 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  // Mobile-first: test a phone viewport alongside desktop.
-  // Both use Chromium so only one browser needs installing.
+  // Mobile-first: a phone viewport alongside desktop, in Chromium, WebKit,
+  // and Firefox. Install with: npx playwright install chromium webkit firefox
   projects: [
     { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },
+    // Other engines: Safari's WebKit (desktop and iPhone) and Firefox.
+    { name: "desktop-webkit", use: { ...devices["Desktop Safari"] } },
+    { name: "mobile-webkit", use: { ...devices["iPhone 13"] } },
+    { name: "desktop-firefox", use: { ...devices["Desktop Firefox"] } },
   ],
   // Run against a production build, as recommended by the Next.js testing guide.
   webServer: {

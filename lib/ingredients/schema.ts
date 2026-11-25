@@ -27,6 +27,15 @@ export const nutritionValuesSchema = z.object({
 });
 export type NutritionValues = z.infer<typeof nutritionValuesSchema>;
 
+/** Where an ingredient's nutrition values come from (USDA FoodData Central). */
+export const nutritionSourceSchema = z.object({
+  dataset: z.enum(["SR Legacy", "Branded"]),
+  /** FoodData Central IDs; values are averaged when there are several. */
+  fdcIds: z.array(z.number().int().positive()).min(1),
+  note: z.string().trim().min(1).optional(),
+});
+export type NutritionSource = z.infer<typeof nutritionSourceSchema>;
+
 export const ingredientSchema = z.object({
   /** Canonical identity used for shopping aggregation and matching. */
   key: slug,
@@ -41,6 +50,8 @@ export const ingredientSchema = z.object({
    * amounts too small to matter (dried spices, fresh herbs).
    */
   per100g: nutritionValuesSchema.nullable(),
+  /** Required whenever per100g is set. */
+  source: nutritionSourceSchema.optional(),
   /** Needed when recipes use this ingredient by the piece (e.g. eggs). */
   gramsPerPiece: positiveQuantity.optional(),
   /** Needed when recipes use this ingredient by volume; defaults to 1 g/ml. */
@@ -49,6 +60,8 @@ export const ingredientSchema = z.object({
   singularName: nonEmptyText.optional(),
   /** Counting word, e.g. "slice"/"slices" for bread, "clove"/"cloves" for garlic. */
   pieceName: z.object({ one: nonEmptyText, other: nonEmptyText }).optional(),
+}).refine((ingredient) => ingredient.per100g === null || ingredient.source !== undefined, {
+  message: "Ingredients with nutrition values must cite a source",
 });
 
 export type Ingredient = z.infer<typeof ingredientSchema>;

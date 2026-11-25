@@ -64,6 +64,9 @@ export const en = {
     advice:
       "Protein Plate is a planning tool. Targets and nutrition values are estimates, not medical advice. If you have a medical condition, are pregnant or breastfeeding, or have a history of disordered eating, please talk to a doctor or registered dietitian.",
     accountLink: "Go to Settings → Account",
+    operatorTitle: "Who runs Protein Plate",
+    operator: "Protein Plate is run by {name}, {country}.",
+    contact: "For privacy questions, contact",
   },
   footer: {
     label: "About this app",
@@ -704,7 +707,7 @@ export const en = {
     },
     recipes: {
       title: "Recipes",
-      intro: "Browse photo-led recipes and filter by meal type, protein, calories, and prep time.",
+      intro: "Browse recipes and filter by meal type, protein, calories, and prep time.",
     },
     recipeDetail: {
       title: "Recipe",

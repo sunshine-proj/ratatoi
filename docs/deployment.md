@@ -1,6 +1,6 @@
 # Deployment
 
-The app has **not been deployed yet**. This guide is what to check when it is.
+The app has **not been deployed yet**. The product owner deploys it. This guide covers what the host needs and what to check afterwards. The CI workflow (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, the build, and the end-to-end suite in Chromium, WebKit, and Firefox. It doesn't deploy anything.
 
 ## Requirements
 
@@ -21,7 +21,8 @@ The app has **not been deployed yet**. This guide is what to check when it is.
 ## After the first deployment
 
 1. Run `npm run test:e2e` against the build locally, and Lighthouse against the live URL (`docs/performance.md`).
-2. Install the app on a real Android phone (Chrome), on iOS (Safari → Share → Add to Home Screen), and on desktop Chrome/Edge. Check that it opens offline after one visit.
+2. Work through `docs/device-testing.md` on a real Android phone, an iPhone, and desktop Chrome or Edge, and record the results there.
 3. Run the manual screen-reader checklist in `docs/accessibility.md`.
-4. Fill in the operator details in the privacy notice (see `docs/launch-checklist.md`).
-5. Confirm the host's server-log retention matches the privacy notice ("standard technical logs… for security and reliability").
+4. Fill in `config/operator.ts` if you haven't yet; the privacy notice shows it.
+5. Run `npm run launch:check`. It lists anything still blocking a public launch.
+6. Confirm the host's server-log retention matches the privacy notice ("standard technical logs… for security and reliability").

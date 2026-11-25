@@ -106,7 +106,10 @@ test.describe("offline", () => {
     await expect(page.getByText("You're offline.")).toBeHidden();
   });
 
-  test("an unvisited page falls back to the offline page", async ({ page, context }) => {
+  test("an unvisited page falls back to the offline page", async ({ page, context, browserName }) => {
+    // Firefox's offline emulation doesn't cover requests made by the service
+    // worker itself, so the worker can still reach the network there.
+    test.skip(browserName === "firefox", "Offline emulation doesn't apply to service-worker fetches in Firefox");
     await page.goto("/");
     await waitForControllingWorker(page);
     await page.waitForTimeout(500);

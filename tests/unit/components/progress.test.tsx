@@ -95,10 +95,10 @@ describe("TodayDashboard", () => {
     expect(meals.querySelector("ol")?.children).toHaveLength(2); // meal rows (each also holds a chip list)
     expect(within(meals).getByRole("link", { name: "Chocolate skyr pot" })).toBeInTheDocument();
     expect(within(meals).queryByText("Lemon salmon and potato traybake")).not.toBeInTheDocument();
-    // 343 + 159 = 502 kcal; 31.1 + 23 = 54.1 g
+    // 345 + 153 = 498 kcal; 30.6 + 23.6 = 54.2 g
     const progress = screen.getByRole("region", { name: "Today's progress" });
-    expect(within(progress).getByText("502 of 1,900 kcal")).toBeInTheDocument();
-    expect(within(progress).getByText("1,398 kcal remaining")).toBeInTheDocument();
+    expect(within(progress).getByText("498 of 1,900 kcal")).toBeInTheDocument();
+    expect(within(progress).getByText("1,402 kcal remaining")).toBeInTheDocument();
     expect(within(progress).getByText("96 g remaining")).toBeInTheDocument();
     expect(screen.getByText(/^Good (morning|afternoon|evening)$/)).toBeInTheDocument();
   });

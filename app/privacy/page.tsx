@@ -3,8 +3,9 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonClasses } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getMessages } from "@/lib/i18n";
+import { formatMessage, getMessages } from "@/lib/i18n";
 import { routes } from "@/lib/navigation";
+import { operator } from "@/config/operator";
 
 const t = getMessages();
 const p = t.privacy;
@@ -39,6 +40,20 @@ export default function PrivacyPage() {
           {p.accountLink}
         </Link>
       </Card>
+      {operator ? (
+        <section aria-labelledby="privacy-operator" className="flex flex-col gap-2">
+          <h2 id="privacy-operator" className="text-xl font-semibold">
+            {p.operatorTitle}
+          </h2>
+          <p>{formatMessage(p.operator, { name: operator.name, country: operator.country })}</p>
+          <p>
+            {p.contact}{" "}
+            <a href={`mailto:${operator.email}`} className="font-medium text-primary underline underline-offset-2">
+              {operator.email}
+            </a>
+          </p>
+        </section>
+      ) : null}
       {sections.map((section) => (
         <section key={section.id} aria-labelledby={`privacy-${section.id}`} className="flex flex-col gap-2">
           <h2 id={`privacy-${section.id}`} className="text-xl font-semibold">

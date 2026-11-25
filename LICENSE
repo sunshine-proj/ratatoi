@@ -1,0 +1,15 @@
+Protein Plate
+Copyright (c) 2026 the copyright holder of Protein Plate. All rights reserved.
+
+This software and its source code, documentation, recipes, and other content
+are proprietary and confidential. No licence is granted to use, copy, modify,
+merge, publish, distribute, sublicense, or sell copies of this software or
+any part of it, except with the prior written permission of the copyright
+holder.
+
+Third-party components are used under their own licences; see each package
+in package-lock.json. Nutrition data is derived from USDA FoodData Central,
+which is in the public domain.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IT IS A MEAL-PLANNING TOOL AND DOES NOT PROVIDE MEDICAL ADVICE.

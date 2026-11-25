@@ -142,8 +142,9 @@ export function AccountSettings() {
             type="file"
             accept="application/json,.json"
             aria-label={a.importLabel}
-            className="sr-only"
-            tabIndex={-1}
+            // Hidden from everyone, including screen readers: the visible
+            // "Restore from a file" button opens it, so it isn't a second control.
+            hidden
             onChange={(event) => {
               void chooseFile(event.target.files?.[0]);
               event.target.value = "";

@@ -99,3 +99,14 @@ describe("ingredient catalogue", () => {
     }
   });
 });
+
+describe("nutrition sources", () => {
+  it("cites a USDA FoodData Central source for every ingredient with nutrition values", () => {
+    const missing = ingredients.filter((ingredient) => ingredient.per100g !== null && !ingredient.source).map((i) => i.key);
+    expect(missing).toEqual([]);
+  });
+
+  it("labels recipe nutrition with its source", () => {
+    for (const recipe of recipes) expect(recipe.nutritionSource).toMatch(/USDA FoodData Central/);
+  });
+});

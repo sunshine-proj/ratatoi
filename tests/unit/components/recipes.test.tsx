@@ -33,8 +33,8 @@ describe("RecipeCard", () => {
     render(<RecipeCard recipe={recipe} />);
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.getByRole("link", { name: "Chocolate skyr pot" })).toHaveAttribute("href", "/recipes/chocolate-skyr-pot");
-    expect(screen.getByText("23 g protein")).toBeInTheDocument();
-    expect(screen.getByText("159 kcal")).toBeInTheDocument();
+    expect(screen.getByText("24 g protein")).toBeInTheDocument();
+    expect(screen.getByText("153 kcal")).toBeInTheDocument();
     expect(screen.getByText("3 min")).toBeInTheDocument();
     expect(screen.getByText("Per serving, estimated")).toBeInTheDocument();
     expect(screen.getByText("Under 200 kcal")).toBeInTheDocument();
@@ -134,8 +134,8 @@ describe("RecipeDetail", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Spinach and feta egg scramble" })).toBeInTheDocument();
     const nutrition = screen.getByRole("region", { name: "Nutrition per serving" });
     expect(within(nutrition).getByText("Estimated")).toBeInTheDocument();
-    expect(within(nutrition).getByText("33 g")).toBeInTheDocument();
-    expect(within(nutrition).getByText("416 kcal")).toBeInTheDocument();
+    expect(within(nutrition).getByText("34 g")).toBeInTheDocument();
+    expect(within(nutrition).getByText("418 kcal")).toBeInTheDocument();
 
     const ingredients = screen.getByRole("region", { name: "Ingredients" });
     expect(within(ingredients).getByText("1 slice")).toBeInTheDocument();

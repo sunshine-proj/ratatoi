@@ -20,7 +20,7 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [x] Add `.env.example` with safe placeholders only; make sure `.env.local` is git-ignored
 - [x] Set up translation-ready strings (English first, ready for Lithuanian)
 - [x] Add CI to run lint, typecheck, unit tests, and build on every push/PR
-- [ ] Pick a `LICENSE` before any public distribution
+- [x] Pick a `LICENSE` before any public distribution (proprietary)
 - [x] Update the README "Project status" and "Getting started" sections to match the real setup
 
 ## Phase 1 — App shell, design tokens, and PWA foundation
@@ -39,7 +39,7 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [x] Register a service worker that caches the app shell and static assets
 - [x] Add an offline indicator component
 - [x] Verify installability in Chromium (automated: `Page.getInstallabilityErrors` in e2e)
-- [ ] Manually verify install on Android Chrome, desktop Edge, and "Add to Home Screen" on iOS Safari over HTTPS
+- [ ] Manually verify install on Android Chrome, desktop Edge, and "Add to Home Screen" on iOS Safari over HTTPS (after deployment; record in `docs/device-testing.md`)
 
 ## Phase 2 — Onboarding and nutrition goals
 
@@ -62,7 +62,7 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [x] Define the `Recipe` type and Zod schema (nutrition per serving, servings, times, meal types, allergens, image metadata, `nutrition_source`, `nutrition_is_estimated`)
 - [x] Create a curated ingredient alias map and category list for shopping aggregation (`data/ingredients.ts`)
 - [x] Write seed recipes: breakfasts, lunches, dinners, several high-protein snacks, vegetarian options, quick and batch-cook dishes
-- [ ] Get licensed, owned, or permitted images only; record attribution and licence for each (schema and UI ready; no photos yet, so recipes show a designed placeholder)
+- [x] Get licensed, owned, or permitted images only; record attribution and licence for each (launching with owned illustrations, decision 0003; photos are post-launch work)
 - [x] Validate all seed data against the schema in a test
 - [x] Recipe card: image with fixed aspect ratio and placeholder, name, kcal and protein per serving, prep time, tags
 - [x] Only show a "low calorie" tag when it meets a stated threshold
@@ -76,7 +76,7 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [x] `/snacks`: snack discovery with editable calorie/protein presets
 - [x] Responsive images with no layout shift
 - [x] Unit tests: each filter, combined filters, boundary values, zero results, exclusions
-- [ ] Verify ingredient nutrition values against an authoritative food-composition source before launch
+- [x] Verify ingredient nutrition values against an authoritative food-composition source before launch (USDA FoodData Central, `docs/nutrition-sources.md`)
 
 ## Phase 4 — Meal planner
 
@@ -137,7 +137,7 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [x] Make sure private data is not exposed to other users on a shared device (Settings → Account: delete everything from this device)
 - [x] Document what works offline; don't claim full offline support if only the shell is cached
 - [x] Keyboard-only pass through all core flows (automated in `tests/e2e/journey.spec.ts`)
-- [ ] Screen-reader pass (VoiceOver and NVDA or TalkBack): checklist ready in `docs/accessibility.md`, not yet run
+- [ ] Screen-reader pass (VoiceOver and NVDA or TalkBack): accessibility-tree review done; manual pass with real screen readers not yet run (`docs/accessibility.md`)
 - [x] Automated accessibility scans (e.g. axe in Playwright)
 - [x] Touch target and contrast checks
 - [x] E2E test: onboarding → plan meals → add snack → generate shopping list
@@ -153,13 +153,17 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [x] Data export and account/data deletion (P1, required before public launch), plus restore from file
 - [x] Content review: all nutrition has a source and estimated/verified flag; all images have a licence (`docs/content-review.md`; no photos yet)
 - [x] Safety copy review: no medical claims, no extreme restriction, no weight-loss guarantees (automated in `tests/unit/content/safety-copy.test.ts`)
-- [ ] Production deployment over HTTPS: ready (`docs/deployment.md`, security headers, CSP); waiting for a hosting decision
+- [ ] Production deployment over HTTPS: deploy-ready (`docs/deployment.md`, security headers, CSP, CI in three engines); the product owner deploys
 - [x] Final README, setup, and route docs update
+- [x] Launch blockers resolved where possible: licence, USDA nutrition sources, illustrations decision, `npm run launch:check`
+- [ ] Operator name, country, and privacy contact in `config/operator.ts`
+- [ ] Dietitian sign-off (`docs/dietitian-review.md`)
 
 ---
 
 ## V1 — After MVP validation
 
+- [ ] Licensed recipe photography (decision 0003)
 - [ ] Favourites and recently viewed recipes
 - [ ] Serving-size adjustment on recipe detail
 - [ ] Suggested targets from profile details, with clear explanation and disclaimer

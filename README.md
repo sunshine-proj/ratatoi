@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**MVP complete (Phases 0–8); not yet deployed.** Users can set goals, browse 25 original recipes, plan a week with progress against their targets, and create a shopping list. Everything works offline and stays on their device, with export, import, and delete-everything in Settings → Account. Phase 8 added a privacy notice, security headers and CSP, a visual polish pass, Lighthouse tuning, and automated content and safety-copy reviews. **Before a public launch:** see [docs/launch-checklist.md](docs/launch-checklist.md) (hosting, licence, operator details, verified nutrition data, photos, and real-device and screen-reader checks). See `ROADMAP.md` for progress and next phases.
+**MVP complete (Phases 0–8); not yet deployed.** Users can set goals, browse 25 original recipes, plan a week with progress against their targets, and create a shopping list. Everything works offline and stays on their device, with export, import, and delete-everything in Settings → Account. Phase 8 added a privacy notice, security headers and CSP, a visual polish pass, Lighthouse tuning, and automated content and safety-copy reviews. Nutrition values come from USDA FoodData Central, and recipes use illustrations until licensed photos are added (decision 0003). **Before a public launch:** see [docs/launch-checklist.md](docs/launch-checklist.md) or run `npm run launch:check` (operator details, dietitian sign-off, deployment with real-device testing, and a screen-reader pass). See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -57,13 +57,14 @@ Open `http://localhost:3000` (Next.js picks another port if 3000 is in use; chec
 | `npm run typecheck` | Generate route types, then `tsc --noEmit` |
 | `npm run test` | Unit and component tests (Vitest, single run) |
 | `npm run test:watch` | Vitest in watch mode |
-| `npm run test:e2e` | Builds, serves on port 3210, runs Playwright (desktop + mobile Chromium) |
+| `npm run test:e2e` | Builds, serves on port 3210, runs Playwright (Chromium, WebKit, and Firefox at phone and desktop sizes) |
 | `npm run icons` | Regenerate PNG icons and favicons from `assets/*.svg` (commit the output) |
 | `npm run check` | Lint, typecheck, unit tests, and build in sequence |
+| `npm run launch:check` | Lists what still blocks a public launch; exits with 1 until nothing does |
 
-Before the first e2e run, install the browser: `npx playwright install chromium`. If port 3210 is taken, set `E2E_PORT`. The e2e run will not reuse a server that is already running on that port.
+Before the first e2e run, install the browsers: `npx playwright install chromium webkit firefox`. WebKit needs extra system libraries (`npx playwright install-deps webkit`, which needs admin rights); without them, run the other engines with `--project=desktop-chromium --project=mobile-chromium --project=desktop-firefox`. If port 3210 is taken, set `E2E_PORT`. The e2e run will not reuse a server that is already running on that port.
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, build, and e2e on every push and pull request.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, build, and e2e in all three engines on every push and pull request, plus `launch:check` as an informational job. It doesn't deploy.
 
 ## Environment variables
 
@@ -119,11 +120,12 @@ lib/                 Domain logic, kept free of UI code
 data/ingredients.ts  Curated ingredient table (nutrition, allergens, aliases, aisle)
 data/recipes/        Seed recipes
 assets/              Icon source artwork (SVG)
-scripts/             Build-time helpers (icon generation)
+config/operator.ts   Who runs the app (shown in the privacy notice)
+scripts/             Icon generation and the launch-readiness check
 proxy.ts             Returns a real 404 for unknown recipe slugs
 public/sw.js         Service worker
 public/icons/        Generated PWA icons
-public/images/       Licensed recipe images
+public/images/       Licensed recipe images (none yet; illustrations for now)
 tests/unit/          Vitest tests
 tests/e2e/           Playwright tests
 ```
@@ -264,11 +266,11 @@ Use only original, licensed, or explicitly permitted recipe content and photogra
 ### Recipe catalogue
 
 - **Recipes** (`data/recipes/index.ts`) are original recipes written for Protein Plate: 6 breakfasts, 5 lunches, 7 dinners, and 7 snacks (some recipes cover more than one meal), including vegan, vegetarian, fish, and meat dishes, quick ones, and batch-cook ones. They are validated against `recipeSchema` at build time; invalid data fails the build.
-- **Ingredients** (`data/ingredients.ts`) are a curated table. Each has a canonical key (used later for shopping-list aggregation), aliases (for search and exclusions, e.g. "zucchini" → courgettes, "shrimp" → prawns), an aisle category, allergens (the 14 EU-declared allergens), what it is made from (plant, dairy, fish…), and approximate nutrition per 100 g.
+- **Ingredients** (`data/ingredients.ts`) are a curated table. Each has a canonical key (used later for shopping-list aggregation), aliases (for search and exclusions, e.g. "zucchini" → courgettes, "shrimp" → prawns), an aisle category, allergens (the 14 EU-declared allergens), what it is made from (plant, dairy, fish…), and nutrition per 100 g with its USDA FoodData Central source.
 - **Derived, not typed in:** a recipe's allergens and its vegan/vegetarian/pescatarian suitability are computed from its ingredients, so they can't contradict the ingredient list.
-- **Nutrition** per serving is calculated from the ingredient table and stored explicitly in each recipe, labelled *estimated* with its source. `tests/unit/lib/recipe-data.test.ts` fails if a stored value drifts from the calculation. **The per-100 g values are approximate typical values compiled for this project, not taken from or verified against a food-composition database.** Check them against an authoritative source before public launch.
+- **Nutrition** per serving is calculated from the ingredient table and stored explicitly in each recipe, labelled *estimated* with its source. `tests/unit/lib/recipe-data.test.ts` fails if a stored value drifts from the calculation. Per-100 g values come from USDA FoodData Central: SR Legacy, or Branded label data for skyr, quark, and light coconut milk. Each ingredient cites its FDC IDs, and the schema refuses nutrition without a source (`docs/nutrition-sources.md`). Carbohydrate is "by difference" and includes fibre, and cooking losses aren't modelled, so values stay labelled *estimated*.
 - **Labels** have stated thresholds, shown on each recipe page: *High protein* = at least 20% of energy from protein (the EU condition for the claim); *Under 200 kcal* (snacks) and *Under 450 kcal* (meals) per serving; *Quick* = 15 minutes or less in total; *Batch cook* = marked by the author. Nothing is labelled "low calorie".
-- **Photos:** none yet. `image` is `null` and a designed, decorative illustration (tinted by meal type) fills the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence` for any photo added later, and the source section of each recipe page shows them. Recipe text is English only for now.
+- **Photos:** none yet; launching with illustrations is decision 0003. `image` is `null` and a designed, decorative illustration (tinted by meal type) fills the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence` for any photo added later, and the source section of each recipe page shows them. Recipe text is English only for now.
 
 ### Searching and filtering
 
@@ -316,10 +318,13 @@ Run `npm run check` (and `npm run test:e2e` for UI flows) before handing off.
 - `ROADMAP.md` — development phases with checkbox task lists for MVP, V1, and later.
 - `README.md` — project overview and developer setup.
 - `docs/accessibility.md` — automated accessibility coverage and the manual screen-reader checklist.
-- `docs/decisions/` — decision records (no accounts in the MVP; no analytics in the MVP).
+- `docs/decisions/` — decision records (no accounts in the MVP; no analytics in the MVP; launch with illustrations).
+- `docs/nutrition-sources.md` — USDA FoodData Central source for every ingredient.
+- `docs/dietitian-review.md` — review pack for a registered dietitian (pending).
+- `docs/device-testing.md` — real-device install and offline checks (not yet run).
 - `docs/content-review.md` — recipe, nutrition, and safety-copy review.
 - `docs/deployment.md`, `docs/performance.md`, `docs/launch-checklist.md` — going live.
 
 ## License
 
-No license has been selected yet. `package.json` is marked `private`. Add a `LICENSE` file before distributing or publishing the project.
+Proprietary. All rights reserved; see [LICENSE](LICENSE).

@@ -59,8 +59,9 @@ test.describe("recipes", () => {
     await page.getByRole("radio", { name: "Up to 150 kcal, 15 g+ protein" }).check();
     await expect(results.getByRole("article")).toHaveCount(0);
     await page.getByRole("radio", { name: "Up to 200 kcal, 20 g+ protein" }).check();
-    await expect(results.getByRole("link", { name: "Tuna and cucumber bites" })).toBeVisible();
+    // Tuna and cucumber bites are 202 kcal, just over this preset's limit.
     await expect(results.getByRole("link", { name: "Chocolate skyr pot" })).toBeVisible();
+    await expect(results.getByRole("link", { name: "Tuna and cucumber bites" })).toHaveCount(0);
   });
 
   test("recipe images keep their space while loading (no layout shift)", async ({ page }) => {

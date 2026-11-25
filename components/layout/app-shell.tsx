@@ -40,9 +40,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <BrandLink />
             <Link
               href={profileNavItem.href}
+              aria-label={t.nav.profile}
               className="-mr-2 inline-flex size-11 items-center justify-center rounded-control text-ink hover:bg-surface-muted"
             >
-              <Icon name="profile" label={t.nav.profile} />
+              <Icon name="profile" />
             </Link>
           </header>
 

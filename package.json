@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "launch:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/launch-check.mts"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -41,5 +42,6 @@
   },
   "engines": {
     "node": ">=24"
-  }
+  },
+  "license": "UNLICENSED"
 }

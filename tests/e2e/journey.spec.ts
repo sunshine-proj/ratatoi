@@ -43,7 +43,7 @@ test("full journey: onboarding → plan meals → add a snack → shopping list"
   // Today shows progress for all three.
   await page.goto("/");
   const progress = page.getByRole("region", { name: "Today's progress" });
-  await expect(progress).toContainText("1,104 of 2,400 kcal"); // 416 + 532 + 156
+  await expect(progress).toContainText("1,094 of 2,400 kcal"); // 418 + 535 + 141
   await expect(page.getByRole("region", { name: "Today's meals" }).locator("ol > li")).toHaveCount(3);
 
   // Shopping list from the plan includes the snack's ingredients.

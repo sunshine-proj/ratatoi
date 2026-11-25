@@ -22,7 +22,7 @@ test.describe("meal planner", () => {
     await expect(page.getByRole("heading", { level: 2, name: /Friday 27 November/ })).toBeVisible();
     const snacks = page.getByRole("region", { name: "Snacks" });
     await expect(snacks.getByRole("link", { name: "Chocolate skyr pot" })).toBeVisible();
-    await expect(page.getByText("Planned: 159 kcal · 23 g protein")).toBeVisible();
+    await expect(page.getByText("Planned: 153 kcal · 24 g protein")).toBeVisible();
 
     await page.reload();
     await expect(page.getByRole("region", { name: "Snacks" }).getByRole("link", { name: "Chocolate skyr pot" })).toBeVisible();
@@ -39,11 +39,11 @@ test.describe("meal planner", () => {
     await page.getByRole("button", { name: "Add snack" }).click();
     sheet = page.getByRole("dialog", { name: "Add snack for Thu 26 Nov" });
     await sheet.getByRole("button", { name: "Add Tuna and cucumber bites" }).click();
-    await expect(page.getByText("Planned: 539 kcal · 68 g protein")).toBeVisible();
+    await expect(page.getByText("Planned: 547 kcal · 67 g protein")).toBeVisible();
 
     await page.getByRole("button", { name: "Swap: Berry yoghurt power bowl" }).click();
     sheet = page.getByRole("dialog", { name: "Swap Berry yoghurt power bowl" });
-    await expect(sheet.getByText("Day now: 539 kcal · 68 g protein")).toBeVisible();
+    await expect(sheet.getByText("Day now: 547 kcal · 67 g protein")).toBeVisible();
     await sheet.getByRole("button", { name: "Swap in Spinach and feta egg scramble" }).click();
     await expect(page.getByRole("region", { name: "Breakfast" }).getByRole("link", { name: "Spinach and feta egg scramble" })).toBeVisible();
 

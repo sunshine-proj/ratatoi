@@ -33,7 +33,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      # All three engines: Chromium, WebKit (Safari, desktop and iPhone), and
+      # Firefox. WebKit needs system libraries that --with-deps installs here.
+      - run: npx playwright install --with-deps chromium webkit firefox
       - run: npm run test:e2e
         env:
           CI: true
@@ -43,3 +45,16 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # Lists what still blocks a public launch (operator details, dietitian
+  # sign-off, real-device and screen-reader passes). Informational: it fails
+  # until those are recorded, without failing the build.
+  launch-readiness:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: npm run launch:check

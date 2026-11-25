@@ -36,13 +36,19 @@ test.describe("routes", () => {
 
   test("unknown recipes reached by client navigation also show not-found", async ({ page }) => {
     await page.goto("/recipes");
-    await page.evaluate(() => {
-      const link = document.createElement("a");
-      link.href = "/recipes/nope";
-      link.textContent = "test link";
-      document.querySelector("main")?.append(link);
-    });
-    await page.getByRole("link", { name: "test link" }).click();
+    // React may still be rendering <main> and can drop a node injected too
+    // early, so re-inject until the click lands.
+    await expect(async () => {
+      await page.evaluate(() => {
+        if (document.getElementById("e2e-test-link")) return;
+        const link = document.createElement("a");
+        link.id = "e2e-test-link";
+        link.href = "/recipes/nope";
+        link.textContent = "test link";
+        document.querySelector("main")?.append(link);
+      });
+      await page.getByRole("link", { name: "test link" }).click({ timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
   });
 

@@ -1,24 +1,25 @@
 # Launch checklist
 
-The MVP features are complete. These items remain before a **public** launch.
+The MVP features are complete. `npm run launch:check` checks the items below and exits with 1 until none are blocking (CI runs it as an informational job).
 
-## Decisions for the product owner
+## Done
 
-- [ ] **Hosting and domain** (see `docs/deployment.md`). Nothing has been deployed.
-- [ ] **Licence** for the code (`package.json` is `private`; no `LICENSE` file).
-- [ ] **Operator identity and contact** for the privacy notice (who runs the app, and how to reach them), plus a legal review of the notice and the disclaimers.
+- [x] **Licence:** proprietary, all rights reserved (`LICENSE`; `package.json` `"license": "UNLICENSED"`).
+- [x] **Nutrition values** from USDA FoodData Central for every ingredient, with recipes recalculated (`docs/nutrition-sources.md`). Still labelled "Estimated".
+- [x] **Imagery:** launching with designed illustrations; licensed photos come after launch (decision 0003).
+- [x] **Deploy-ready:** security headers and CSP, HTTPS requirements, and the host checklist in `docs/deployment.md`. CI runs the full suite in Chromium, WebKit, and Firefox.
 
-## Content
+## Still blocking a public launch
 
-- [ ] Verify ingredient nutrition values against an authoritative food-composition table (values are currently approximate and labelled "Estimated").
-- [ ] Add licensed recipe photography (alt text, attribution, and licence are required by the schema).
-- [ ] Dietitian review of recipes, targets copy, and the estimate method (`docs/content-review.md`).
+- [ ] **Operator identity and contact:** fill in `config/operator.ts` (name, country, privacy contact email). The privacy notice shows them automatically. A legal review of the notice and the disclaimers is recommended.
+- [ ] **Dietitian review:** a registered dietitian works through `docs/dietitian-review.md` and sets its status to Approved.
+- [ ] **Deploy over HTTPS** (the product owner does this; see `docs/deployment.md`), then **test on real devices:** Android Chrome, iOS Safari, desktop Chrome or Edge (`docs/device-testing.md`).
+- [ ] **Manual screen-reader pass:** VoiceOver, TalkBack, NVDA (`docs/accessibility.md`). The accessibility-tree review is done; this needs real screen readers.
 
-## Verification on real devices
+## After going live
 
-- [ ] Install and offline check: Android Chrome, iOS Safari, desktop Chrome/Edge, over HTTPS.
-- [ ] Manual screen-reader pass: VoiceOver, TalkBack, NVDA (`docs/accessibility.md`).
 - [ ] Lighthouse against the live URL; compare with `docs/performance.md`.
+- [ ] Confirm the host's log retention matches the privacy notice.
 
 ## Already done (Phases 0–8)
 

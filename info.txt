@@ -365,6 +365,42 @@ Still blocking a public launch (listed in docs/launch-checklist.md): a code lice
 ============================
 
 
+I've resolved every launch blocker I can resolve myself, and prepared the rest. npm run launch:check now shows 4 items left, and each one needs a person: you, a dietitian or a tester. Nothing is committed or deployed.
+
+Resolved
+
+Licence: proprietary, with a LICENSE file and "license": "UNLICENSED" in package.json.
+
+Nutrition data: all 61 ingredients now cite USDA FoodData Central, which is public, authoritative food-composition data. Every recipe was recalculated from it. The full table is in docs/nutrition-sources.md, and a test fails if an ingredient has no source.
+
+Photos: launching with illustrations, recorded in decision docs/decisions/0003-launch-with-illustrations.md. The recipes page said "Browse photo-led recipes", which is no longer true, so I reworded it.
+
+CI: now installs and runs all three browser engines (Chromium, WebKit, Firefox). It also has a non-blocking job that runs launch:check. CI doesn't deploy.
+
+Intermittent test failure: the test for "unknown recipe reached by in-app navigation" sometimes failed because of a timing problem in the test, not an app bug. The page was still rendering and removed the link the test had just added. The test now re-adds the link until the click works.
+
+Screen-reader readiness: I read through what each core page gives screen readers, and fixed two problems:
+
+On the account page, the hidden file picker was a second "restore" control next to the visible button.
+On phones, the profile link's name was read twice.
+Notes are in docs/accessibility.md.
+
+Prepared, but needs people
+
+Dietitian: docs/dietitian-review.md covers the target-estimate method and its safety limits, the safety copy, the label thresholds, and a nutrition table for all 25 recipes. It ends with specific questions, for example whether a curry with only 19% of energy from protein belongs in a high-protein app.
+Real devices: docs/device-testing.md has the install, offline and back-online checks, with a table to record results. It needs the app deployed over HTTPS.
+Screen readers: the VoiceOver, TalkBack and NVDA checklist in docs/accessibility.md still needs running on real devices.
+I also updated the README, ROADMAP, launch checklist, content review and deployment guide.
+
+Checks run: lint, typecheck, unit tests (271 passed) and the production build all pass. The end-to-end tests passed in Chromium and Firefox, twice in a row: 205 passed, 17 skipped, none failed. WebKit, Safari's engine, can't run on this machine because it needs system libraries that require admin rights, so its first run will be in CI.
+
+Still needed from you: the operator's name, country and privacy contact email, which I'll put in config/operator.ts and the privacy page will show. Optionally, also the legal name for the copyright line in LICENSE, which currently reads "the copyright holder of Protein Plate".
+
+
+
+============================
+
+
 
 
 

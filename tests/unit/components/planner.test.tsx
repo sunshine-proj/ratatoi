@@ -71,8 +71,8 @@ describe("PlannerView", () => {
 
     expect(storedPlan().meals).toMatchObject([{ recipeSlug: "tuna-chickpea-salad", servings: 1.5, mealType: "lunch", date: DATE }]);
     expect(within(slot("Lunch")).getByRole("link", { name: "Tuna and chickpea salad" })).toBeInTheDocument();
-    // 403 kcal × 1.5 = 604.5; 41.4 g × 1.5 = 62.1 g
-    expect(screen.getByText("Planned: 605 kcal · 62 g protein")).toBeInTheDocument();
+    // 425 kcal × 1.5 = 637.5; 41.4 g × 1.5 = 62.1 g
+    expect(screen.getByText("Planned: 638 kcal · 62 g protein")).toBeInTheDocument();
   });
 
   it("supports several snacks in one day", async () => {
@@ -90,9 +90,9 @@ describe("PlannerView", () => {
     seed({ kind: "recipe", recipeSlug: "chocolate-skyr-pot", date: DATE, mealType: "snack", servings: 1 });
     const user = userEvent.setup();
     renderPlanner();
-    expect(await screen.findByText("Planned: 159 kcal · 23 g protein")).toBeInTheDocument();
+    expect(await screen.findByText("Planned: 153 kcal · 24 g protein")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "More servings of Chocolate skyr pot" }));
-    expect(screen.getByText("Planned: 239 kcal · 35 g protein")).toBeInTheDocument();
+    expect(screen.getByText("Planned: 230 kcal · 35 g protein")).toBeInTheDocument();
     expect(storedPlan().meals[0]?.servings).toBe(1.5);
   });
 
@@ -113,14 +113,14 @@ describe("PlannerView", () => {
     renderPlanner();
     await user.click(await screen.findByRole("button", { name: "Swap: Tuna and chickpea salad" }));
     const dialog = screen.getByRole("dialog", { name: "Swap Tuna and chickpea salad" });
-    expect(within(dialog).getByText("Day now: 403 kcal · 41 g protein")).toBeInTheDocument();
-    // Wraps: 446 kcal, 36.7 g → +43 kcal, −5 g (rounded from −4.7)
-    expect(within(dialog).getByText("Day after: 446 kcal (+43 kcal) · 37 g protein (−5 g)")).toBeInTheDocument();
+    expect(within(dialog).getByText("Day now: 425 kcal · 41 g protein")).toBeInTheDocument();
+    // Wraps: 450 kcal, 37.4 g → +25 kcal, −4 g
+    expect(within(dialog).getByText("Day after: 450 kcal (+25 kcal) · 37 g protein (−4 g)")).toBeInTheDocument();
     expect(within(dialog).queryByText("Tuna and chickpea salad", { selector: "span" })).not.toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Swap in Smoky chicken and hummus wraps" }));
     expect(storedPlan().meals[0]).toMatchObject({ recipeSlug: "chicken-hummus-wraps", id: "seed-1" });
-    expect(screen.getByText("Planned: 446 kcal · 37 g protein")).toBeInTheDocument();
+    expect(screen.getByText("Planned: 450 kcal · 37 g protein")).toBeInTheDocument();
   });
 
   it("adds a custom meal, marked as the user's own entry", async () => {

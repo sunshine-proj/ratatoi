@@ -3,7 +3,8 @@ import type { RecipeInput } from "@/lib/recipes/schema";
 /**
  * Seed recipe catalogue: original recipes written for Protein Plate.
  *
- * - Nutrition per serving is calculated from data/ingredients.ts and stored
+ * - Nutrition per serving is calculated from data/ingredients.ts (USDA
+ *   FoodData Central values, cited per ingredient) and stored
  *   explicitly. tests/unit/lib/recipe-data.test.ts fails if a stored value
  *   drifts from the calculation; update the numbers it prints.
  * - No licensed photography exists yet, so `image` is null and the UI shows
@@ -13,7 +14,7 @@ type SeedRecipe = Omit<RecipeInput, "nutritionSource" | "nutritionIsEstimated" |
   Partial<Pick<RecipeInput, "image">>;
 
 const ESTIMATED_SOURCE =
-  "Calculated from approximate per-100 g ingredient values in the Protein Plate ingredient table. Not laboratory-verified.";
+  "Calculated from USDA FoodData Central values for each ingredient (mostly SR Legacy food-composition data; manufacturer label data for skyr, quark, and light coconut milk), scaled to the recipe. Raw ingredient weights; cooking losses aren't modelled, so values are estimates.";
 
 function seed(recipe: SeedRecipe): RecipeInput {
   return {
@@ -53,7 +54,7 @@ export const recipeData: RecipeInput[] = [
       "Top with the berries, oats, and chia seeds.",
       "Drizzle with the honey and eat straight away, or cover and chill for up to 12 hours.",
     ],
-    nutritionPerServing: n(343, 31.1, 43.6, 5.7),
+    nutritionPerServing: n(345, 30.6, 45, 5.9),
   }),
   seed({
     slug: "spinach-feta-egg-scramble",
@@ -78,7 +79,7 @@ export const recipeData: RecipeInput[] = [
       "Pour in the eggs and stir gently until just set, about 2–3 minutes.",
       "Scatter over the feta and serve on the toast.",
     ],
-    nutritionPerServing: n(416, 33.3, 21.1, 21.2),
+    nutritionPerServing: n(418, 34.1, 21.6, 21.3),
   }),
   seed({
     slug: "protein-overnight-oats",
@@ -105,7 +106,7 @@ export const recipeData: RecipeInput[] = [
       "Divide between three jars and top each with a third of the blueberries.",
       "Cover and refrigerate overnight. Eat cold, or loosen with a splash of milk.",
     ],
-    nutritionPerServing: n(500, 43.8, 61.5, 9.5),
+    nutritionPerServing: n(493, 44.7, 61.1, 8.9),
   }),
   seed({
     slug: "cottage-cheese-oat-pancakes",
@@ -131,7 +132,7 @@ export const recipeData: RecipeInput[] = [
       "Cook 2 tablespoons of batter per pancake for about 2 minutes a side, until golden.",
       "Serve topped with the blueberries.",
     ],
-    nutritionPerServing: n(427, 25.7, 52.6, 12.9),
+    nutritionPerServing: n(427, 25.6, 54.4, 12.9),
   }),
   seed({
     slug: "smoked-salmon-quark-rye-toast",
@@ -155,7 +156,7 @@ export const recipeData: RecipeInput[] = [
       "Toast the rye bread if you like, then spread with the quark.",
       "Top with the cucumber, smoked salmon, and torn dill.",
     ],
-    nutritionPerServing: n(290, 27.2, 33.9, 4.3),
+    nutritionPerServing: n(337, 27.5, 41, 7.5),
   }),
   seed({
     slug: "turmeric-tofu-scramble",
@@ -182,7 +183,7 @@ export const recipeData: RecipeInput[] = [
       "Stir through the spinach until wilted. Season with salt and pepper.",
       "Serve on the toast.",
     ],
-    nutritionPerServing: n(401, 32.3, 29.8, 19.4),
+    nutritionPerServing: n(399, 32.9, 30.3, 19.4),
   }),
 
   // ===================================================================
@@ -216,7 +217,7 @@ export const recipeData: RecipeInput[] = [
       "Whisk the remaining oil with the lemon juice.",
       "Divide the spinach, quinoa, tomatoes, and cucumber between two bowls, top with chicken and feta, and drizzle with the dressing.",
     ],
-    nutritionPerServing: n(524, 46.2, 44.2, 18.5),
+    nutritionPerServing: n(524, 46.3, 44.2, 18.6),
   }),
   seed({
     slug: "tuna-chickpea-salad",
@@ -243,7 +244,7 @@ export const recipeData: RecipeInput[] = [
       "Toss the chickpeas, tomatoes, cucumber, onion, and parsley with the dressing.",
       "Flake the tuna over the top and gently fold through.",
     ],
-    nutritionPerServing: n(403, 41.4, 36.3, 11.4),
+    nutritionPerServing: n(425, 41.4, 42.2, 11.3),
   }),
   seed({
     slug: "chicken-hummus-wraps",
@@ -268,7 +269,7 @@ export const recipeData: RecipeInput[] = [
       "Fry in a hot pan for 6–8 minutes until cooked through.",
       "Spread each wrap with hummus, add the salad leaves, pepper, and chicken, and roll up tightly.",
     ],
-    nutritionPerServing: n(446, 36.7, 38.1, 15.1),
+    nutritionPerServing: n(450, 37.4, 37.1, 17),
   }),
   seed({
     slug: "red-lentil-tomato-soup",
@@ -298,7 +299,7 @@ export const recipeData: RecipeInput[] = [
       "Add the lentils, tomatoes, and stock. Simmer for 20 minutes until the lentils have collapsed.",
       "Stir in the spinach and the lemon juice. Blend partly or fully, and season to taste.",
     ],
-    nutritionPerServing: n(336, 18.6, 53.9, 5.8),
+    nutritionPerServing: n(331, 18.2, 56.6, 5.6),
   }),
   seed({
     slug: "tofu-edamame-rice-bowl",
@@ -327,7 +328,7 @@ export const recipeData: RecipeInput[] = [
       "Mix the soy sauce and ginger, pour over the tofu, and toss for 1 minute until glazed.",
       "Divide the rice and edamame between bowls and top with the tofu, carrot, cucumber, and spring onions.",
     ],
-    nutritionPerServing: n(537, 33.1, 63.6, 19),
+    nutritionPerServing: n(529, 32.8, 62.8, 19),
   }),
 
   // ===================================================================
@@ -358,7 +359,7 @@ export const recipeData: RecipeInput[] = [
       "Squeeze over half the lemon and roast for 12–15 minutes until the salmon flakes easily.",
       "Serve with the remaining lemon cut into wedges.",
     ],
-    nutritionPerServing: n(563, 35.6, 52, 25.3),
+    nutritionPerServing: n(563, 35.6, 52.5, 25.3),
   }),
   seed({
     slug: "turkey-black-bean-chilli",
@@ -390,7 +391,7 @@ export const recipeData: RecipeInput[] = [
       "Simmer gently for 25–30 minutes until thick. Season to taste.",
       "Meanwhile, cook the rice and serve it with the chilli.",
     ],
-    nutritionPerServing: n(526, 39.4, 69.7, 9),
+    nutritionPerServing: n(527, 40.9, 74.9, 7.5),
   }),
   seed({
     slug: "ginger-chicken-stir-fry",
@@ -420,7 +421,7 @@ export const recipeData: RecipeInput[] = [
       "Add the garlic, ginger, and soy sauce and toss for 1 minute.",
       "Serve over the rice, scattered with spring onions.",
     ],
-    nutritionPerServing: n(532, 44.5, 66.7, 9.7),
+    nutritionPerServing: n(535, 44.1, 67.5, 9.8),
   }),
   seed({
     slug: "lean-beef-ragu-wholewheat-pasta",
@@ -451,7 +452,7 @@ export const recipeData: RecipeInput[] = [
       "Cook the pasta according to the packet, drain, and toss with the sauce.",
       "Serve with the Parmesan.",
     ],
-    nutritionPerServing: n(607, 45.1, 69.9, 15.6),
+    nutritionPerServing: n(601, 45.5, 75.8, 15.2),
   }),
   seed({
     slug: "baked-cod-pea-potato-crush",
@@ -477,7 +478,7 @@ export const recipeData: RecipeInput[] = [
       "Drain the potatoes and peas, then crush with the remaining oil, the lemon juice, and the parsley. Season.",
       "Serve the cod on the crush.",
     ],
-    nutritionPerServing: n(433, 36.7, 52.7, 8.7),
+    nutritionPerServing: n(429, 36.5, 53.3, 8.7),
   }),
   seed({
     slug: "chickpea-tofu-spinach-curry",
@@ -509,7 +510,7 @@ export const recipeData: RecipeInput[] = [
       "Meanwhile, cook the rice according to the packet.",
       "Stir the spinach into the curry until wilted. Season, scatter with coriander, and serve with the rice.",
     ],
-    nutritionPerServing: n(620, 29.9, 83.4, 20.7),
+    nutritionPerServing: n(628, 29.5, 89.1, 19.5),
   }),
   seed({
     slug: "garlic-prawn-courgette-pasta",
@@ -537,7 +538,7 @@ export const recipeData: RecipeInput[] = [
       "Add the garlic, chilli, and tomatoes and cook for 3 minutes, then add the prawns to heat through for 2 minutes.",
       "Toss in the pasta with a splash of cooking water and the lemon juice. Serve with the Parmesan.",
     ],
-    nutritionPerServing: n(516, 45.3, 57.6, 12.2),
+    nutritionPerServing: n(519, 45.9, 62.8, 12.4),
   }),
 
   // ===================================================================
@@ -558,7 +559,7 @@ export const recipeData: RecipeInput[] = [
       { ingredient: "honey", quantity: 1, unit: "tsp" },
     ],
     steps: ["Whisk the cocoa and honey into the skyr until smooth.", "Eat straight away or chill for later."],
-    nutritionPerServing: n(159, 23, 16.7, 1.1),
+    nutritionPerServing: n(153, 23.6, 16.7, 0.7),
   }),
   seed({
     slug: "cottage-cheese-tomato-rice-cakes",
@@ -575,7 +576,7 @@ export const recipeData: RecipeInput[] = [
       { ingredient: "cherry-tomatoes", quantity: 60, unit: "g", note: "quartered" },
     ],
     steps: ["Spread the cottage cheese over the rice cakes.", "Top with the tomatoes and plenty of black pepper."],
-    nutritionPerServing: n(161, 12.5, 20.3, 2.9),
+    nutritionPerServing: n(161, 12.4, 21.8, 2.9),
   }),
   seed({
     slug: "chilli-lemon-edamame",
@@ -596,7 +597,7 @@ export const recipeData: RecipeInput[] = [
       "Boil the edamame for 3–4 minutes, then drain.",
       "Toss with the soy sauce, chilli flakes, and a squeeze of lemon.",
     ],
-    nutritionPerServing: n(156, 15, 13.3, 6.3),
+    nutritionPerServing: n(141, 14.2, 11.8, 5.7),
   }),
   seed({
     slug: "egg-veg-snack-box",
@@ -618,7 +619,7 @@ export const recipeData: RecipeInput[] = [
       "Boil the eggs for 9 minutes, then cool in cold water and peel.",
       "Pack with the vegetable sticks and the hummus for dipping.",
     ],
-    nutritionPerServing: n(266, 16.1, 16.2, 15.2),
+    nutritionPerServing: n(262, 16.4, 16.5, 15.1),
   }),
   seed({
     slug: "tuna-cucumber-bites",
@@ -640,7 +641,7 @@ export const recipeData: RecipeInput[] = [
       "Mash the tuna with the quark, a squeeze of lemon, and black pepper.",
       "Spoon onto the cucumber slices and top with dill.",
     ],
-    nutritionPerServing: n(196, 36.7, 9.3, 1.3),
+    nutritionPerServing: n(202, 35.9, 9.5, 2.3),
   }),
   seed({
     slug: "peanut-butter-banana-quark",
@@ -657,7 +658,7 @@ export const recipeData: RecipeInput[] = [
       { ingredient: "banana", quantity: 0.5, unit: "piece", note: "sliced" },
     ],
     steps: ["Spoon the quark into a bowl and swirl through the peanut butter.", "Top with the banana."],
-    nutritionPerServing: n(213, 21.2, 21.7, 5.5),
+    nutritionPerServing: n(236, 17.9, 22.7, 9.4),
   }),
   seed({
     slug: "berry-whey-smoothie",
@@ -674,6 +675,6 @@ export const recipeData: RecipeInput[] = [
       { ingredient: "mixed-berries", quantity: 100, unit: "g" },
     ],
     steps: ["Blend everything until smooth.", "Drink straight away."],
-    nutritionPerServing: n(266, 28.5, 25.4, 5.7),
+    nutritionPerServing: n(269, 28.8, 26.3, 6.1),
   }),
 ];

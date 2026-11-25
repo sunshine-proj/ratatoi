@@ -401,6 +401,22 @@ Still needed from you: the operator's name, country and privacy contact email, w
 ============================
 
 
+I can't make photos myself, but there are three realistic ways to get them. The app is already set up for any of them: recipeImageSchema in lib/recipes/schema.ts:22 requires alt, attribution and licence for every photo, and decision 0003 put photos off until after launch.
+
+What I can't do: I have no tool here that creates images.
+
+What I can do:
+
+Download openly licensed photos. I can search Wikimedia Commons, Openverse, Pexels or Unsplash, check each image's licence, and download it to public/images/. I'd fill in attribution, licence and sourceUrl from the source page, never guessed. The catch is that stock photos rarely show your recipe. A generic "chicken bowl" photo may have different ingredients or portion size, which goes against the "honest nutrition" rule. So I'd only use close matches and flag anything doubtful for you to decide on. CC BY-SA images also come with share-alike terms you should be comfortable with.
+Write a script that calls an image-generation API with your key. It would read each recipe's name and ingredients, write a prompt, generate the image, resize it and update the recipe data. Licence would read something like "Generated with [provider], owned by Protein Plate," based on that provider's terms. One caveat: AI food images can show things the recipe doesn't contain. I'd recommend reviewing each one, and maybe labelling them as illustrative.
+Make more SVG illustrations. You're already launching with these, and they're fully owned with no licence risk.
+My recommendation: for real photos, the best option is shooting the dishes yourself. Next best is option 2 with a human review step. Option 1 only works for a few generic recipes like oats or yoghurt bowls.
+
+Which way do you want to go? For option 2, tell me which provider you'll use and I'll add its key name to .env.example. Either way, this reverses decision 0003, so I'd add a new decision record and update docs/content-review.md at the same time.
+
+
+
+============================
 
 
 

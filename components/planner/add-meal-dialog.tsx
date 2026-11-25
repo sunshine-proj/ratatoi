@@ -8,8 +8,9 @@ import { TextField } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { Tabs } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
-import { formatMessage, getMessages } from "@/lib/i18n";
-import { formatDate } from "@/lib/i18n/format";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
+import { formatDate, lowercase } from "@/lib/i18n/format";
 import {
   emptyCustomMealDraft,
   parseCustomMeal,
@@ -25,7 +26,7 @@ import { usePlanActions } from "./use-plan-actions";
 export type AddMealTarget = { date: string; mealType: MealType };
 
 export function AddMealDialog({ target, onClose }: { target: AddMealTarget | null; onClose: () => void }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const current = target;
 
   return (
@@ -37,8 +38,8 @@ export function AddMealDialog({ target, onClose }: { target: AddMealTarget | nul
       title={
         current
           ? formatMessage(t.planner.addDialog.title, {
-              meal: t.mealTypes[current.mealType].toLocaleLowerCase("en"),
-              day: formatDate(current.date, "dayShort"),
+              meal: lowercase(t.mealTypes[current.mealType], locale),
+              day: formatDate(current.date, "dayShort", locale),
             })
           : ""
       }
@@ -50,12 +51,12 @@ export function AddMealDialog({ target, onClose }: { target: AddMealTarget | nul
 }
 
 function AddMealContent({ target, onDone }: { target: AddMealTarget; onDone: () => void }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const toast = useToast();
   const { apply } = usePlanActions();
   const [servings, setServings] = useState(1);
-  const day = formatDate(target.date, "dayShort");
-  const meal = t.mealTypes[target.mealType].toLocaleLowerCase("en");
+  const day = formatDate(target.date, "dayShort", locale);
+  const meal = lowercase(t.mealTypes[target.mealType], locale);
 
   function added(name: string) {
     toast.show({ message: formatMessage(t.planner.addDialog.added, { name, meal, day }), tone: "success" });
@@ -113,7 +114,7 @@ function AddMealContent({ target, onDone }: { target: AddMealTarget; onDone: () 
 function CustomMealForm({ onSubmit }: {
   onSubmit: (content: { name: string; nutritionPerServing: { kcal: number; proteinG: number; carbsG: number | null; fatG: number | null } }) => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const c = t.planner.custom;
   const [draft, setDraft] = useState<CustomMealDraft>(emptyCustomMealDraft);
   const [errors, setErrors] = useState<CustomMealErrors>({});
@@ -124,7 +125,7 @@ function CustomMealForm({ onSubmit }: {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = parseCustomMeal(draft);
+    const result = parseCustomMeal(draft, locale);
     if (!result.ok) {
       setErrors(result.errors);
       focusFirstError(

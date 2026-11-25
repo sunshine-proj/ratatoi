@@ -2,13 +2,15 @@
 
 import { Suspense, type ComponentProps } from "react";
 import { usePathname } from "next/navigation";
+import { splitLocale } from "@/lib/i18n";
 import { NavList } from "./nav-list";
 
 type Props = Omit<ComponentProps<typeof NavList>, "pathname">;
 
 function PathAwareNavList(props: Props) {
+  // Nav items are locale-free paths: "/lt/planner" matches "/planner".
   const pathname = usePathname();
-  return <NavList {...props} pathname={pathname} />;
+  return <NavList {...props} pathname={pathname === null ? null : splitLocale(pathname).path} />;
 }
 
 /**

@@ -69,7 +69,19 @@ test("service worker registers and controls the page", async ({ page }) => {
   await page.goto("/");
   await waitForControllingWorker(page);
   const scriptURL = await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL);
-  expect(scriptURL).toMatch(/\/sw\.js$/);
+  // The worker URL carries the language whose core pages it precaches.
+  expect(scriptURL).toMatch(/\/sw\.js\?locale=en$/);
+});
+
+test("each language has its own manifest, so the installed app opens in that language", async ({ page, request }) => {
+  await page.goto("/lt");
+  const href = await page.locator('link[rel="manifest"]').getAttribute("href");
+  expect(href).toBe("/lt/manifest.webmanifest");
+  const manifest = (await (await request.get(href!)).json()) as Manifest & { lang: string };
+  expect(manifest.start_url).toBe("/lt");
+  expect(manifest.lang).toBe("lt");
+  await waitForControllingWorker(page);
+  expect(await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL)).toMatch(/\/sw\.js\?locale=lt$/);
 });
 
 test("sw.js is served uncached so updates roll out", async ({ request }) => {
@@ -118,6 +130,24 @@ test.describe("offline", () => {
     // Core pages are precached; an unvisited recipe page is not.
     await page.goto("/recipes/berry-whey-smoothie");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("You're offline");
+    await context.setOffline(false);
+  });
+
+  test("core pages of the chosen language open offline, never visited", async ({ page, context, browserName }) => {
+    test.skip(browserName === "firefox", "Offline emulation doesn't apply to service-worker fetches in Firefox");
+    await page.goto("/et");
+    await waitForControllingWorker(page);
+    // The Estonian worker may still be installing behind an earlier one; wait for it.
+    await expect
+      .poll(() => page.evaluate(() => navigator.serviceWorker.controller?.scriptURL ?? ""), { timeout: 15_000 })
+      .toMatch(/locale=et$/);
+    await page.waitForTimeout(500);
+
+    await context.setOffline(true);
+    await page.goto("/et/shopping-list");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Ostunimekiri");
+    await page.goto("/et/recipes/berry-whey-smoothie");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Oled võrguühenduseta");
     await context.setOffline(false);
   });
 });

@@ -20,7 +20,7 @@ This is a meal-planning tool, not medical advice.
 
 ## Project status
 
-**MVP complete (Phases 0–8); not yet deployed.** Users can set goals, browse 25 original recipes, plan a week with progress against their targets, and create a shopping list. Everything works offline and stays on their device, with export, import, and delete-everything in Settings → Account. Phase 8 added a privacy notice, security headers and CSP, a visual polish pass, Lighthouse tuning, and automated content and safety-copy reviews. Nutrition values come from USDA FoodData Central, and recipes use illustrations until licensed photos are added (decision 0003). **Before a public launch:** see [docs/launch-checklist.md](docs/launch-checklist.md) or run `npm run launch:check` (operator details, dietitian sign-off, deployment with real-device testing, and a screen-reader pass). See `ROADMAP.md` for progress and next phases.
+**MVP complete (Phases 0–8); not yet deployed.** Users can set goals, browse 25 original recipes, plan a week with progress against their targets, and create a shopping list. Everything works offline and stays on their device, with export, import, and delete-everything in Settings → Account. Phase 8 added a privacy notice, security headers and CSP, a visual polish pass, Lighthouse tuning, and automated content and safety-copy reviews. Nutrition values come from USDA FoodData Central, and recipes use illustrations until licensed photos are added (decision 0003). The whole app is available in English, Latvian, Lithuanian, and Estonian (V1). **Before a public launch:** see [docs/launch-checklist.md](docs/launch-checklist.md) or run `npm run launch:check` (operator details, dietitian sign-off, native-speaker review of the translations, deployment with real-device testing, and a screen-reader pass). See `ROADMAP.md` for progress and next phases.
 
 ## Tech stack
 
@@ -82,12 +82,14 @@ Until a hosted backend is configured, the MVP uses local persistence and guest m
 ## Application structure
 
 ```text
-app/                 Routes (App Router), manifest.ts, icon.svg, apple-icon.png
-  error.tsx, global-error.tsx, not-found.tsx, loading.tsx   Route boundaries
+app/                 App Router: icon.svg, apple-icon.png, global-error.tsx, globals.css
+  [locale]/          Root layout (html lang, messages), not-found, error,
+                     manifest.webmanifest (per language), missing/ (the 404 page)
+    (app)/           Every page, plus loading.tsx
 components/
   ui/                Base components: Button, Card, Tag, TextField/SelectField/Checkbox,
                      Dialog (native <dialog>, optional bottom-sheet), Tabs, Toast, Icon
-  layout/            App shell, navigation, page header, offline banner
+  layout/            App shell, navigation, language picker, page header, offline banner
   pwa/               Service worker registration
   onboarding/        Set-up wizard and summaries
   goals/             Goal type, targets, estimate, and Goals settings
@@ -102,7 +104,8 @@ components/
   storage/           Loading / unreadable-data gate shared by settings, plan, and list
   shopping/          Shopping list view, item rows, item fields, date-range picker
 lib/                 Domain logic, kept free of UI code
-  i18n/              Translation-ready UI strings (English; Lithuanian-ready)
+  i18n/              Locales and paths (index.ts), messages per language (messages/),
+                     server and client access (server.ts, client.tsx), formatting (format.ts)
   validation/        Shared Zod primitives (amounts, servings, dates, slugs)
   forms/             Numeric input parsing and field error codes
   nutrition/         Goal schema and target parsing (goal.ts), estimate (estimate.ts),
@@ -113,16 +116,17 @@ lib/                 Domain logic, kept free of UI code
   planner/           Plan schema, pure plan operations, saved plan document, custom-meal form
   shopping/          List schema, aggregation, list operations, formatting, date ranges
   dates.ts           Calendar-date helpers (weeks start Monday)
-  ingredients/       Ingredient schema, catalogue, alias index, word matching
+  ingredients/       Ingredient schema, catalogue, alias index, word matching, translations
   recipes/           Recipe schema, catalogue views, nutrition calculation,
-                     labels (tags.ts), filters and sorting, quantity formatting
+                     labels (tags.ts), filters and sorting, quantity formatting, translations
   navigation.ts      Route table and nav configuration
 data/ingredients.ts  Curated ingredient table (nutrition, allergens, aliases, aisle)
-data/recipes/        Seed recipes
+data/recipes/        Seed recipes (English, the source)
+data/translations/   Ingredient and recipe text in Latvian, Lithuanian, and Estonian
 assets/              Icon source artwork (SVG)
 config/operator.ts   Who runs the app (shown in the privacy notice)
 scripts/             Icon generation and the launch-readiness check
-proxy.ts             Returns a real 404 for unknown recipe slugs
+proxy.ts             Language routing and real 404s for unknown pages and recipes
 public/sw.js         Service worker
 public/icons/        Generated PWA icons
 public/images/       Licensed recipe images (none yet; illustrations for now)
@@ -144,9 +148,16 @@ Forms are hand-written with small helpers rather than a form library. Validation
 
 **Next.js keeps recently visited pages mounted.** With Cache Components, up to three routes stay alive (hidden with React `<Activity>`) with their state. Forms that edit saved data are keyed by that data, so they re-initialise if it changes elsewhere, and the onboarding wizard resets after a successful save. In e2e tests, prefer role queries (`getByRole`), which ignore hidden pages, over `getByLabel`/`getByText`.
 
-### Strings and locales
+### Languages
 
-UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages()`. To add Lithuanian, create `messages/lt.ts` typed as `Messages`, then add `"lt"` to `locales` in `lib/i18n/index.ts`. A missing key is a type error.
+The app is in **English, Latvian (`lv`), Lithuanian (`lt`), and Estonian (`et`)**: all interface text, the 25 recipes, the ingredient names, and the privacy notice. See [docs/translations.md](docs/translations.md) for conventions, review status, and how to add a language, and [decision 0004](docs/decisions/0004-language-routing.md) for the routing.
+
+- **Addresses:** English has no prefix (`/recipes`); the others do (`/lv/recipes`, `/lt/recipes`, `/et/recipes`). `proxy.ts` rewrites English pages to `/en/...` internally and redirects `/en/...` to the unprefixed address.
+- **Choosing a language:** the language picker is in every page's footer and in Settings → Preferences. It keeps you on the same page and remembers the choice in a small functional cookie (`pp-locale`). Without one, a first visit to an unprefixed page follows the browser's language.
+- **Text:** `lib/i18n/messages/<locale>.ts`, typed as `Messages`, so a missing key is a type error. Server Components use `await getI18n()`; Client Components use `useI18n()`. Links use `components/ui/link.tsx`, which adds the current prefix.
+- **Content:** recipes and ingredients are written in English (`data/`), with translations in `data/translations/<locale>/`. Tests fail if any recipe, step, note, or ingredient is missing.
+- **Formats:** numbers, dates, and plurals follow each language (`1 900`, `2,5`, Lithuanian `1 receptas / 3 receptai / 10 receptų`). Number fields accept a decimal comma; outside English a comma is always decimal.
+- **Your data stays the same in every language:** the plan and list store recipe and ingredient keys, so switching language translates generated shopping lines. Items you typed yourself stay as written. Saved exclusions match ingredient names in every language.
 
 ## Main routes
 
@@ -164,6 +175,8 @@ UI text lives in `lib/i18n/messages/en.ts`; components read it with `getMessages
 | `/settings/account` | What's saved on this device; download, restore, or delete it |
 | `/privacy` | Privacy notice |
 | `/offline` | Shown for pages that aren't available offline |
+
+Every route also exists under `/lv`, `/lt`, and `/et` (for example `/lt/planner`).
 
 ## Core domain concepts
 
@@ -185,7 +198,7 @@ Guest mode only; there is no account or server storage yet.
 - **Validation and versions:** every document has a `version` and is checked against its schema on every read. Older versions are upgraded by migrations (`migrations[n]` upgrades n → n+1) and saved in the new shape on the next write. Damaged data is never trusted: the UI explains and offers a reset. Data saved by a **newer** app version (e.g. another tab already updated) is never reset or overwritten: the UI asks for a reload instead. Writes never replace a document that can't be read. Failed writes (storage blocked or full) show an error and change nothing.
 - **Shared devices:** anyone using the same browser can see this data, and the app says so where it saves. **Settings → Account** shows what's stored and deletes everything from the device (it works even if the data can't be read).
 - **Export and import:** Settings → Account downloads everything as one JSON file (`lib/storage/backup.ts`) and can restore it in another browser. An imported file goes through the same schemas and migrations as a normal read, and replaces current data only after confirmation.
-- **Privacy notice:** `/privacy`, linked from every page's footer. No analytics, cookies, or third-party requests ([decision 0002](docs/decisions/0002-no-analytics-in-mvp.md)); `tests/e2e/security.spec.ts` fails if any page loads anything from another origin.
+- **Privacy notice:** `/privacy`, linked from every page's footer. No analytics, tracking cookies, or third-party requests ([decision 0002](docs/decisions/0002-no-analytics-in-mvp.md)); `tests/e2e/security.spec.ts` fails if any page loads anything from another origin. The only cookie is the optional language choice (`pp-locale`, the language code only), set when you pick a language and removed by "Delete everything".
 
 ### Suggested targets
 
@@ -237,7 +250,7 @@ The user always reviews and edits the numbers. Manual targets must be between 80
 
 **What works offline** (verified by `tests/e2e/pwa.spec.ts` and `tests/e2e/offline-edit.spec.ts`):
 
-- **Core pages open offline even if you never visited them:** Today, Plan, Recipes, Snacks, Shopping list, set-up, and every Settings page. The service worker precaches them at install, with the build assets their HTML references.
+- **Core pages open offline even if you never visited them:** Today, Plan, Recipes, Snacks, Shopping list, set-up, and every Settings page, in the language you're using. The page registers `/sw.js?locale=<code>`, and the worker precaches that language's core pages at install, with the build assets their HTML references. Choosing another language registers it again for that language.
 - **Everything you can edit works offline:** goals, preferences, the meal plan, and the shopping list are stored in the browser, so adding meals, changing servings, creating the list, and ticking items all work without a connection and are still there after reloading. There is no server, so there is nothing to sync (see [decision 0001](docs/decisions/0001-guest-first-no-account-sync-in-mvp.md)).
 - **Recipe pages** work offline once opened (network-first, so they're fresh when online). Up to 60 are kept, oldest first out. Unvisited recipe pages show a friendly `/offline` page. Recipes are original content, so caching them raises no licensing issue.
 - **Moving between pages** while offline works through Next.js's prefetched pages and `experimental.useOffline`. A full reload is served from the cache.
@@ -245,7 +258,7 @@ The user always reviews and edits the numbers. Manual targets must be between 80
 
 **Service worker** (`public/sw.js`, production builds only): pages are network-first with a cache fallback; hashed `/_next/static/` assets are cache-first; icons are stale-while-revalidate. It never caches non-GET requests, `/api/*`, other origins, or React Server Component and prefetch requests. Bump `VERSION` when caching rules or the precache list change; old caches are deleted when the new worker activates. Personal data is never in these caches: every page is the same public HTML for everyone.
 
-**Installable:** web app manifest with 192/512 px and maskable icons, theme colours, `display: standalone`, and shortcuts. Chrome's installability check passes in e2e. It hasn't been tested on real iOS or Android devices yet, and production must be served over HTTPS.
+**Installable:** a web app manifest per language (`/manifest.webmanifest`, `/lt/manifest.webmanifest`, …), so an app installed from a Lithuanian page opens in Lithuanian. Each has 192/512 px and maskable icons, theme colours, `display: standalone`, and shortcuts. Chrome's installability check passes in e2e. It hasn't been tested on real iOS or Android devices yet, and production must be served over HTTPS.
 
 To test locally, use a production build (`npm run build && npm run start`); the worker isn't registered in `npm run dev`.
 
@@ -270,7 +283,7 @@ Use only original, licensed, or explicitly permitted recipe content and photogra
 - **Derived, not typed in:** a recipe's allergens and its vegan/vegetarian/pescatarian suitability are computed from its ingredients, so they can't contradict the ingredient list.
 - **Nutrition** per serving is calculated from the ingredient table and stored explicitly in each recipe, labelled *estimated* with its source. `tests/unit/lib/recipe-data.test.ts` fails if a stored value drifts from the calculation. Per-100 g values come from USDA FoodData Central: SR Legacy, or Branded label data for skyr, quark, and light coconut milk. Each ingredient cites its FDC IDs, and the schema refuses nutrition without a source (`docs/nutrition-sources.md`). Carbohydrate is "by difference" and includes fibre, and cooking losses aren't modelled, so values stay labelled *estimated*.
 - **Labels** have stated thresholds, shown on each recipe page: *High protein* = at least 20% of energy from protein (the EU condition for the claim); *Under 200 kcal* (snacks) and *Under 450 kcal* (meals) per serving; *Quick* = 15 minutes or less in total; *Batch cook* = marked by the author. Nothing is labelled "low calorie".
-- **Photos:** none yet; launching with illustrations is decision 0003. `image` is `null` and a designed, decorative illustration (tinted by meal type) fills the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence` for any photo added later, and the source section of each recipe page shows them. Recipe text is English only for now.
+- **Photos:** none yet; launching with illustrations is decision 0003. `image` is `null` and a designed, decorative illustration (tinted by meal type) fills the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence` for any photo added later, and the source section of each recipe page shows them. Recipe text is translated into Latvian, Lithuanian, and Estonian (`data/translations/`).
 
 ### Searching and filtering
 
@@ -318,10 +331,11 @@ Run `npm run check` (and `npm run test:e2e` for UI flows) before handing off.
 - `ROADMAP.md` — development phases with checkbox task lists for MVP, V1, and later.
 - `README.md` — project overview and developer setup.
 - `docs/accessibility.md` — automated accessibility coverage and the manual screen-reader checklist.
-- `docs/decisions/` — decision records (no accounts in the MVP; no analytics in the MVP; launch with illustrations).
+- `docs/decisions/` — decision records (no accounts in the MVP; no analytics in the MVP; launch with illustrations; language routing).
 - `docs/nutrition-sources.md` — USDA FoodData Central source for every ingredient.
 - `docs/dietitian-review.md` — review pack for a registered dietitian (pending).
 - `docs/device-testing.md` — real-device install and offline checks (not yet run).
+- `docs/translations.md` — languages, translation conventions, and native-speaker review status.
 - `docs/content-review.md` — recipe, nutrition, and safety-copy review.
 - `docs/deployment.md`, `docs/performance.md`, `docs/launch-checklist.md` — going live.
 

@@ -17,7 +17,8 @@ import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
 import { toLocalIsoDate } from "@/lib/dates";
 import type { FieldError } from "@/lib/forms/number-field";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage, localePath } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { routes } from "@/lib/navigation";
 import {
   emptyProfileDraft,
@@ -76,7 +77,7 @@ export function OnboardingWizard() {
 }
 
 function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished: () => void }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const toast = useToast();
   const { update } = useSettings();
@@ -88,7 +89,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
   const [profileErrors, setProfileErrors] = useState<ProfileErrors>({});
   // Only the parsed profile is kept, in memory, so the estimate follows goal changes.
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [targets, setTargets] = useState<TargetsDraft>(saved?.goal ? targetsToDraft(saved.goal) : emptyTargetsDraft);
+  const [targets, setTargets] = useState<TargetsDraft>(saved?.goal ? targetsToDraft(saved.goal, locale) : emptyTargetsDraft);
   const [targetErrors, setTargetErrors] = useState<TargetsErrors>({});
   const [targetSource, setTargetSource] = useState<TargetSource>(saved?.goal?.targetSource ?? "manual");
   const [preferences, setPreferences] = useState<UserPreferences>(saved?.preferences ?? defaultPreferences);
@@ -121,7 +122,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
   }
 
   function submitProfile() {
-    const result = parseProfile(profileDraft);
+    const result = parseProfile(profileDraft, locale);
     if (!result.ok) {
       setProfileErrors(result.errors);
       setProfile(null);
@@ -142,7 +143,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
   }
 
   function submitTargets() {
-    const result = parseTargets(targets);
+    const result = parseTargets(targets, locale);
     if (!result.ok) {
       setTargetErrors(result.errors);
       focusFirstError(targetFieldIds("onboarding-targets"), result.errors);
@@ -153,7 +154,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
   }
 
   function save() {
-    const parsedTargets = parseTargets(targets);
+    const parsedTargets = parseTargets(targets, locale);
     if (!goalType) return goTo("goal");
     if (!parsedTargets.ok) return goTo("targets");
 
@@ -173,7 +174,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
     }
     toast.show({ message: t.onboarding.saved, tone: "success" });
     onFinished();
-    router.push(routes.today);
+    router.push(localePath(locale, routes.today));
   }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -186,7 +187,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
   }
 
   const stepCopy = t.onboarding.steps[step];
-  const parsedForSummary = parseTargets(targets);
+  const parsedForSummary = parseTargets(targets, locale);
 
   return (
     <div className="flex flex-col gap-6">
@@ -315,7 +316,7 @@ function Wizard({ saved, onFinished }: { saved: UserSettings | null; onFinished:
 }
 
 function Progress({ current, total }: { current: number; total: number }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const label = formatMessage(t.onboarding.stepOf, { current, total });
   return (
     <div className="flex flex-col gap-2">
@@ -343,7 +344,7 @@ function StepActions({ showBack, onBack, primary, primaryVariant, busy, extra }:
   busy: boolean;
   extra?: ReactNode;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
       {showBack ? (
@@ -364,7 +365,7 @@ function StepActions({ showBack, onBack, primary, primaryVariant, busy, extra }:
 }
 
 function SummaryRow({ title, onEdit, children }: { title: string; onEdit: () => void; children: ReactNode }) {
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     <Card as="section" className="flex items-start justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">

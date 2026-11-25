@@ -1,22 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
-import { defaultLocale, getMessages } from "@/lib/i18n";
+import { usePathname } from "next/navigation";
+import { splitLocale } from "@/lib/i18n";
+import { fatalErrorMessages } from "@/lib/i18n/messages/fatal-error";
 import "./globals.css";
 
 /**
  * Replaces the root layout when it fails, so it renders its own document
- * and cannot rely on the app shell, fonts, or providers.
+ * and cannot rely on the app shell, fonts, or providers. Its few strings
+ * come from a small per-locale table rather than the full catalogues.
  */
 export default function GlobalError({ error, retry }: { error: unknown; retry: () => void }) {
-  const t = getMessages();
+  const locale = splitLocale(usePathname() ?? "/").locale;
+  const t = { pages: { error: fatalErrorMessages[locale] } };
 
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
-    <html lang={defaultLocale}>
+    <html lang={locale}>
       <body className="flex min-h-dvh items-center justify-center bg-canvas p-6 text-ink">
         <title>{t.pages.error.title}</title>
         <main role="alert" className="flex max-w-md flex-col items-start gap-4">

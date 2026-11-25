@@ -7,7 +7,8 @@ The app has **not been deployed yet**. The product owner deploys it. This guide 
 - **HTTPS.** Required for installation and the service worker. HSTS is already sent.
 - **Node.js 24 or newer**, running `npm ci && npm run build && npm run start`, or a platform with native Next.js 16 support.
 - **No environment variables** are needed. There is no backend, database, or analytics.
-- `proxy.ts` (unknown recipe → real 404) runs in Next.js's Node.js proxy runtime; the host must support Next.js proxy/middleware.
+- `proxy.ts` runs on every page request in Next.js's Node.js proxy runtime, so the host must support Next.js proxy/middleware. It serves English pages from unprefixed addresses, sends people to their language, and returns real 404s (decision 0004).
+- **Caching:** a CDN may cache pages by URL, but not the proxy's language redirects (they send `Vary: Cookie, Accept-Language`). Don't strip the `pp-locale` cookie at the edge.
 
 ## Options
 

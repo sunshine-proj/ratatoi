@@ -5,8 +5,15 @@
  * EU-style decimal commas ("72,5") and grouped thousands ("1,900", "1 900")
  * work consistently across browsers and locales.
  *
+ * Separators follow the locale. English: "1,900" is a grouped thousand and
+ * any other comma is a decimal ("72,5"). Latvian, Lithuanian, Estonian: a
+ * comma is always the decimal separator ("1,25" is 1.25), and spaces group
+ * thousands ("1 900"). A dot is read as a decimal point everywhere.
+ *
  * Errors are returned as codes; the UI turns them into translated messages.
  */
+import type { Locale } from "@/lib/i18n";
+
 export type FieldError =
   | { code: "required" }
   | { code: "notANumber" }
@@ -20,6 +27,8 @@ export type NumberFieldOptions = {
   max: number;
   integer?: boolean;
   required?: boolean;
+  /** Defaults to English rules. */
+  locale?: Locale;
 };
 
 export type NumberFieldResult = { ok: true; value: number | null } | { ok: false; error: FieldError };
@@ -34,8 +43,9 @@ export function parseNumberField(raw: string, options: NumberFieldOptions): Numb
     return options.required ? { ok: false, error: { code: "required" } } : { ok: true, value: null };
   }
 
-  // "1,900" is a grouped thousand; any other comma is a decimal separator.
-  text = GROUPED_THOUSANDS.test(text) ? text.replace(/,/g, "") : text.replace(",", ".");
+  // English: "1,900" is a grouped thousand; any other comma is a decimal separator.
+  const englishGrouping = (options.locale ?? "en") === "en" && GROUPED_THOUSANDS.test(text);
+  text = englishGrouping ? text.replace(/,/g, "") : text.replace(",", ".");
 
   if (!PLAIN_NUMBER.test(text)) return { ok: false, error: { code: "notANumber" } };
 
@@ -47,7 +57,8 @@ export function parseNumberField(raw: string, options: NumberFieldOptions): Numb
   return { ok: true, value };
 }
 
-/** Show a stored number back in an input; null becomes an empty field. */
-export function numberToInput(value: number | null | undefined): string {
-  return value === null || value === undefined ? "" : String(value);
+/** Show a stored number back in an input; null becomes an empty field. Uses a decimal comma outside English. */
+export function numberToInput(value: number | null | undefined, locale: Locale = "en"): string {
+  if (value === null || value === undefined) return "";
+  return locale === "en" ? String(value) : String(value).replace(".", ",");
 }

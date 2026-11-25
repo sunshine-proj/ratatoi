@@ -1,7 +1,7 @@
 "use client";
 
 import { useToast } from "@/components/ui/toast";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import type { ShoppingList } from "@/lib/shopping/schema";
 import { useShoppingList } from "@/lib/shopping/use-shopping-list";
 
@@ -9,7 +9,7 @@ import { useShoppingList } from "@/lib/shopping/use-shopping-list";
 export function useShoppingActions() {
   const { state, update, reset } = useShoppingList();
   const toast = useToast();
-  const t = getMessages();
+  const { t } = useI18n();
 
   function apply(change: (list: ShoppingList) => ShoppingList): boolean {
     if (state.status === "invalid") {

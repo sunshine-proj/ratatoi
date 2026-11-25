@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n";
 import { parseNumberField, type FieldError } from "@/lib/forms/number-field";
 import { SHOPPING_NAME_MAX, shoppingCategories, shoppingUnits, type ShoppingCategory, type ShoppingUnit } from "./schema";
 
@@ -20,6 +21,7 @@ const isCategory = (value: string): value is ShoppingCategory => (shoppingCatego
 export function parseItemDraft(
   draft: ItemDraft,
   options: { requireName: boolean },
+  locale: Locale = "en",
 ): { ok: true; value: ParsedItem } | { ok: false; errors: ItemErrors } {
   const errors: ItemErrors = {};
   const name = draft.name.trim().replace(/\s+/g, " ");
@@ -27,7 +29,7 @@ export function parseItemDraft(
     if (name === "") errors.name = { code: "required" };
     else if (name.length > SHOPPING_NAME_MAX) errors.name = { code: "tooLong", max: SHOPPING_NAME_MAX };
   }
-  const quantity = parseNumberField(draft.quantity, { min: 0, max: 100_000 });
+  const quantity = parseNumberField(draft.quantity, { min: 0, max: 100_000, locale });
   if (!quantity.ok) errors.quantity = quantity.error;
   if (!quantity.ok || errors.name) return { ok: false, errors };
 

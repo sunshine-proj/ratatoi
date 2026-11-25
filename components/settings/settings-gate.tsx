@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { DocumentGate } from "@/components/storage/document-gate";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import type { UserSettings } from "@/lib/settings/settings";
 import { useSettings } from "@/lib/settings/use-settings";
 
@@ -12,7 +12,7 @@ export function SettingsGate({ children, loading }: {
   loading?: ReactNode;
 }) {
   const { state, reset } = useSettings();
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     <DocumentGate
       state={state}

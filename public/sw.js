@@ -10,7 +10,7 @@
  *     MAX_VISITED_PAGES, oldest first out.
  *   - Hashed build assets under /_next/static/ (cache-first; immutable).
  *   - Icons, images, manifest (stale-while-revalidate).
- *   - /offline, served for pages that were never cached.
+ *   - /offline (in the page's language), served for pages that were never cached.
  *
  * What it never touches:
  *   - Non-GET requests, cross-origin requests, /api/*
@@ -22,18 +22,39 @@
  * caches. Settings → Account deletes both. If authenticated, user-specific
  * pages are ever added, exclude them here and clear caches on sign-out.
  *
+ * Languages: the page registers this worker as /sw.js?locale=lt, and core
+ * pages are precached in that language (/lt, /lt/planner, …; English has
+ * no prefix). Choosing another language re-registers it with the new
+ * locale, which installs and precaches that language too.
+ *
  * Bump VERSION whenever the caching rules or the precache list change.
  */
-const VERSION = "v3";
+const VERSION = "v4";
 const PREFIX = "protein-plate-";
 const SHELL_CACHE = `${PREFIX}shell-${VERSION}`;
 const PAGES_CACHE = `${PREFIX}pages-${VERSION}`;
 const ASSETS_CACHE = `${PREFIX}assets-${VERSION}`;
 const CURRENT_CACHES = [SHELL_CACHE, PAGES_CACHE, ASSETS_CACHE];
-const OFFLINE_URL = "/offline";
 const MAX_VISITED_PAGES = 60;
 
-const CORE_PAGES = [
+const LOCALES = ["en", "lv", "lt", "et"];
+const PREFIXED_LOCALES = LOCALES.filter((locale) => locale !== "en");
+const requestedLocale = new URL(self.location.href).searchParams.get("locale");
+const LOCALE = LOCALES.includes(requestedLocale) ? requestedLocale : "en";
+
+/** "/planner" in a locale: "/lt/planner", or "/planner" for English. */
+function localePath(locale, path) {
+  if (locale === "en") return path;
+  return path === "/" ? `/${locale}` : `/${locale}${path}`;
+}
+
+/** The locale a path belongs to, from its prefix. */
+function localeOf(pathname) {
+  const first = pathname.split("/")[1];
+  return PREFIXED_LOCALES.includes(first) ? first : "en";
+}
+
+const CORE_PATHS = [
   "/",
   "/planner",
   "/recipes",
@@ -44,14 +65,19 @@ const CORE_PAGES = [
   "/settings/preferences",
   "/settings/account",
   "/privacy",
-  OFFLINE_URL,
+  "/offline",
 ];
-const CORE_FILES = ["/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
+/** Core pages in every language: any of them is kept in the shell cache once fetched. */
+const ALL_CORE_PAGES = new Set(LOCALES.flatMap((locale) => CORE_PATHS.map((path) => localePath(locale, path))));
+/** Precached at install: this worker's language only. */
+const CORE_PAGES = CORE_PATHS.map((path) => localePath(LOCALE, path));
+const CORE_FILES = [localePath(LOCALE, "/manifest.webmanifest"), "/icons/icon-192.png", "/icons/icon-512.png"];
 
 const STATIC_ASSET = /\/_next\/static\/[^"'\s)\\]+/g;
 
 function isCacheable(response) {
-  return response && response.ok && response.type === "basic";
+  // Never store a redirect's target under the original URL.
+  return response && response.ok && response.type === "basic" && !response.redirected;
 }
 
 /** Fetch the core pages, then every build asset their HTML references. */
@@ -62,6 +88,7 @@ async function precache() {
 
   const assetUrls = new Set();
   for (const path of CORE_PAGES) {
+    // Plain fetches are never redirected by language (see proxy.ts).
     const response = await fetch(path, { cache: "reload" });
     if (!isCacheable(response)) throw new Error(`Precache failed for ${path}`);
     const html = await response.clone().text();
@@ -113,7 +140,7 @@ function pageKey(url) {
 }
 
 async function networkFirstPage(request, url) {
-  const isCore = CORE_PAGES.includes(url.pathname);
+  const isCore = ALL_CORE_PAGES.has(url.pathname);
   try {
     const response = await fetch(request);
     if (isCacheable(response)) {
@@ -125,7 +152,8 @@ async function networkFirstPage(request, url) {
     }
     return response;
   } catch {
-    const cached = (await caches.match(pageKey(url))) ?? (await caches.match(OFFLINE_URL));
+    const offline = (locale) => caches.match(new URL(localePath(locale, "/offline"), url.origin).href);
+    const cached = (await caches.match(pageKey(url))) ?? (await offline(localeOf(url.pathname))) ?? (await offline(LOCALE)) ?? (await offline("en"));
     return cached ?? Response.error();
   }
 }
@@ -177,7 +205,7 @@ self.addEventListener("fetch", (event) => {
   if (
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/images/") ||
-    url.pathname === "/manifest.webmanifest" ||
+    url.pathname.endsWith("/manifest.webmanifest") ||
     /\.(?:png|svg|ico|webp|avif|jpg|jpeg|woff2)$/.test(url.pathname)
   ) {
     event.respondWith(staleWhileRevalidate(request, event));

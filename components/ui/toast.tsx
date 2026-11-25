@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { Icon, type IconName } from "./icon";
 
 export type ToastTone = "info" | "success" | "error";
@@ -80,7 +80,7 @@ export function useToast(): ToastApi {
 }
 
 function Toaster({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: number) => void }) {
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     // The live region is always mounted so screen readers announce new toasts.
     <section

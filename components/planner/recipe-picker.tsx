@@ -4,7 +4,8 @@ import { useId, useState, type ReactNode } from "react";
 import { Checkbox } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { RecipeImage } from "@/components/recipes/recipe-image";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber } from "@/lib/i18n/format";
 import type { RecipeSummary } from "@/lib/recipes/catalogue";
 import { emptyFilters, filterRecipes, hasPreferenceExclusions, withPreferences } from "@/lib/recipes/filter";
@@ -23,7 +24,7 @@ export function RecipePicker({ mealType, excludeSlug, action, detail }: {
   /** Optional extra line per recipe, e.g. the day total after a swap. */
   detail?: (recipe: RecipeSummary) => ReactNode;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const { all } = useRecipeLookup();
   const { state } = useSettings();
   const preferences = state.status === "ready" ? state.value.preferences : null;
@@ -33,7 +34,7 @@ export function RecipePicker({ mealType, excludeSlug, action, detail }: {
 
   const showPreferences = hasPreferenceExclusions(preferences);
   const filters = { ...emptyFilters, query, mealType };
-  const results = filterRecipes(all, applyPreferences ? withPreferences(filters, preferences) : filters, "name").filter(
+  const results = filterRecipes(all, applyPreferences ? withPreferences(filters, preferences) : filters, "name", locale).filter(
     (recipe) => recipe.slug !== excludeSlug,
   );
 
@@ -80,8 +81,8 @@ export function RecipePicker({ mealType, excludeSlug, action, detail }: {
                 <span className="font-semibold">{recipe.name}</span>
                 <span className="text-sm text-ink-muted">
                   {formatMessage(t.planner.mealNutrition, {
-                    kcal: formatNumber(recipe.nutritionPerServing.kcal),
-                    protein: formatNumber(recipe.nutritionPerServing.proteinG),
+                    kcal: formatNumber(recipe.nutritionPerServing.kcal, locale),
+                    protein: formatNumber(recipe.nutritionPerServing.proteinG, locale),
                   })}
                   {" · "}
                   {formatMessage(t.recipes.card.minutes, { min: recipe.totalMinutes })}

@@ -3,7 +3,7 @@
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { TextField } from "@/components/ui/field";
 import { fieldErrorText } from "@/components/forms/field-error";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import {
   activityLevels,
   sexOptions,
@@ -26,7 +26,7 @@ export function ProfileFields({ idPrefix, draft, errors, onChange }: {
   errors: ProfileErrors;
   onChange: (draft: ProfileDraft) => void;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const set = <K extends ProfileField>(field: K, value: ProfileDraft[K]) => onChange({ ...draft, [field]: value });
   const common = { autoComplete: "off" } as const;
 

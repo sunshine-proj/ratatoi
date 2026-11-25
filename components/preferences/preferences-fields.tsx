@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { FieldMessages, SelectField } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import {
   addExcludedIngredient,
   allergens,
@@ -29,7 +30,7 @@ export function PreferencesFields({ idPrefix, value, onChange }: {
   value: UserPreferences;
   onChange: (value: UserPreferences) => void;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const set = <K extends keyof UserPreferences>(key: K, next: UserPreferences[K]) => onChange({ ...value, [key]: next });
 
   return (
@@ -134,7 +135,7 @@ export function ExcludedIngredientsField({ id, value, onChange, label, hint }: {
   label?: string;
   hint?: string;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | undefined>();
   const [announcement, setAnnouncement] = useState("");

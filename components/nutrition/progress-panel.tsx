@@ -1,8 +1,11 @@
-import Link from "next/link";
+"use client";
+
+import { Link } from "@/components/ui/link";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
-import { formatMessage, getMessages } from "@/lib/i18n";
-import { formatNumber, formatPlural } from "@/lib/i18n/format";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
+import { formatNumber, formatPlural, lowercase } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import type { DailyTargets } from "@/lib/nutrition/goal";
 import { dayProgress, type MetricProgress } from "@/lib/nutrition/progress";
@@ -27,7 +30,7 @@ export function ProgressPanel({ totals, targets, headingId, heading, headingLeve
   heading: string;
   headingLevel?: 2 | 3;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const p = t.progress;
   const Heading = headingLevel === 2 ? "h2" : "h3";
 
@@ -46,7 +49,7 @@ export function ProgressPanel({ totals, targets, headingId, heading, headingLeve
       ) : (
         <div className="flex flex-col gap-2">
           <p className="font-medium">
-            {formatMessage(t.planner.dayTotals, { kcal: formatNumber(totals.kcal), protein: formatNumber(totals.proteinG) })}
+            {formatMessage(t.planner.dayTotals, { kcal: formatNumber(totals.kcal, locale), protein: formatNumber(totals.proteinG, locale) })}
           </p>
           <p className="text-sm text-ink-muted">
             {p.noTargets}{" "}
@@ -60,7 +63,7 @@ export function ProgressPanel({ totals, targets, headingId, heading, headingLeve
       {totals.unknownMeals > 0 ? (
         <p className="flex items-start gap-2 text-sm text-ink-muted">
           <Icon name="info" className="mt-0.5 size-4 shrink-0" />
-          {formatPlural(t.planner.unknownMeals, totals.unknownMeals)}
+          {formatPlural(t.planner.unknownMeals, totals.unknownMeals, locale)}
         </p>
       ) : null}
       {targets ? <p className="text-xs text-ink-muted">{p.note}</p> : null}
@@ -69,7 +72,7 @@ export function ProgressPanel({ totals, targets, headingId, heading, headingLeve
 }
 
 function ProgressRow({ progress }: { progress: MetricProgress }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const p = t.progress;
   const { label, unit } = p.metrics[progress.metric];
 
@@ -77,15 +80,15 @@ function ProgressRow({ progress }: { progress: MetricProgress }) {
     return (
       <li className="flex flex-col gap-1">
         <span className="font-medium">{label}</span>
-        <span className="text-sm text-ink-muted">{formatMessage(p.unknown, { metric: label.toLocaleLowerCase("en") })}</span>
+        <span className="text-sm text-ink-muted">{formatMessage(p.unknown, { metric: lowercase(label, locale) })}</span>
       </li>
     );
   }
 
   const status =
     progress.displayRemaining >= 0
-      ? formatMessage(p.remaining, { value: formatNumber(progress.displayRemaining), unit })
-      : formatMessage(p.above, { value: formatNumber(-progress.displayRemaining), unit });
+      ? formatMessage(p.remaining, { value: formatNumber(progress.displayRemaining, locale), unit })
+      : formatMessage(p.above, { value: formatNumber(-progress.displayRemaining, locale), unit });
   const fill = Math.min(1, progress.ratio ?? 0) * 100;
 
   return (
@@ -94,8 +97,8 @@ function ProgressRow({ progress }: { progress: MetricProgress }) {
         <span className="font-medium">{label}</span>
         <span className="text-sm">
           {formatMessage(p.plannedOf, {
-            planned: formatNumber(progress.displayPlanned),
-            target: formatNumber(progress.target),
+            planned: formatNumber(progress.displayPlanned, locale),
+            target: formatNumber(progress.target, locale),
             unit,
           })}
         </span>

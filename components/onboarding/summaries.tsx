@@ -1,32 +1,35 @@
+"use client";
+
 import { Tag } from "@/components/ui/tag";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber } from "@/lib/i18n/format";
 import type { DailyTargets, TargetSource } from "@/lib/nutrition/goal";
 import type { UserPreferences } from "@/lib/preferences/preferences";
 
 export function TargetsSummary({ targets, source }: { targets: DailyTargets; source?: TargetSource }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   return (
     <div className="flex flex-col gap-2">
       <ul className="flex flex-wrap gap-2" aria-label={t.targets.legend}>
         <li>
           <Tag tone="energy">
-            {formatMessage(t.targets.summaryCalories, { kcal: formatNumber(targets.dailyCalorieTargetKcal) })}
+            {formatMessage(t.targets.summaryCalories, { kcal: formatNumber(targets.dailyCalorieTargetKcal, locale) })}
           </Tag>
         </li>
         <li>
           <Tag tone="protein">
-            {formatMessage(t.targets.summaryProtein, { g: formatNumber(targets.dailyProteinTargetG) })}
+            {formatMessage(t.targets.summaryProtein, { g: formatNumber(targets.dailyProteinTargetG, locale) })}
           </Tag>
         </li>
         {targets.dailyCarbsTargetG !== null ? (
           <li>
-            <Tag>{formatMessage(t.targets.summaryCarbs, { g: formatNumber(targets.dailyCarbsTargetG) })}</Tag>
+            <Tag>{formatMessage(t.targets.summaryCarbs, { g: formatNumber(targets.dailyCarbsTargetG, locale) })}</Tag>
           </li>
         ) : null}
         {targets.dailyFatTargetG !== null ? (
           <li>
-            <Tag>{formatMessage(t.targets.summaryFat, { g: formatNumber(targets.dailyFatTargetG) })}</Tag>
+            <Tag>{formatMessage(t.targets.summaryFat, { g: formatNumber(targets.dailyFatTargetG, locale) })}</Tag>
           </li>
         ) : null}
       </ul>
@@ -40,7 +43,7 @@ export function TargetsSummary({ targets, source }: { targets: DailyTargets; sou
 }
 
 export function PreferencesSummary({ preferences }: { preferences: UserPreferences }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const list = (items: readonly string[]) => (items.length ? items.join(", ") : t.common.none);
 
   const rows: Array<[string, string]> = [

@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { ingredientData } from "@/data/ingredients";
+import { getIngredientTranslation, ingredientTranslations } from "./translations";
+import type { Locale, PluralForms } from "@/lib/i18n";
 import { ingredientSchema, type Ingredient } from "./schema";
 
 /**
@@ -51,10 +53,30 @@ export const ingredients: readonly Ingredient[] = z.array(ingredientSchema).pars
 const byKey = new Map(ingredients.map((ingredient) => [ingredient.key, ingredient]));
 if (byKey.size !== ingredients.length) throw new Error("Duplicate ingredient keys in data/ingredients.ts");
 
+/**
+ * Every name and alias an ingredient has, in every language: English first,
+ * then Latvian, Lithuanian, Estonian. Matching uses all of them, so saved
+ * exclusions and your own list items keep working after switching language.
+ */
+export function allIngredientNames(ingredient: Ingredient): string[] {
+  const names = [ingredient.name, ...ingredient.aliases];
+  for (const translation of Object.values(ingredientTranslations)) {
+    const text = translation.ingredients[ingredient.key];
+    if (text) names.push(text.name, ...(text.aliases ?? []));
+  }
+  return [...new Set(names)];
+}
+
+/** An ingredient's name and aliases in one language (empty for English, whose names are on the ingredient). */
+export function ingredientSearchNames(ingredient: Ingredient, locale: Locale): string[] {
+  const text = getIngredientTranslation(locale)?.ingredients[ingredient.key];
+  return text ? [text.name, ...(text.aliases ?? [])] : [];
+}
+
 /** Every name and alias (normalised, singular) → canonical key. */
 const aliasIndex = new Map<string, string>();
 for (const ingredient of ingredients) {
-  for (const name of [ingredient.name, ...ingredient.aliases]) {
+  for (const name of allIngredientNames(ingredient)) {
     const normalized = tokens(name).join(" ");
     const existing = aliasIndex.get(normalized);
     if (existing && existing !== ingredient.key) {
@@ -72,6 +94,36 @@ export function requireIngredient(key: string): Ingredient {
   const ingredient = byKey.get(key);
   if (!ingredient) throw new Error(`Unknown ingredient "${key}"`);
   return ingredient;
+}
+
+/** How an ingredient is named in one language. */
+export type LocalizedIngredientName = {
+  name: string;
+  /** English only: the name for a single piece ("Lemon"). */
+  singularName?: string;
+  /** Counting word for pieces ("slice/slices", "skiltelė/skiltelės"). */
+  pieceName?: PluralForms;
+};
+
+/**
+ * An ingredient's display name in a locale. Outside English, pieces are
+ * always counted with a word ("2 vnt."), because Baltic nouns change form
+ * with the number and a bare "2 Citrinos" would often be ungrammatical.
+ * Falls back to English if a translation is missing.
+ */
+export function localizedIngredientName(ingredient: Ingredient, locale: Locale): LocalizedIngredientName {
+  const translation = getIngredientTranslation(locale);
+  const text = translation?.ingredients[ingredient.key];
+  if (!translation || !text) {
+    return { name: ingredient.name, singularName: ingredient.singularName, pieceName: ingredient.pieceName };
+  }
+  return { name: text.name, pieceName: text.pieceName ?? translation.pieces };
+}
+
+/** `localizedIngredientName` by key; undefined for unknown keys. */
+export function getLocalizedIngredientName(key: string, locale: Locale): LocalizedIngredientName | undefined {
+  const ingredient = byKey.get(key);
+  return ingredient ? localizedIngredientName(ingredient, locale) : undefined;
 }
 
 /** Resolve a free-text name ("Greek yogurt", "tomatoes") to a canonical key, if curated. */

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useState } from "react";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,8 +9,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { Checkbox, SelectField } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { parseNumberField } from "@/lib/forms/number-field";
-import { formatMessage, getMessages } from "@/lib/i18n";
-import { formatNumber, formatPlural } from "@/lib/i18n/format";
+import { formatMessage, type Locale } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
+import { formatNumber, formatPlural, lowercase } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import type { UserPreferences } from "@/lib/preferences/preferences";
 import type { RecipeSummary } from "@/lib/recipes/catalogue";
@@ -31,9 +32,9 @@ import { emptyFilterDraft, RecipeFilterFields, type FilterDraft } from "./recipe
 
 const LIMITS = { protein: { min: 0, max: 200 }, calories: { min: 0, max: 3000 } };
 
-function parseDraft(draft: FilterDraft) {
-  const protein = parseNumberField(draft.proteinMin, { ...LIMITS.protein, integer: true });
-  const calories = parseNumberField(draft.caloriesMax, { ...LIMITS.calories, integer: true });
+function parseDraft(draft: FilterDraft, locale: Locale) {
+  const protein = parseNumberField(draft.proteinMin, { ...LIMITS.protein, integer: true, locale });
+  const calories = parseNumberField(draft.caloriesMax, { ...LIMITS.calories, integer: true, locale });
   return {
     errors: { proteinMin: protein.ok ? undefined : protein.error, caloriesMax: calories.ok ? undefined : calories.error },
     // Invalid numbers are ignored (and flagged) rather than hiding everything.
@@ -43,7 +44,7 @@ function parseDraft(draft: FilterDraft) {
 }
 
 export function RecipeBrowser({ recipes, mode }: { recipes: RecipeSummary[]; mode: "all" | "snacks" }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const { state } = useSettings();
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState<FilterDraft>(emptyFilterDraft);
@@ -53,7 +54,7 @@ export function RecipeBrowser({ recipes, mode }: { recipes: RecipeSummary[]; mod
 
   const preferences: UserPreferences | null = state.status === "ready" ? state.value.preferences : null;
   const showPreferences = hasPreferenceExclusions(preferences);
-  const parsed = parseDraft(draft);
+  const parsed = parseDraft(draft, locale);
 
   const filters: RecipeFilters = {
     ...emptyFilters,
@@ -67,7 +68,7 @@ export function RecipeBrowser({ recipes, mode }: { recipes: RecipeSummary[]; mod
     excludeIngredients: draft.excludeIngredients,
   };
   const effective = applyPreferences ? withPreferences(filters, preferences) : filters;
-  const results = filterRecipes(recipes, effective, sort);
+  const results = filterRecipes(recipes, effective, sort, locale);
   const activeCount = countActiveFilters({ ...filters, mealType: mode === "snacks" ? null : filters.mealType });
   const loading = state.status === "loading";
 
@@ -145,7 +146,7 @@ export function RecipeBrowser({ recipes, mode }: { recipes: RecipeSummary[]; mod
             {t.recipes.resultsHeading}
           </h2>
           <p role="status" aria-live="polite" className="text-sm font-medium text-ink-muted">
-            {loading ? t.recipes.loading : formatPlural(t.recipes.resultCount, results.length)}
+            {loading ? t.recipes.loading : formatPlural(t.recipes.resultCount, results.length, locale)}
           </p>
 
           {loading ? (
@@ -197,7 +198,7 @@ export function RecipeBrowser({ recipes, mode }: { recipes: RecipeSummary[]; mod
         className="lg:hidden"
         footer={
           <Button className="w-full" onClick={() => setFiltersOpen(false)}>
-            {formatPlural(t.recipes.showResults, results.length)}
+            {formatPlural(t.recipes.showResults, results.length, locale)}
           </Button>
         }
       >
@@ -208,7 +209,7 @@ export function RecipeBrowser({ recipes, mode }: { recipes: RecipeSummary[]; mod
 }
 
 function SnackPresets({ draft, onChange }: { draft: FilterDraft; onChange: (draft: FilterDraft) => void }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const selected =
     draft.proteinMin === "" && draft.caloriesMax === ""
       ? "all"
@@ -238,8 +239,8 @@ function SnackPresets({ draft, onChange }: { draft: FilterDraft; onChange: (draf
         ...snackPresets.map((preset) => ({
           value: preset.id,
           label: formatMessage(t.snacks.preset, {
-            kcal: formatNumber(preset.caloriesMaxKcal),
-            g: formatNumber(preset.proteinMinG),
+            kcal: formatNumber(preset.caloriesMaxKcal, locale),
+            g: formatNumber(preset.proteinMinG, locale),
           }),
         })),
       ]}
@@ -252,7 +253,7 @@ function PreferencesNotice({ preferences, apply, onApplyChange }: {
   apply: boolean;
   onApplyChange: (apply: boolean) => void;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const items = [
     ...preferences.dietaryPatterns.map((pattern) => t.preferences.patterns[pattern]),
     ...preferences.allergens.map((allergen) => t.preferences.allergens[allergen]),
@@ -284,8 +285,8 @@ function ActiveFilters({ draft, mode, onChange, onClear }: {
   onChange: (draft: FilterDraft) => void;
   onClear: () => void;
 }) {
-  const t = getMessages();
-  const parsed = parseDraft(draft);
+  const { t, locale } = useI18n();
+  const parsed = parseDraft(draft, locale);
   const chips: { key: string; label: string; remove: () => FilterDraft }[] = [];
 
   if (mode === "all" && draft.mealType) {
@@ -294,14 +295,14 @@ function ActiveFilters({ draft, mode, onChange, onClear }: {
   if (parsed.proteinMinG !== null) {
     chips.push({
       key: "protein",
-      label: formatMessage(t.recipes.chipProtein, { g: formatNumber(parsed.proteinMinG) }),
+      label: formatMessage(t.recipes.chipProtein, { g: formatNumber(parsed.proteinMinG, locale) }),
       remove: () => ({ ...draft, proteinMin: "" }),
     });
   }
   if (parsed.caloriesMaxKcal !== null) {
     chips.push({
       key: "calories",
-      label: formatMessage(t.recipes.chipCalories, { kcal: formatNumber(parsed.caloriesMaxKcal) }),
+      label: formatMessage(t.recipes.chipCalories, { kcal: formatNumber(parsed.caloriesMaxKcal, locale) }),
       remove: () => ({ ...draft, caloriesMax: "" }),
     });
   }
@@ -322,7 +323,7 @@ function ActiveFilters({ draft, mode, onChange, onClear }: {
   for (const allergen of draft.excludeAllergens) {
     chips.push({
       key: `allergen-${allergen}`,
-      label: formatMessage(t.recipes.chipWithout, { name: t.preferences.allergens[allergen].toLocaleLowerCase("en") }),
+      label: formatMessage(t.recipes.chipWithout, { name: lowercase(t.preferences.allergens[allergen], locale) }),
       remove: () => ({ ...draft, excludeAllergens: draft.excludeAllergens.filter((a) => a !== allergen) }),
     });
   }

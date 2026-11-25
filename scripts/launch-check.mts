@@ -41,6 +41,13 @@ const checks: Check[] = [
     fix: "Have a registered dietitian complete docs/dietitian-review.md and set its status to Approved.",
   },
   {
+    name: "Translations reviewed by native speakers (lv, lt, et)",
+    ok: ["Latvian", "Lithuanian", "Estonian"].every((language) =>
+      new RegExp(`\\| ${language} \\([a-z]{2}\\)[^\\n]*\\| Approved \\|`).test(read("docs/translations.md")),
+    ),
+    fix: "Have each language reviewed (docs/translations.md) and set its status to Approved.",
+  },
+  {
     name: "Installed and tested on real devices over HTTPS",
     ok: /\| (Android|iPhone|iOS)[^|]*\|[^|]*\| (Pass|Passed)/i.test(read("docs/device-testing.md")),
     fix: "Deploy over HTTPS, then record install/offline results in docs/device-testing.md.",

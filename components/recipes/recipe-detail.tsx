@@ -1,8 +1,9 @@
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { Tag } from "@/components/ui/tag";
-import { formatMessage, getMessages, type Messages } from "@/lib/i18n";
+import { formatMessage, type Messages } from "@/lib/i18n";
+import { getI18n } from "@/lib/i18n/server";
 import { formatNumber, formatPlural } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import type { RecipeDetail as RecipeDetailData } from "@/lib/recipes/catalogue";
@@ -34,8 +35,8 @@ function tagRule(t: Messages, tag: RecipeTag): string {
   }
 }
 
-export function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
-  const t = getMessages();
+export async function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
+  const { t, locale } = await getI18n();
   const d = t.recipes.detail;
   const n = recipe.nutritionPerServing;
   const list = (items: string[]) => items.join(", ");
@@ -89,7 +90,7 @@ export function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
               <dt className="sr-only">{d.servingsLabel}</dt>
               <dd className="flex items-center gap-1.5 font-semibold">
                 <Icon name="servings" className="size-5" />
-                {formatPlural(d.servings, recipe.servings)}
+                {formatPlural(d.servings, recipe.servings, locale)}
               </dd>
             </div>
           </dl>
@@ -107,10 +108,10 @@ export function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
         </div>
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: d.protein, value: `${formatNumber(n.proteinG)} ${d.gramsUnit}`, tone: "bg-protein-bg text-protein-fg" },
-            { label: d.energy, value: `${formatNumber(n.kcal)} ${d.kcalUnit}`, tone: "bg-energy-bg text-energy-fg" },
-            { label: d.carbs, value: `${formatNumber(n.carbsG)} ${d.gramsUnit}`, tone: "bg-surface-muted text-ink" },
-            { label: d.fat, value: `${formatNumber(n.fatG)} ${d.gramsUnit}`, tone: "bg-surface-muted text-ink" },
+            { label: d.protein, value: `${formatNumber(n.proteinG, locale)} ${d.gramsUnit}`, tone: "bg-protein-bg text-protein-fg" },
+            { label: d.energy, value: `${formatNumber(n.kcal, locale)} ${d.kcalUnit}`, tone: "bg-energy-bg text-energy-fg" },
+            { label: d.carbs, value: `${formatNumber(n.carbsG, locale)} ${d.gramsUnit}`, tone: "bg-surface-muted text-ink" },
+            { label: d.fat, value: `${formatNumber(n.fatG, locale)} ${d.gramsUnit}`, tone: "bg-surface-muted text-ink" },
           ].map((item) => (
             <div key={item.label} className={`rounded-control px-4 py-3 ${item.tone}`}>
               <dt className="text-sm">{item.label}</dt>
@@ -129,7 +130,7 @@ export function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
             <h2 id="ingredients-title" className="text-2xl font-semibold">
               {d.ingredients}
             </h2>
-            <p className="text-sm text-ink-muted">{formatPlural(d.ingredientsFor, recipe.servings)}</p>
+            <p className="text-sm text-ink-muted">{formatPlural(d.ingredientsFor, recipe.servings, locale)}</p>
           </div>
           <ul className="divide-y divide-line rounded-card border border-line bg-surface">
             {recipe.ingredients.map((line) => (

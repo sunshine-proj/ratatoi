@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber, formatPlural } from "@/lib/i18n/format";
 import { usePlan } from "@/lib/planner/use-plan";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -25,7 +26,7 @@ import type { DocumentState } from "@/lib/storage/local-document";
  * when saved data can't be read, so it doubles as a recovery path.
  */
 export function AccountSettings() {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const a = t.account;
   const toast = useToast();
   const settings = useSettings().state;
@@ -90,8 +91,8 @@ export function AccountSettings() {
 
   const rows = [
     { label: a.goals, value: describe(settings, () => a.goalsSet) },
-    { label: a.plan, value: describe(plan, (p) => formatPlural(a.planCount, p.meals.length)) },
-    { label: a.list, value: describe(list, (l) => formatPlural(a.listCount, l.items.length)) },
+    { label: a.plan, value: describe(plan, (p) => formatPlural(a.planCount, p.meals.length, locale)) },
+    { label: a.list, value: describe(list, (l) => formatPlural(a.listCount, l.items.length, locale)) },
   ];
   const hasData = [settings, plan, list].some((state) => state.status === "ready" || state.status === "invalid");
 
@@ -116,7 +117,7 @@ export function AccountSettings() {
             </dl>
             {hasData ? (
               <p className="text-sm text-ink-muted">
-                {formatMessage(a.size, { kb: formatNumber(Math.max(0.1, storedBytes() / 1024), undefined, 1) })}
+                {formatMessage(a.size, { kb: formatNumber(Math.max(0.1, storedBytes() / 1024), locale, 1) })}
               </p>
             ) : null}
           </>

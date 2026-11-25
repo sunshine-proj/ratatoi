@@ -3,7 +3,7 @@
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { fieldErrorText } from "@/components/forms/field-error";
 import type { FieldError } from "@/lib/forms/number-field";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { goalTypes, type GoalType } from "@/lib/nutrition/goal";
 
 export function GoalTypeField({ id, value, onChange, error, hideLegend }: {
@@ -13,7 +13,7 @@ export function GoalTypeField({ id, value, onChange, error, hideLegend }: {
   error?: FieldError;
   hideLegend?: boolean;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     <ChoiceGroup
       id={id}

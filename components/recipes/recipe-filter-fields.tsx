@@ -5,7 +5,8 @@ import { ChoiceGroup } from "@/components/ui/choice-group";
 import { SelectField, TextField } from "@/components/ui/field";
 import { fieldErrorText } from "@/components/forms/field-error";
 import type { FieldError } from "@/lib/forms/number-field";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { allergens, dietaryPatterns, toggleInList, type Allergen, type DietaryPattern } from "@/lib/preferences/preferences";
 import { timeFilterOptions } from "@/lib/recipes/presets";
 import { mealTypes, type MealType } from "@/lib/recipes/schema";
@@ -37,7 +38,7 @@ export function RecipeFilterFields({ idPrefix, draft, errors, onChange, showMeal
   onChange: (draft: FilterDraft) => void;
   showMealType: boolean;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const set = <K extends keyof FilterDraft>(key: K, value: FilterDraft[K]) => onChange({ ...draft, [key]: value });
 
   return (

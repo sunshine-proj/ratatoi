@@ -30,6 +30,8 @@ function recipe(overrides: Partial<RecipeSummary> & { slug: string }): RecipeSum
     tags: [],
     ingredientNames: [],
     ...overrides,
+    // Search uses the same names unless a test says otherwise.
+    searchNames: overrides.searchNames ?? overrides.ingredientNames ?? [],
   };
 }
 
@@ -203,14 +205,14 @@ describe("saved preferences", () => {
 
 describe("real catalogue", () => {
   it("excluding milk removes every dairy recipe", () => {
-    const results = filterRecipes(getRecipeSummaries(), { ...emptyFilters, excludeAllergens: ["milk"] });
+    const results = filterRecipes(getRecipeSummaries("en"), { ...emptyFilters, excludeAllergens: ["milk"] });
     expect(results.length).toBeGreaterThan(0);
     for (const r of results) expect(r.allergens).not.toContain("milk");
     expect(results.map((r) => r.slug)).not.toContain("chocolate-skyr-pot");
   });
 
   it("finds recipes by an ingredient alias", () => {
-    const results = filterRecipes(getRecipeSummaries(), { ...emptyFilters, query: "shrimp" });
+    const results = filterRecipes(getRecipeSummaries("en"), { ...emptyFilters, query: "shrimp" });
     expect(results.map((r) => r.slug)).toEqual(["garlic-prawn-courgette-pasta"]);
   });
 });

@@ -14,6 +14,10 @@
 | Images are licensed | ✅ No photos: every recipe shows a designed illustration owned by the project, and says so. Launching without photos is decision 0003. The schema requires alt text, attribution, and licence for any photo added later. | Schema; data test. |
 | Nutrition values from an authoritative database | ✅ Every ingredient with nutrition cites USDA FoodData Central (SR Legacy; Branded label data for skyr, quark, and light coconut milk). Recipe values were recalculated from them. Full table: `docs/nutrition-sources.md`. | The schema requires a source; `tests/unit/lib/recipe-data.test.ts`. |
 
+## Translations
+
+The Latvian, Lithuanian, and Estonian interface text and recipes were drafted by an AI assistant and are **pending native-speaker review** (`docs/translations.md`). Every language has every key, placeholder, recipe step, and note (`tests/unit/i18n/`). The safety-copy test below checks only the English wording; the reviewers check the rest.
+
 ## Safety copy
 
 Reviewed by reading all user-facing text, then encoded as `tests/unit/content/safety-copy.test.ts`, which fails on:

@@ -228,7 +228,7 @@ describe("PreferencesSettings", () => {
   });
 });
 
-const TodayOverview = () => <TodayDashboard recipes={getRecipeSummaries()} />;
+const TodayOverview = () => <TodayDashboard recipes={getRecipeSummaries("en")} />;
 
 describe("Today dashboard and saved-data states", () => {
   it("invites new users to set up", async () => {

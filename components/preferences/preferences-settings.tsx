@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { SettingsGate } from "@/components/settings/settings-gate";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { defaultPreferences, type UserPreferences } from "@/lib/preferences/preferences";
 import { withPreferences } from "@/lib/settings/settings";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -23,7 +23,7 @@ export function PreferencesSettings() {
 }
 
 function PreferencesForm({ initial }: { initial: UserPreferences }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const toast = useToast();
   const { update } = useSettings();
   const [value, setValue] = useState(initial);

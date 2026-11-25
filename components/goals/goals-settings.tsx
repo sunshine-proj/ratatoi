@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useState, type FormEvent } from "react";
 import { focusFirstError } from "@/components/forms/field-error";
 import { SettingsGate } from "@/components/settings/settings-gate";
@@ -10,7 +10,7 @@ import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { toLocalIsoDate } from "@/lib/dates";
 import type { FieldError } from "@/lib/forms/number-field";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { routes } from "@/lib/navigation";
 import { emptyProfileDraft, estimateTargets, parseProfile, type Profile, type ProfileDraft, type ProfileErrors } from "@/lib/nutrition/estimate";
 import {
@@ -43,13 +43,13 @@ export function GoalsSettings() {
 }
 
 function GoalsForm({ goal }: { goal: NutritionGoal | null }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const toast = useToast();
   const { update } = useSettings();
 
   const [goalType, setGoalType] = useState<GoalType | null>(goal?.goalType ?? null);
   const [goalError, setGoalError] = useState<FieldError | undefined>();
-  const [targets, setTargets] = useState<TargetsDraft>(targetsToDraft(goal));
+  const [targets, setTargets] = useState<TargetsDraft>(targetsToDraft(goal, locale));
   const [errors, setErrors] = useState<TargetsErrors>({});
   const [source, setSource] = useState<TargetSource>(goal?.targetSource ?? "manual");
   const [estimateOpen, setEstimateOpen] = useState(false);
@@ -57,7 +57,7 @@ function GoalsForm({ goal }: { goal: NutritionGoal | null }) {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = parseTargets(targets);
+    const parsed = parseTargets(targets, locale);
     setGoalError(goalType ? undefined : { code: "required" });
     setErrors(parsed.ok ? {} : parsed.errors);
 
@@ -197,7 +197,7 @@ function EstimateDialog({ open, goalType, onClose, onApply }: {
   onClose: () => void;
   onApply: (calories: number, protein: number) => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const [draft, setDraft] = useState<ProfileDraft>(emptyProfileDraft);
   const [errors, setErrors] = useState<ProfileErrors>({});
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -212,7 +212,7 @@ function EstimateDialog({ open, goalType, onClose, onApply }: {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = parseProfile(draft);
+    const result = parseProfile(draft, locale);
     if (!result.ok) {
       setErrors(result.errors);
       setProfile(null);

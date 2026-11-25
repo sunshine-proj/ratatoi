@@ -1,14 +1,18 @@
 import { z } from "zod";
-import { recipeData } from "@/data/recipes";
-import { requireIngredient } from "@/lib/ingredients/catalogue";
+import { ESTIMATED_SOURCE, ORIGINAL_CREDIT, recipeData } from "@/data/recipes";
+import { allIngredientNames, ingredientSearchNames, localizedIngredientName, requireIngredient } from "@/lib/ingredients/catalogue";
+import { locales, type Locale, type PluralForms } from "@/lib/i18n";
 import type { IngredientCategory, IngredientKind } from "@/lib/ingredients/schema";
 import { allergens as allAllergens, type Allergen, type DietaryPattern } from "@/lib/preferences/preferences";
 import { recipeSchema, type Recipe, type RecipeIngredient } from "./schema";
 import { deriveTags, type RecipeTag } from "./tags";
+import { getRecipeTranslation } from "./translations";
 
 /**
  * Read-only recipe catalogue built from the seed data. Validated at module
  * load, so invalid recipe data fails the build rather than reaching users.
+ * Built once per locale: text comes from lib/recipes/translations.ts
+ * (English is the source), numbers and ingredients are shared.
  */
 
 export type RecipeSummary = Pick<
@@ -31,14 +35,16 @@ export type RecipeSummary = Pick<
   /** Derived from ingredients. */
   suitableFor: DietaryPattern[];
   tags: RecipeTag[];
-  /** For each ingredient: its name followed by aliases (used by search and exclusions). */
+  /** For each ingredient: its names and aliases in every language (for exclusions, which work whatever language they were typed in). */
   ingredientNames: string[][];
+  /** For each ingredient: its names in this language, then English (for search). */
+  searchNames: string[][];
 };
 
 export type RecipeIngredientLine = RecipeIngredient & {
   name: string;
   category: IngredientCategory;
-  pieceName?: { one: string; other: string };
+  pieceName?: PluralForms;
 };
 
 export type RecipeDetail = RecipeSummary &
@@ -58,16 +64,20 @@ export function deriveSuitability(kinds: readonly IngredientKind[]): DietaryPatt
   return suitable;
 }
 
-function buildDetail(recipe: Recipe): RecipeDetail {
+function buildDetail(recipe: Recipe, locale: Locale): RecipeDetail {
   const lines = recipe.ingredients.map((line) => ({ line, ingredient: requireIngredient(line.ingredient) }));
+  const translation = getRecipeTranslation(locale);
+  const text = translation?.recipes[recipe.slug];
+  const isDefaultCredit =
+    recipe.contentSource.author === ORIGINAL_CREDIT.author && recipe.contentSource.licence === ORIGINAL_CREDIT.licence;
   const allergenSet = new Set(lines.flatMap(({ ingredient }) => ingredient.allergens));
   const suitableFor = deriveSuitability(lines.map(({ ingredient }) => ingredient.kind));
   const totalMinutes = recipe.prepMinutes + recipe.cookMinutes;
 
   return {
     slug: recipe.slug,
-    name: recipe.name,
-    description: recipe.description,
+    name: text?.name ?? recipe.name,
+    description: text?.description ?? recipe.description,
     mealTypes: recipe.mealTypes,
     servings: recipe.servings,
     prepMinutes: recipe.prepMinutes,
@@ -75,36 +85,53 @@ function buildDetail(recipe: Recipe): RecipeDetail {
     totalMinutes,
     nutritionPerServing: recipe.nutritionPerServing,
     nutritionIsEstimated: recipe.nutritionIsEstimated,
-    nutritionSource: recipe.nutritionSource,
+    nutritionSource:
+      translation && recipe.nutritionSource === ESTIMATED_SOURCE ? translation.nutritionSource : recipe.nutritionSource,
     image: recipe.image,
     batchFriendly: recipe.batchFriendly,
-    storageNote: recipe.storageNote,
-    contentSource: recipe.contentSource,
-    steps: recipe.steps,
+    storageNote: recipe.storageNote === undefined ? undefined : (text?.storageNote ?? recipe.storageNote),
+    contentSource: translation && isDefaultCredit ? translation.contentSource : recipe.contentSource,
+    steps: text?.steps.length === recipe.steps.length ? [...text.steps] : recipe.steps,
     allergens: allAllergens.filter((allergen) => allergenSet.has(allergen)),
     suitableFor,
     tags: deriveTags({ ...recipe, totalMinutes, suitableFor }),
-    ingredientNames: lines.map(({ ingredient }) => [ingredient.name, ...ingredient.aliases]),
-    ingredients: lines.map(({ line, ingredient }) => ({
-      ...line,
-      name: line.unit === "piece" && line.quantity <= 1 && ingredient.singularName ? ingredient.singularName : ingredient.name,
-      category: ingredient.category,
-      pieceName: ingredient.pieceName,
-    })),
+    ingredientNames: lines.map(({ ingredient }) => {
+      const local = localizedIngredientName(ingredient, locale).name;
+      return [local, ...allIngredientNames(ingredient).filter((name) => name !== local)];
+    }),
+    searchNames: lines.map(({ ingredient }) => [
+      ...(translation ? ingredientSearchNames(ingredient, locale) : []),
+      ingredient.name,
+      ...ingredient.aliases,
+    ]),
+    ingredients: lines.map(({ line, ingredient }) => {
+      const local = localizedIngredientName(ingredient, locale);
+      const note = line.note === undefined ? undefined : (text?.notes?.[line.ingredient] ?? line.note);
+      return {
+        ...line,
+        note,
+        name: line.unit === "piece" && line.quantity <= 1 && local.singularName ? local.singularName : local.name,
+        category: ingredient.category,
+        pieceName: local.pieceName,
+      };
+    }),
   };
 }
 
 const recipes: readonly Recipe[] = z.array(recipeSchema).parse(recipeData);
-const details: readonly RecipeDetail[] = recipes.map(buildDetail);
-const bySlug = new Map(details.map((detail) => [detail.slug, detail]));
-if (bySlug.size !== details.length) throw new Error("Duplicate recipe slugs in data/recipes");
+if (new Set(recipes.map((recipe) => recipe.slug)).size !== recipes.length) throw new Error("Duplicate recipe slugs in data/recipes");
 
-export function getRecipeDetails(): readonly RecipeDetail[] {
-  return details;
+const detailsByLocale = new Map(locales.map((locale) => [locale, recipes.map((recipe) => buildDetail(recipe, locale))]));
+const bySlugByLocale = new Map(
+  locales.map((locale) => [locale, new Map(detailsByLocale.get(locale)!.map((detail) => [detail.slug, detail]))]),
+);
+
+export function getRecipeDetails(locale: Locale): readonly RecipeDetail[] {
+  return detailsByLocale.get(locale)!;
 }
 
-export function getRecipeDetail(slug: string): RecipeDetail | undefined {
-  return bySlug.get(slug);
+export function getRecipeDetail(slug: string, locale: Locale): RecipeDetail | undefined {
+  return bySlugByLocale.get(locale)!.get(slug);
 }
 
 /** Card-sized data, small enough to send to the client for filtering. */
@@ -126,11 +153,12 @@ export function toSummary(detail: RecipeDetail): RecipeSummary {
     suitableFor: detail.suitableFor,
     tags: detail.tags,
     ingredientNames: detail.ingredientNames,
+    searchNames: detail.searchNames,
   };
 }
 
-export function getRecipeSummaries(): RecipeSummary[] {
-  return details.map(toSummary);
+export function getRecipeSummaries(locale: Locale): RecipeSummary[] {
+  return getRecipeDetails(locale).map(toSummary);
 }
 
 /** Ingredient lines per recipe, for shopping-list generation in the browser. */

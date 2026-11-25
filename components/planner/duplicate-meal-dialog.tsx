@@ -6,8 +6,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { SelectField } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
 import { addDays } from "@/lib/dates";
-import { formatMessage, getMessages } from "@/lib/i18n";
-import { formatDate } from "@/lib/i18n/format";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
+import { formatDate, lowercase } from "@/lib/i18n/format";
 import { duplicateMeal, findMeal } from "@/lib/planner/operations";
 import type { PlannedMeal } from "@/lib/planner/schema";
 import { mealTypes, type MealType } from "@/lib/recipes/schema";
@@ -17,7 +18,7 @@ import { usePlanActions } from "./use-plan-actions";
 
 /** Copy a meal to another day (default: the next day) and meal. */
 export function DuplicateMealDialog({ mealId, onClose }: { mealId: string | null; onClose: () => void }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const { plan } = usePlanActions();
   const lookup = useRecipeLookup();
   const meal = plan && mealId ? findMeal(plan, mealId) : undefined;
@@ -34,7 +35,7 @@ export function DuplicateMealDialog({ mealId, onClose }: { mealId: string | null
 }
 
 function DuplicateForm({ meal, onDone }: { meal: PlannedMeal; onDone: () => void }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const toast = useToast();
   const { apply } = usePlanActions();
   const [date, setDate] = useState(addDays(meal.date, 1));
@@ -51,8 +52,8 @@ function DuplicateForm({ meal, onDone }: { meal: PlannedMeal; onDone: () => void
         if (!ok) return;
         toast.show({
           message: formatMessage(t.planner.duplicated, {
-            meal: t.mealTypes[mealType].toLocaleLowerCase("en"),
-            day: formatDate(date, "dayShort"),
+            meal: lowercase(t.mealTypes[mealType], locale),
+            day: formatDate(date, "dayShort", locale),
           }),
           tone: "success",
         });
@@ -62,7 +63,7 @@ function DuplicateForm({ meal, onDone }: { meal: PlannedMeal; onDone: () => void
       <SelectField id="duplicate-day" label={t.planner.duplicateDay} value={date} onChange={(e) => setDate(e.target.value)}>
         {days.map((day) => (
           <option key={day} value={day}>
-            {formatDate(day, "dayShort")}
+            {formatDate(day, "dayShort", locale)}
           </option>
         ))}
       </SelectField>

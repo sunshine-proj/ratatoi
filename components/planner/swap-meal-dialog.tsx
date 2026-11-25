@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage, type Locale } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber } from "@/lib/i18n/format";
 import { sumNutrition } from "@/lib/nutrition/totals";
 import { findMeal, mealContent, mealsOn, replaceMeal } from "@/lib/planner/operations";
@@ -14,14 +15,14 @@ import { usePlanActions } from "./use-plan-actions";
 import { plannedMealName } from "./planned-meal-item";
 
 /** Signed, neutral change: "+80 kcal", "−12 g", or "no change". */
-function delta(value: number, unit: string, none: string): string {
+function delta(value: number, unit: string, none: string, locale: Locale): string {
   const rounded = Math.round(value);
   if (rounded === 0) return none;
-  return `${rounded > 0 ? "+" : "−"}${formatNumber(Math.abs(rounded))} ${unit}`;
+  return `${rounded > 0 ? "+" : "−"}${formatNumber(Math.abs(rounded), locale)} ${unit}`;
 }
 
 export function SwapMealDialog({ mealId, onClose }: { mealId: string | null; onClose: () => void }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const s = t.planner.swapDialog;
   const toast = useToast();
   const { plan, apply } = usePlanActions();
@@ -67,7 +68,7 @@ function SwapOptions({ plan, meal, onSwap }: {
   meal: PlannedMeal;
   onSwap: (slug: string, name: string) => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const s = t.planner.swapDialog;
   const lookup = useRecipeLookup();
   const now = sumNutrition(mealsOn(plan, meal.date), lookup.nutrition);
@@ -75,7 +76,7 @@ function SwapOptions({ plan, meal, onSwap }: {
   return (
     <div className="flex flex-col gap-4">
       <p className="rounded-control bg-surface-muted px-3 py-2 font-medium">
-        {formatMessage(s.dayNow, { kcal: formatNumber(now.kcal), protein: formatNumber(now.proteinG) })}
+        {formatMessage(s.dayNow, { kcal: formatNumber(now.kcal, locale), protein: formatNumber(now.proteinG, locale) })}
       </p>
       <RecipePicker
         mealType={meal.mealType}
@@ -84,10 +85,10 @@ function SwapOptions({ plan, meal, onSwap }: {
           const swapped = replaceMeal(plan, meal.id, { kind: "recipe", recipeSlug: recipe.slug }, { now: new Date(0) });
           const after = sumNutrition(mealsOn(swapped, meal.date), lookup.nutrition);
           return formatMessage(s.after, {
-            kcal: formatNumber(after.kcal),
-            kcalDelta: delta(after.kcal - now.kcal, "kcal", s.noChange),
-            protein: formatNumber(after.proteinG),
-            proteinDelta: delta(after.proteinG - now.proteinG, "g", s.noChange),
+            kcal: formatNumber(after.kcal, locale),
+            kcalDelta: delta(after.kcal - now.kcal, "kcal", s.noChange, locale),
+            protein: formatNumber(after.proteinG, locale),
+            proteinDelta: delta(after.proteinG - now.proteinG, "g", s.noChange, locale),
           });
         }}
         action={(recipe) => (

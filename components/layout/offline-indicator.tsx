@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useOffline } from "next/offline";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { Icon } from "@/components/ui/icon";
 
 /**
@@ -83,7 +83,7 @@ export function useIsOffline(): boolean {
 
 export function OfflineIndicator() {
   const offline = useIsOffline();
-  const t = getMessages();
+  const { t } = useI18n();
 
   return (
     // Always mounted so the change is announced politely by screen readers.

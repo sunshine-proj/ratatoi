@@ -12,7 +12,7 @@ import type { ShoppingList } from "@/lib/shopping/schema";
 import { SHOPPING_STORAGE_KEY } from "@/lib/shopping/store";
 
 const today = toLocalIsoDate();
-const recipeNames = Object.fromEntries(getRecipeSummaries().map((r) => [r.slug, r.name]));
+const recipeNames = Object.fromEntries(getRecipeSummaries("en").map((r) => [r.slug, r.name]));
 const ctx = { now: new Date(), newId: () => crypto.randomUUID() };
 
 function seedPlan(...meals: NewMeal[]): MealPlan {

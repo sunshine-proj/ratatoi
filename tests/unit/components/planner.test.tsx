@@ -18,7 +18,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(nav.search),
 }));
 
-const recipes = getRecipeSummaries();
+const recipes = getRecipeSummaries("en");
 
 function seed(...meals: NewMeal[]) {
   let n = 0;
@@ -167,15 +167,21 @@ describe("PlannerView", () => {
     expect(storedPlan().meals.map((m) => m.date)).toEqual(["2026-11-27"]);
   });
 
-  it("navigates days and weeks through the URL", async () => {
+  it("navigates days and weeks through the URL, without a server round trip", async () => {
+    window.history.replaceState(null, "", "/lt/planner");
+    const replaceState = vi.spyOn(window.history, "replaceState");
     const user = userEvent.setup();
     renderPlanner();
     await user.click(await screen.findByRole("tab", { name: /Friday 27 November/ }));
-    expect(nav.replace).toHaveBeenLastCalledWith("/planner?date=2026-11-27", { scroll: false });
+    // Keeps the address people see, including its language prefix.
+    expect(replaceState).toHaveBeenLastCalledWith(null, "", "/lt/planner?date=2026-11-27");
     await user.click(screen.getByRole("button", { name: "Next week" }));
-    expect(nav.replace).toHaveBeenLastCalledWith("/planner?date=2026-11-30", { scroll: false });
+    expect(replaceState).toHaveBeenLastCalledWith(null, "", "/lt/planner?date=2026-11-30");
     await user.click(screen.getByRole("button", { name: "Previous week" }));
-    expect(nav.replace).toHaveBeenLastCalledWith("/planner?date=2026-11-16", { scroll: false });
+    expect(replaceState).toHaveBeenLastCalledWith(null, "", "/lt/planner?date=2026-11-16");
+    expect(nav.replace).not.toHaveBeenCalled();
+    replaceState.mockRestore();
+    window.history.replaceState(null, "", "/");
   });
 
   it("explains an unreadable saved plan and refuses to overwrite it silently", async () => {

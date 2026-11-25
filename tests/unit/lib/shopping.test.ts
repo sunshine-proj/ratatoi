@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getIngredient } from "@/lib/ingredients/catalogue";
-import { getMessages } from "@/lib/i18n";
+import { getIngredient, getLocalizedIngredientName } from "@/lib/ingredients/catalogue";
+import { getMessages } from "@/lib/i18n/catalogue";
 import { addMeal, removeMeal, setServings, type NewMeal } from "@/lib/planner/operations";
 import { emptyPlan, type MealPlan } from "@/lib/planner/schema";
 import { getRecipeIngredientIndex } from "@/lib/recipes/catalogue";
@@ -21,7 +21,7 @@ import {
 import { matchPreset, presetRange, validateRange } from "@/lib/shopping/range";
 import { emptyShoppingList, shoppingListSchema, type ShoppingList } from "@/lib/shopping/schema";
 
-const t = getMessages();
+const t = getMessages("en");
 const WEEK = { start: "2026-11-23", end: "2026-11-29" };
 const NOW = new Date("2026-11-24T12:00:00Z");
 
@@ -267,8 +267,8 @@ describe("formatting", () => {
   });
 
   it("uses singular names for one piece or less", () => {
-    expect(shoppingItemName({ name: "Lemons", quantity: 0.75, unit: "piece" }, getIngredient("lemon"))).toBe("Lemon");
-    expect(shoppingItemName({ name: "Lemons", quantity: 2, unit: "piece" }, getIngredient("lemon"))).toBe("Lemons");
+    expect(shoppingItemName({ name: "Lemons", quantity: 0.75, unit: "piece", origin: "generated" }, getLocalizedIngredientName("lemon", "en"))).toBe("Lemon");
+    expect(shoppingItemName({ name: "Lemons", quantity: 2, unit: "piece", origin: "generated" }, getLocalizedIngredientName("lemon", "en"))).toBe("Lemons");
   });
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { DocumentGate } from "@/components/storage/document-gate";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { addDays, isIsoDate, toLocalIsoDate, weekDates } from "@/lib/dates";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatDate, formatDateRange, formatPlural } from "@/lib/i18n/format";
 import { clearDates, countMealsOn } from "@/lib/planner/operations";
 import { emptyPlan, type MealPlan } from "@/lib/planner/schema";
@@ -29,7 +30,7 @@ import { useSettings } from "@/lib/settings/use-settings";
  * refresh, back/forward, and "View plan" links land on the right day.
  */
 export function PlannerView({ recipes }: { recipes: RecipeSummary[] }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const { state, reset } = usePlanActions();
   return (
     <RecipeLookupProvider recipes={recipes}>
@@ -51,7 +52,7 @@ export function PlannerView({ recipes }: { recipes: RecipeSummary[] }) {
 }
 
 export function PlannerSkeleton() {
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     <div aria-busy="true" className="flex flex-col gap-4 motion-safe:animate-pulse">
       <p role="status" className="sr-only">
@@ -67,10 +68,8 @@ export function PlannerSkeleton() {
 type Confirm = { kind: "day"; date: string } | { kind: "week" } | null;
 
 function Planner({ plan }: { plan: MealPlan }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const toast = useToast();
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { apply } = usePlanActions();
   const { state: settings } = useSettings();
@@ -86,10 +85,14 @@ function Planner({ plan }: { plan: MealPlan }) {
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<Confirm>(null);
 
-  const select = (date: string) => router.replace(`${pathname}?date=${date}`, { scroll: false });
+  // The native history API updates useSearchParams instantly, with no server
+  // round trip (the page is the same; only the selected day changes).
+  // window.location is the address people see (/planner or /lt/planner),
+  // unlike usePathname(), which reports /en/planner on English pages.
+  const select = (date: string) => window.history.replaceState(null, "", `${window.location.pathname}?date=${date}`);
   const mealCounts = Object.fromEntries(week.map((date) => [date, countMealsOn(plan, [date])]));
   const weekCount = countMealsOn(plan, week);
-  const range = formatDateRange(week[0]!, week[6]!);
+  const range = formatDateRange(week[0]!, week[6]!, locale);
 
   function clear() {
     if (!confirm) return;
@@ -158,13 +161,13 @@ function Planner({ plan }: { plan: MealPlan }) {
         onClose={() => setConfirm(null)}
         title={
           confirm?.kind === "day"
-            ? formatMessage(t.planner.clearDayTitle, { day: formatDate(confirm.date, "dayShort") })
+            ? formatMessage(t.planner.clearDayTitle, { day: formatDate(confirm.date, "dayShort", locale) })
             : t.planner.clearWeekTitle
         }
         description={
           confirm?.kind === "day"
-            ? formatPlural(t.planner.clearDayBody, confirmCount, { day: formatDate(confirm.date, "dayShort") })
-            : formatPlural(t.planner.clearWeekBody, confirmCount, { range })
+            ? formatPlural(t.planner.clearDayBody, confirmCount, locale, { day: formatDate(confirm.date, "dayShort", locale) })
+            : formatPlural(t.planner.clearWeekBody, confirmCount, locale, { range })
         }
         footer={
           <>

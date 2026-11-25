@@ -1,7 +1,8 @@
 "use client";
 
 import { Icon } from "@/components/ui/icon";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber, formatPlural } from "@/lib/i18n/format";
 import type { DailyTargets } from "@/lib/nutrition/goal";
 import { summarizeRange } from "@/lib/nutrition/totals";
@@ -14,7 +15,7 @@ export function WeekSummary({ plan, week, targets }: {
   week: readonly string[];
   targets: DailyTargets | null;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const w = t.week;
   const lookup = useRecipeLookup();
   const summary = summarizeRange(plan.meals, week, lookup.nutrition);
@@ -30,27 +31,27 @@ export function WeekSummary({ plan, week, targets }: {
           <>
             <p className="font-medium">
               {formatMessage(w.total, {
-                kcal: formatNumber(summary.totals.kcal),
-                protein: formatNumber(summary.totals.proteinG),
+                kcal: formatNumber(summary.totals.kcal, locale),
+                protein: formatNumber(summary.totals.proteinG, locale),
               })}
             </p>
             <p>
-              {formatPlural(w.average, summary.plannedDays, {
-                kcal: formatNumber(summary.dailyAverage.kcal),
-                protein: formatNumber(summary.dailyAverage.proteinG),
+              {formatPlural(w.average, summary.plannedDays, locale, {
+                kcal: formatNumber(summary.dailyAverage.kcal, locale),
+                protein: formatNumber(summary.dailyAverage.proteinG, locale),
               })}
             </p>
             {targets ? (
               <p className="text-ink-muted">
                 {formatMessage(w.targets, {
-                  kcal: formatNumber(targets.dailyCalorieTargetKcal),
-                  protein: formatNumber(targets.dailyProteinTargetG),
+                  kcal: formatNumber(targets.dailyCalorieTargetKcal, locale),
+                  protein: formatNumber(targets.dailyProteinTargetG, locale),
                 })}
               </p>
             ) : null}
             <p className="text-ink-muted">{w.averageNote}</p>
             {summary.totals.unknownMeals > 0 ? (
-              <p className="text-ink-muted">{formatPlural(w.unknownMeals, summary.totals.unknownMeals)}</p>
+              <p className="text-ink-muted">{formatPlural(w.unknownMeals, summary.totals.unknownMeals, locale)}</p>
             ) : null}
           </>
         ) : (

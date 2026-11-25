@@ -1,16 +1,10 @@
 import { isoDateToUtc } from "@/lib/dates";
-import { defaultLocale, formatMessage, type Locale } from "./index";
-
-/**
- * Intl locale per app locale. English uses en-GB conventions (day before
- * month, 24-hour time), matching the app's EU defaults.
- */
-const intlLocales: Record<Locale, string> = { en: "en-GB" };
+import { formatMessage, intlLocales, type Locale, type PluralForms } from "./index";
 
 const formatters = new Map<string, Intl.NumberFormat>();
 
-/** Locale-aware number formatting, e.g. 1900 → "1,900" (en) or "1 900" (lt). */
-export function formatNumber(value: number, locale: Locale = defaultLocale, maximumFractionDigits = 0): string {
+/** Locale-aware number formatting, e.g. 1900 → "1,900" (en) or "1 900" (lt); 2.5 → "2,5" (lt). */
+export function formatNumber(value: number, locale: Locale, maximumFractionDigits = 0): string {
   const cacheKey = `${locale}:${maximumFractionDigits}`;
   let formatter = formatters.get(cacheKey);
   if (!formatter) {
@@ -20,21 +14,30 @@ export function formatNumber(value: number, locale: Locale = defaultLocale, maxi
   return formatter.format(value);
 }
 
-export type PluralForms = { readonly one: string; readonly other: string };
+const pluralRules = new Map<Locale, Intl.PluralRules>();
+
+/** The plural form for `count` in this locale (CLDR rules), falling back to `other`. */
+export function selectPlural(forms: PluralForms, count: number, locale: Locale): string {
+  let rules = pluralRules.get(locale);
+  if (!rules) {
+    rules = new Intl.PluralRules(intlLocales[locale]);
+    pluralRules.set(locale, rules);
+  }
+  const category = rules.select(count) as keyof PluralForms;
+  return forms[category] ?? forms.other;
+}
 
 /**
  * Pick the plural form for `count` and fill `{count}` (formatted) plus any
- * other placeholders. Lithuanian needs "few"/"many" forms too; extend
- * PluralForms when that locale is added.
+ * other placeholders.
  */
 export function formatPlural(
   forms: PluralForms,
   count: number,
+  locale: Locale,
   values: Record<string, string | number> = {},
-  locale: Locale = defaultLocale,
 ): string {
-  const template = new Intl.PluralRules(locale).select(count) === "one" ? forms.one : forms.other;
-  return formatMessage(template, { count: formatNumber(count, locale), ...values });
+  return formatMessage(selectPlural(forms, count, locale), { count: formatNumber(count, locale, 2), ...values });
 }
 
 export type DateStyle = "weekdayShort" | "dayOfMonth" | "dayShort" | "dayLong";
@@ -60,20 +63,25 @@ function dateFormatter(style: DateStyle | "range", locale: Locale): Intl.DateTim
   return formatter;
 }
 
+/** Sentence-start capitalisation: Baltic weekday and month names are lowercase in Intl. */
+export function capitalize(text: string, locale: Locale): string {
+  return text.charAt(0).toLocaleUpperCase(intlLocales[locale]) + text.slice(1);
+}
+
 /** Format a `YYYY-MM-DD` calendar date. */
-export function formatDate(iso: string, style: DateStyle, locale: Locale = defaultLocale): string {
-  return dateFormatter(style, locale).format(isoDateToUtc(iso));
+export function formatDate(iso: string, style: DateStyle, locale: Locale): string {
+  return capitalize(dateFormatter(style, locale).format(isoDateToUtc(iso)), locale);
 }
 
 /** Format a range of calendar dates, e.g. "23–29 Nov 2026". */
-export function formatDateRange(startIso: string, endIso: string, locale: Locale = defaultLocale): string {
+export function formatDateRange(startIso: string, endIso: string, locale: Locale): string {
   return dateFormatter("range", locale).formatRange(isoDateToUtc(startIso), isoDateToUtc(endIso));
 }
 
 const timestampFormatters = new Map<string, Intl.DateTimeFormat>();
 
 /** A moment in the user's local time, 24-hour clock: "24 Nov, 14:05". */
-export function formatTimestamp(isoDateTime: string, locale: Locale = defaultLocale): string {
+export function formatTimestamp(isoDateTime: string, locale: Locale): string {
   let formatter = timestampFormatters.get(locale);
   if (!formatter) {
     formatter = new Intl.DateTimeFormat(intlLocales[locale], {
@@ -86,4 +94,9 @@ export function formatTimestamp(isoDateTime: string, locale: Locale = defaultLoc
     timestampFormatters.set(locale, formatter);
   }
   return formatter.format(new Date(isoDateTime));
+}
+
+/** Lowercase a label for use mid-sentence ("Breakfast" → "breakfast"). */
+export function lowercase(text: string, locale: Locale): string {
+  return text.toLocaleLowerCase(intlLocales[locale]);
 }

@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n";
 import { z } from "zod";
 import { parseNumberField, numberToInput, type FieldError } from "@/lib/forms/number-field";
 import { isoDate } from "@/lib/validation";
@@ -53,23 +54,24 @@ export type TargetsErrors = Partial<Record<TargetsField, FieldError>>;
 
 export const emptyTargetsDraft: TargetsDraft = { calories: "", protein: "", carbs: "", fat: "" };
 
-export function targetsToDraft(goal: DailyTargets | null | undefined): TargetsDraft {
+export function targetsToDraft(goal: DailyTargets | null | undefined, locale: Locale = "en"): TargetsDraft {
   if (!goal) return emptyTargetsDraft;
   return {
-    calories: numberToInput(goal.dailyCalorieTargetKcal),
-    protein: numberToInput(goal.dailyProteinTargetG),
-    carbs: numberToInput(goal.dailyCarbsTargetG),
-    fat: numberToInput(goal.dailyFatTargetG),
+    calories: numberToInput(goal.dailyCalorieTargetKcal, locale),
+    protein: numberToInput(goal.dailyProteinTargetG, locale),
+    carbs: numberToInput(goal.dailyCarbsTargetG, locale),
+    fat: numberToInput(goal.dailyFatTargetG, locale),
   };
 }
 
 export function parseTargets(
   draft: TargetsDraft,
+  locale: Locale = "en",
 ): { ok: true; value: DailyTargets } | { ok: false; errors: TargetsErrors } {
-  const calories = parseNumberField(draft.calories, { ...TARGET_LIMITS.calories, integer: true, required: true });
-  const protein = parseNumberField(draft.protein, { ...TARGET_LIMITS.protein, integer: true, required: true });
-  const carbs = parseNumberField(draft.carbs, { ...TARGET_LIMITS.carbs, integer: true });
-  const fat = parseNumberField(draft.fat, { ...TARGET_LIMITS.fat, integer: true });
+  const calories = parseNumberField(draft.calories, { ...TARGET_LIMITS.calories, integer: true, required: true, locale });
+  const protein = parseNumberField(draft.protein, { ...TARGET_LIMITS.protein, integer: true, required: true, locale });
+  const carbs = parseNumberField(draft.carbs, { ...TARGET_LIMITS.carbs, integer: true, locale });
+  const fat = parseNumberField(draft.fat, { ...TARGET_LIMITS.fat, integer: true, locale });
 
   const errors: TargetsErrors = {};
   if (!calories.ok) errors.calories = calories.error;

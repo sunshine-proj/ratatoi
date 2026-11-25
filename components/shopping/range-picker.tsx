@@ -2,7 +2,8 @@
 
 import { ChoiceGroup } from "@/components/ui/choice-group";
 import { FieldMessages, TextField } from "@/components/ui/field";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatDateRange } from "@/lib/i18n/format";
 import { presetRange, rangePresets, type DateRange, type RangeError, type RangePreset } from "@/lib/shopping/range";
 
@@ -14,7 +15,7 @@ export function RangePicker({ preset, custom, today, error, onPresetChange, onCu
   onPresetChange: (preset: RangePreset) => void;
   onCustomChange: (range: DateRange) => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const r = t.shopping.range;
   const errorText = error
     ? error.code === "invalid"
@@ -35,7 +36,7 @@ export function RangePicker({ preset, custom, today, error, onPresetChange, onCu
           value,
           label: r[value],
           description:
-            value === "custom" ? undefined : formatDateRange(presetRange(value, today).start, presetRange(value, today).end),
+            value === "custom" ? undefined : formatDateRange(presetRange(value, today).start, presetRange(value, today).end, locale),
         }))}
       />
       {preset === "custom" ? (

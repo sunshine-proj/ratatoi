@@ -169,7 +169,8 @@ Every task must meet the **Definition of done** in `AGENTS.md`: responsive at mo
 - [ ] Suggested targets from profile details, with clear explanation and disclaimer
 - [ ] Rule-based suggested week from goals and preferences
 - [ ] Copy a previous day or week
-- [ ] Lithuanian localisation
+- [x] Baltic localisation: Latvian, Lithuanian, and Estonian, including recipes, ingredients, formats, language picker, and per-language offline and install (`docs/translations.md`, decision 0004)
+- [ ] Native-speaker review of the lv, lt, and et translations
 - [ ] Pantry inventory and subtract-on-hand quantities
 - [ ] Share/export shopping list
 - [ ] Optional account sync (Supabase: auth, RLS, sync queue with retry/backoff), see `docs/decisions/0001-…`

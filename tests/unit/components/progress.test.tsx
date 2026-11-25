@@ -76,7 +76,7 @@ describe("TodayDashboard", () => {
   function renderToday() {
     return render(
       <ToastProvider>
-        <TodayDashboard recipes={getRecipeSummaries()} />
+        <TodayDashboard recipes={getRecipeSummaries("en")} />
       </ToastProvider>,
     );
   }

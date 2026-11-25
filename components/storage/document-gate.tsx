@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import type { DocumentState, WriteResult } from "@/lib/storage/local-document";
 
 /**
@@ -20,7 +20,7 @@ export function DocumentGate<T>({ state, reset, copy, children, loading }: {
   loading?: ReactNode;
 }) {
   const toast = useToast();
-  const t = getMessages();
+  const { t } = useI18n();
 
   if (state.status === "loading") {
     return (

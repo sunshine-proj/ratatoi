@@ -124,7 +124,10 @@ test.describe("layout", () => {
 
   test("nav touch targets are at least 44px", async ({ page }) => {
     await page.goto("/");
-    const links = page.getByRole("navigation", { name: "Main" }).getByRole("link");
+    const nav = page.getByRole("navigation", { name: "Main" });
+    // Wait for the hydrated list (it marks the current page) so links aren't swapped mid-measurement.
+    await expect(nav.getByRole("link", { name: "Today" })).toHaveAttribute("aria-current", "page");
+    const links = nav.getByRole("link");
     for (const link of await links.all()) {
       const box = await link.boundingBox();
       expect(box!.height).toBeGreaterThanOrEqual(44);

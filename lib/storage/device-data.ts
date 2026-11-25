@@ -1,3 +1,4 @@
+import { forgetLocale } from "@/lib/i18n/preference";
 import { planDocument } from "@/lib/planner/store";
 import { settingsDocument } from "@/lib/settings/settings";
 import { shoppingDocument } from "@/lib/shopping/store";
@@ -22,8 +23,13 @@ export function storedBytes(): number {
   }
 }
 
-/** Remove all of the app's saved data from this browser. Works even when a document can't be read. */
+/**
+ * Remove all of the app's saved data from this browser, including the
+ * language cookie (if a language was chosen). Works even when a document
+ * can't be read.
+ */
 export function deleteAllDeviceData(): WriteResult {
+  forgetLocale();
   let result: WriteResult = { ok: true };
   for (const document of deviceDocuments) {
     const cleared = document.clear();

@@ -7,11 +7,13 @@ The MVP features are complete. `npm run launch:check` checks the items below and
 - [x] **Licence:** proprietary, all rights reserved (`LICENSE`; `package.json` `"license": "UNLICENSED"`).
 - [x] **Nutrition values** from USDA FoodData Central for every ingredient, with recipes recalculated (`docs/nutrition-sources.md`). Still labelled "Estimated".
 - [x] **Imagery:** launching with designed illustrations; licensed photos come after launch (decision 0003).
+- [x] **Languages:** English, Latvian, Lithuanian, and Estonian throughout, including recipes (V1; `docs/translations.md`).
 - [x] **Deploy-ready:** security headers and CSP, HTTPS requirements, and the host checklist in `docs/deployment.md`. CI runs the full suite in Chromium, WebKit, and Firefox.
 
 ## Still blocking a public launch
 
 - [ ] **Operator identity and contact:** fill in `config/operator.ts` (name, country, privacy contact email). The privacy notice shows them automatically. A legal review of the notice and the disclaimers is recommended.
+- [ ] **Native-speaker review** of the Latvian, Lithuanian, and Estonian text, safety copy and privacy notice first (`docs/translations.md`). The translations were drafted by an AI assistant.
 - [ ] **Dietitian review:** a registered dietitian works through `docs/dietitian-review.md` and sets its status to Approved.
 - [ ] **Deploy over HTTPS** (the product owner does this; see `docs/deployment.md`), then **test on real devices:** Android Chrome, iOS Safari, desktop Chrome or Edge (`docs/device-testing.md`).
 - [ ] **Manual screen-reader pass:** VoiceOver, TalkBack, NVDA (`docs/accessibility.md`). The accessibility-tree review is done; this needs real screen readers.

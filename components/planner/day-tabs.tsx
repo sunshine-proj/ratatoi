@@ -2,7 +2,7 @@
 
 import { useRef, type KeyboardEvent } from "react";
 import { cn } from "@/lib/cn";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatDate, formatPlural } from "@/lib/i18n/format";
 
 export const DAY_PANEL_ID = "planner-day-panel";
@@ -19,7 +19,7 @@ export function DayTabs({ dates, selected, today, mealCounts, onSelect }: {
   mealCounts: Record<string, number>;
   onSelect: (date: string) => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const refs = useRef(new Map<string, HTMLButtonElement>());
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -65,7 +65,7 @@ export function DayTabs({ dates, selected, today, mealCounts, onSelect }: {
           >
             {/* Visual short labels; the sr-only text below is the tab's full name. */}
             <span aria-hidden="true" className={cn("text-xs", isSelected ? "font-semibold" : "text-ink-muted")}>
-              {formatDate(date, "weekdayShort")}
+              {formatDate(date, "weekdayShort", locale)}
             </span>
             {/* Today: a ring around the date (shape, not just colour). */}
             <span
@@ -75,7 +75,7 @@ export function DayTabs({ dates, selected, today, mealCounts, onSelect }: {
                 isToday && (isSelected ? "ring-2 ring-on-primary" : "ring-2 ring-primary"),
               )}
             >
-              {formatDate(date, "dayOfMonth")}
+              {formatDate(date, "dayOfMonth", locale)}
             </span>
             <span aria-hidden="true" className="flex h-1.5 gap-0.5">
               {Array.from({ length: Math.min(count, 4) }, (_, i) => (
@@ -83,8 +83,8 @@ export function DayTabs({ dates, selected, today, mealCounts, onSelect }: {
               ))}
             </span>
             <span className="sr-only">
-              {formatDate(date, "dayLong")}
-              {isToday ? `, ${t.planner.today}` : ""}, {formatPlural(t.planner.dayMeals, count)}
+              {formatDate(date, "dayLong", locale)}
+              {isToday ? `, ${t.planner.today}` : ""}, {formatPlural(t.planner.dayMeals, count, locale)}
             </span>
           </button>
         );

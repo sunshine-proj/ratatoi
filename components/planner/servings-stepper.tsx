@@ -1,7 +1,8 @@
 "use client";
 
 import { useId } from "react";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatPlural } from "@/lib/i18n/format";
 import { SERVINGS_MAX, SERVINGS_MIN } from "@/lib/planner/schema";
 import { formatQuantity } from "@/lib/recipes/format";
@@ -25,9 +26,9 @@ export function ServingsStepper({ value, onChange, itemName, label }: {
   /** Visible label; omit when the context makes it obvious. */
   label?: string;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const id = useId();
-  const valueText = formatPlural(t.planner.servings, value, { count: formatQuantity(value) });
+  const valueText = formatPlural(t.planner.servings, value, locale, { count: formatQuantity(value, locale) });
   const fewerLabel = itemName ? formatMessage(t.planner.fewer, { name: itemName }) : t.planner.fewerPlain;
   const moreLabel = itemName ? formatMessage(t.planner.more, { name: itemName }) : t.planner.morePlain;
 

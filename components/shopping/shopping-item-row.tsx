@@ -4,8 +4,9 @@ import { Fragment, useId, useRef, type ReactNode } from "react";
 import { Icon } from "@/components/ui/icon";
 import { Tag } from "@/components/ui/tag";
 import { cn } from "@/lib/cn";
-import { getIngredient } from "@/lib/ingredients/catalogue";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { getLocalizedIngredientName } from "@/lib/ingredients/catalogue";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatShoppingAmount, shoppingItemName } from "@/lib/shopping/format";
 import type { ShoppingItem } from "@/lib/shopping/schema";
 
@@ -20,7 +21,7 @@ export function ShoppingItemRow({ item, recipeName, onToggle, onEdit, onRemove }
   onEdit: () => void;
   onRemove: () => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const s = t.shopping;
   const id = useId();
   const menu = useRef<HTMLDetailsElement>(null);
@@ -28,7 +29,7 @@ export function ShoppingItemRow({ item, recipeName, onToggle, onEdit, onRemove }
     if (menu.current) menu.current.open = false;
     action();
   };
-  const ingredient = item.canonicalKey ? getIngredient(item.canonicalKey) : undefined;
+  const ingredient = item.canonicalKey ? getLocalizedIngredientName(item.canonicalKey, locale) : undefined;
   const amount = formatShoppingAmount(item, t, ingredient);
   const name = shoppingItemName(item, ingredient);
   const label = amount ? `${amount} ${name}` : name;

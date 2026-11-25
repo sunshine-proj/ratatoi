@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useState, type FormEvent } from "react";
 import { focusFirstError } from "@/components/forms/field-error";
 import { DocumentGate } from "@/components/storage/document-gate";
@@ -10,8 +10,9 @@ import { Dialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { toLocalIsoDate } from "@/lib/dates";
-import { getIngredient } from "@/lib/ingredients/catalogue";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { getIngredient, getLocalizedIngredientName } from "@/lib/ingredients/catalogue";
+import { formatMessage, intlLocales } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatDateRange, formatPlural, formatTimestamp } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import { emptyPlan, type MealPlan } from "@/lib/planner/schema";
@@ -19,6 +20,7 @@ import { usePlan } from "@/lib/planner/use-plan";
 import { generateItems, type RecipeIngredientIndex } from "@/lib/shopping/aggregate";
 import { formatShoppingAmount, shoppingItemName } from "@/lib/shopping/format";
 import { emptyItemDraft, parseItemDraft, type ItemDraft, type ItemErrors, type ParsedItem } from "@/lib/shopping/item-form";
+import { numberToInput } from "@/lib/forms/number-field";
 import {
   addManualItem,
   clearList,
@@ -41,7 +43,7 @@ export function ShoppingListView({ recipeIndex, recipeNames }: {
   recipeIndex: RecipeIngredientIndex;
   recipeNames: Record<string, string>;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const plan = usePlan();
   const shopping = useShoppingActions();
   const planCopy = { title: t.planner.loadFailedTitle, body: t.planner.loadFailedBody, reset: t.planner.reset, resetDone: t.planner.resetDone };
@@ -71,7 +73,7 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
   recipeIndex: RecipeIngredientIndex;
   recipeNames: Record<string, string>;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const s = t.shopping;
   const toast = useToast();
   const { apply } = useShoppingActions();
@@ -108,15 +110,21 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
     });
   }
 
+  function itemName(item: ShoppingItem): string {
+    return shoppingItemName(item, item.canonicalKey ? getLocalizedIngredientName(item.canonicalKey, locale) : undefined);
+  }
+
   function itemLabel(item: ShoppingItem): string {
-    const ingredient = item.canonicalKey ? getIngredient(item.canonicalKey) : undefined;
+    const ingredient = item.canonicalKey ? getLocalizedIngredientName(item.canonicalKey, locale) : undefined;
     const amount = formatShoppingAmount(item, t, ingredient);
-    const name = shoppingItemName(item, ingredient);
+    const name = itemName(item);
     return amount ? `${amount} ${name}` : name;
   }
 
+  const collator = new Intl.Collator(intlLocales[locale]);
+
   // Only format a valid range: a half-typed custom date must not crash the page.
-  const rangeLabel = rangeError ? "" : formatDateRange(range.start, range.end);
+  const rangeLabel = rangeError ? "" : formatDateRange(range.start, range.end, locale);
   const nothingPlanned = preview !== null && preview.recipeMeals === 0;
 
   const rangeCard = (
@@ -138,13 +146,13 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
             {preview.customMeals > 0 ? (
               <p className="flex items-start gap-2 text-sm">
                 <Icon name="info" className="mt-0.5 size-4 shrink-0" />
-                {formatPlural(s.customMealsSkipped, preview.customMeals)}
+                {formatPlural(s.customMealsSkipped, preview.customMeals, locale)}
               </p>
             ) : null}
             {preview.missingRecipes > 0 ? (
               <p className="flex items-start gap-2 text-sm">
                 <Icon name="info" className="mt-0.5 size-4 shrink-0" />
-                {formatPlural(s.missingRecipes, preview.missingRecipes)}
+                {formatPlural(s.missingRecipes, preview.missingRecipes, locale)}
               </p>
             ) : null}
             {nothingPlanned ? (
@@ -199,8 +207,8 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
         {list.range && list.generatedAt ? (
           <p className="text-sm text-ink-muted">
             {formatMessage(s.lastUpdated, {
-              range: formatDateRange(list.range.start, list.range.end),
-              time: formatTimestamp(list.generatedAt),
+              range: formatDateRange(list.range.start, list.range.end, locale),
+              time: formatTimestamp(list.generatedAt, locale),
             })}
           </p>
         ) : null}
@@ -223,7 +231,10 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
           </Card>
         ) : (
           shoppingCategories.map((category) => {
-            const items = list.items.filter((item) => item.category === category);
+            // Stored order is by English name; show each aisle in this language's order.
+            const items = list.items
+              .filter((item) => item.category === category)
+              .sort((a, b) => collator.compare(itemName(a), itemName(b)) || a.id.localeCompare(b.id));
             if (items.length === 0) return null;
             const headingId = `aisle-${category}`;
             return (
@@ -232,7 +243,7 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
                   <h3 id={headingId} className="font-sans text-base font-semibold">
                     {s.categories[category]}
                   </h3>
-                  <span className="text-sm text-ink-muted">{formatPlural(s.aisleCount, items.length)}</span>
+                  <span className="text-sm text-ink-muted">{formatPlural(s.aisleCount, items.length, locale)}</span>
                 </div>
                 <ul className="divide-y divide-line">
                   {items.map((item) => (
@@ -311,14 +322,14 @@ function ShoppingListContent({ plan, list, recipeIndex, recipeNames }: {
 }
 
 function AddItemForm({ onAdd }: { onAdd: (parsed: ParsedItem) => boolean }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const s = t.shopping;
   const [draft, setDraft] = useState<ItemDraft>(emptyItemDraft);
   const [errors, setErrors] = useState<ItemErrors>({});
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = parseItemDraft(draft, { requireName: true });
+    const result = parseItemDraft(draft, { requireName: true }, locale);
     if (!result.ok) {
       setErrors(result.errors);
       focusFirstError(
@@ -364,7 +375,7 @@ function EditItemDialog({ item, onClose, onSave }: {
   onClose: () => void;
   onSave: (item: ShoppingItem, parsed: ParsedItem) => void;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   return (
     <Dialog open={item !== null} onClose={onClose} title={item ? formatMessage(t.shopping.editTitle, { name: item.name }) : ""}>
       {item ? <EditItemForm key={item.id} item={item} onCancel={onClose} onSave={onSave} /> : null}
@@ -377,10 +388,10 @@ function EditItemForm({ item, onCancel, onSave }: {
   onCancel: () => void;
   onSave: (item: ShoppingItem, parsed: ParsedItem) => void;
 }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const [draft, setDraft] = useState<ItemDraft>({
     name: item.name,
-    quantity: item.quantity === null ? "" : String(Math.round(item.quantity * 100) / 100),
+    quantity: numberToInput(item.quantity === null ? null : Math.round(item.quantity * 100) / 100, locale),
     unit: item.unit ?? "",
     category: item.category,
   });
@@ -393,7 +404,7 @@ function EditItemForm({ item, onCancel, onSave }: {
       className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault();
-        const result = parseItemDraft(draft, { requireName: isManual });
+        const result = parseItemDraft(draft, { requireName: isManual }, locale);
         if (!result.ok) {
           setErrors(result.errors);
           focusFirstError(

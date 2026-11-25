@@ -1,10 +1,19 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+import { afterEach, vi } from "vitest";
 
 afterEach(() => {
   cleanup();
+  delete (globalThis as { __testLocale?: string }).__testLocale;
 });
+
+/*
+ * `next/root-params` only works inside a Next.js build. Server Components
+ * under test get the locale from `globalThis.__testLocale` (default "en").
+ */
+vi.mock("next/root-params", () => ({
+  locale: async () => (globalThis as { __testLocale?: string }).__testLocale ?? "en",
+}));
 
 /*
  * jsdom does not implement HTMLDialogElement.showModal/close. This minimal

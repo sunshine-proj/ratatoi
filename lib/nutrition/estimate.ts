@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n";
 import { parseNumberField, type FieldError } from "@/lib/forms/number-field";
 import type { GoalType } from "./goal";
 
@@ -127,22 +128,22 @@ export type ProfileErrors = Partial<Record<ProfileField, FieldError>>;
 
 export const emptyProfileDraft: ProfileDraft = { age: "", height: "", weight: "", sex: null, activity: null };
 
-export function parseProfile(draft: ProfileDraft): { ok: true; value: Profile } | { ok: false; errors: ProfileErrors } {
+export function parseProfile(draft: ProfileDraft, locale: Locale = "en"): { ok: true; value: Profile } | { ok: false; errors: ProfileErrors } {
   const errors: ProfileErrors = {};
 
   // Parse age with a wide range first, so under-18s get the specific
   // "designed for adults" message rather than a generic range error.
-  const age = parseNumberField(draft.age, { min: 0, max: PROFILE_LIMITS.age.max, integer: true, required: true });
+  const age = parseNumberField(draft.age, { min: 0, max: PROFILE_LIMITS.age.max, integer: true, required: true, locale });
   if (!age.ok) {
     errors.age = age.error.code === "outOfRange" ? { code: "outOfRange", ...PROFILE_LIMITS.age } : age.error;
   } else if (age.value !== null && age.value < PROFILE_LIMITS.age.min) {
     errors.age = { code: "adultsOnly" };
   }
 
-  const height = parseNumberField(draft.height, { ...PROFILE_LIMITS.heightCm, required: true });
+  const height = parseNumberField(draft.height, { ...PROFILE_LIMITS.heightCm, required: true, locale });
   if (!height.ok) errors.height = height.error;
 
-  const weight = parseNumberField(draft.weight, { ...PROFILE_LIMITS.weightKg, required: true });
+  const weight = parseNumberField(draft.weight, { ...PROFILE_LIMITS.weightKg, required: true, locale });
   if (!weight.ok) errors.weight = weight.error;
 
   if (!draft.sex) errors.sex = { code: "required" };

@@ -3,7 +3,8 @@
 import { TextField } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { fieldErrorText } from "@/components/forms/field-error";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber } from "@/lib/i18n/format";
 import {
   parseTargets,
@@ -23,8 +24,8 @@ export function TargetsFields({ idPrefix, draft, errors, onChange }: {
   errors: TargetsErrors;
   onChange: (field: TargetsField, value: string) => void;
 }) {
-  const t = getMessages();
-  const parsed = parseTargets(draft);
+  const { t, locale } = useI18n();
+  const parsed = parseTargets(draft, locale);
   const notices = parsed.ok ? targetNotices(parsed.value) : null;
   const showOptional = Boolean(draft.carbs || draft.fat || errors.carbs || errors.fat);
 
@@ -93,7 +94,7 @@ export function TargetsFields({ idPrefix, draft, errors, onChange }: {
           {notices.lowCalories ? <Notice>{t.targets.lowCalorieNotice}</Notice> : null}
           {notices.macroEnergyOverCalories ? (
             <Notice>
-              {formatMessage(t.targets.macroEnergyNotice, { kcal: formatNumber(notices.macroEnergyOverCalories) })}
+              {formatMessage(t.targets.macroEnergyNotice, { kcal: formatNumber(notices.macroEnergyOverCalories, locale) })}
             </Notice>
           ) : null}
         </ul>

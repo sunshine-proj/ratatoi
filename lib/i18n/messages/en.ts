@@ -5,6 +5,7 @@
  * Placeholders use `{name}` syntax and are filled with `formatMessage`.
  */
 export const en = {
+  meta: { locale: "en" },
   app: {
     name: "Protein Plate",
     shortName: "Protein Plate",
@@ -34,10 +35,10 @@ export const en = {
   privacy: {
     title: "Privacy",
     intro: "Protein Plate is built to keep your information on your own device. This page explains what that means.",
-    updated: "Last updated: 24 November 2026.",
+    updated: "Last updated: 25 November 2026.",
     summaryTitle: "In short",
     summary1: "There's no account. Your goals, food preferences, meal plan, and shopping list are saved only in this browser, on this device.",
-    summary2: "Nothing you enter is sent to us or anyone else. There's no analytics, no advertising, no tracking, and no cookies.",
+    summary2: "Nothing you enter is sent to us or anyone else. There's no analytics, no advertising, and no tracking.",
     summary3: "You can see, download, and delete everything at any time in Settings → Account.",
     storedTitle: "What is saved, and where",
     stored:
@@ -47,7 +48,10 @@ export const en = {
       "Targets, allergens, and food preferences can say something about your health. That's why they stay on your device. If you use the optional estimate, the age, sex, height, weight, and activity level you enter are used once to calculate a starting point and are never saved.",
     notCollectedTitle: "What we don't collect",
     notCollected:
-      "No account details, no usage analytics, no advertising identifiers, no location, and no cookies. The app doesn't load anything from other companies' servers: fonts and images are served with the app.",
+      "No account details, no usage analytics, no advertising identifiers, no location, and no tracking cookies. The app doesn't load anything from other companies' servers: fonts and images are served with the app.",
+    cookieTitle: "The language cookie",
+    cookie:
+      "If you choose a language, the app saves one small cookie with just that choice (for example \"lt\"), so opening the app's address takes you to your language. It's sent only to our server, contains nothing else, and expires after a year. Without it, the app uses your browser's language. Delete everything in Settings → Account removes it.",
     serverTitle: "Loading the app",
     server:
       "When you open Protein Plate, your browser downloads the app's files from our web server, like any website. The hosting provider may keep standard technical logs (such as IP address and browser type) for security and reliability. These logs don't include anything you enter in the app.",
@@ -71,6 +75,11 @@ export const en = {
   footer: {
     label: "About this app",
     privacy: "Privacy",
+  },
+  language: {
+    label: "Language",
+    title: "Language",
+    intro: "Choose the app's language. Recipes, ingredients, and your shopping list change too; your saved plan and list stay the same.",
   },
   common: {
     close: "Close",
@@ -731,7 +740,7 @@ export const en = {
     },
     preferences: {
       title: "Preferences",
-      intro: "Dietary preferences, allergens, and ingredients you'd rather avoid.",
+      intro: "Language, dietary preferences, allergens, and ingredients you'd rather avoid.",
     },
     account: {
       title: "Account and data",
@@ -757,6 +766,3 @@ export const en = {
   },
 } as const;
 
-type DeepString<T> = { readonly [K in keyof T]: T[K] extends string ? string : DeepString<T[K]> };
-
-export type Messages = DeepString<typeof en>;

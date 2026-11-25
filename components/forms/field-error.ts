@@ -13,7 +13,7 @@ export function fieldErrorText(t: Messages, error: FieldError | undefined, kind:
     case "notWholeNumber":
       return t.forms.notWholeNumber;
     case "outOfRange":
-      return formatMessage(t.forms.outOfRange, { min: formatNumber(error.min), max: formatNumber(error.max) });
+      return formatMessage(t.forms.outOfRange, { min: formatNumber(error.min, t.meta.locale), max: formatNumber(error.max, t.meta.locale) });
     case "adultsOnly":
       return t.forms.adultsOnly;
     case "tooLong":

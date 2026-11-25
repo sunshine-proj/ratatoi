@@ -1,7 +1,10 @@
-import Link from "next/link";
+"use client";
+
+import { Link } from "@/components/ui/link";
 import { Icon } from "@/components/ui/icon";
 import { Tag } from "@/components/ui/tag";
-import { formatMessage, getMessages } from "@/lib/i18n";
+import { formatMessage } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatNumber } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import type { RecipeSummary } from "@/lib/recipes/catalogue";
@@ -10,7 +13,7 @@ import { RecipeImage } from "./recipe-image";
 
 /** The card is one link (the title, stretched) plus a separate "Add to plan" button. */
 export function RecipeCard({ recipe, priority }: { recipe: RecipeSummary; priority?: boolean }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const n = recipe.nutritionPerServing;
 
   return (
@@ -46,10 +49,10 @@ export function RecipeCard({ recipe, priority }: { recipe: RecipeSummary; priori
         <div className="mt-auto flex flex-col gap-2">
           <ul className="flex flex-wrap items-center gap-1.5 sm:gap-2" aria-label={recipe.nutritionIsEstimated ? t.recipes.card.perServing : t.recipes.card.perServingVerified}>
             <li>
-              <Tag tone="protein">{formatMessage(t.recipes.card.protein, { g: formatNumber(n.proteinG) })}</Tag>
+              <Tag tone="protein">{formatMessage(t.recipes.card.protein, { g: formatNumber(n.proteinG, locale) })}</Tag>
             </li>
             <li>
-              <Tag tone="energy">{formatMessage(t.recipes.card.kcal, { kcal: formatNumber(n.kcal) })}</Tag>
+              <Tag tone="energy">{formatMessage(t.recipes.card.kcal, { kcal: formatNumber(n.kcal, locale) })}</Tag>
             </li>
             <li className="inline-flex items-center gap-1 text-sm text-ink-muted">
               <Icon name="clock" className="size-4" />

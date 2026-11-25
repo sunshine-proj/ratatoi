@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { recipeData } from "@/data/recipes";
-import { getMessages } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n/catalogue";
 
 /**
  * Safety copy review, made repeatable (see docs/content-review.md).
@@ -39,7 +39,7 @@ function strings(value: unknown, path = ""): Array<[string, string]> {
   return [];
 }
 
-const t = getMessages();
+const t = getMessages("en");
 const recipeText = recipeData.flatMap((recipe) =>
   [recipe.name, recipe.description, recipe.storageNote ?? "", ...recipe.steps].map((text) => [recipe.slug, text] as [string, string]),
 );

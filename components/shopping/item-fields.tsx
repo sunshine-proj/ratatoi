@@ -2,7 +2,7 @@
 
 import { fieldErrorText } from "@/components/forms/field-error";
 import { SelectField, TextField } from "@/components/ui/field";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import type { ItemDraft, ItemErrors } from "@/lib/shopping/item-form";
 import { shoppingCategories, shoppingUnits } from "@/lib/shopping/schema";
 
@@ -16,7 +16,7 @@ export function ItemFields({ idPrefix, draft, errors, onChange, showName, autoCa
   /** Offer "Choose for me" for the aisle (adding); editing uses explicit aisles. */
   autoCategory: boolean;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const s = t.shopping;
   const set = (key: keyof ItemDraft, value: string) => onChange({ ...draft, [key]: value });
 

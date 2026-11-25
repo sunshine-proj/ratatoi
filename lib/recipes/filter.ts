@@ -1,3 +1,4 @@
+import { intlLocales, type Locale } from "@/lib/i18n";
 import { namesMatchTerm, normalizeText, singularize, tokens } from "@/lib/ingredients/catalogue";
 import type { Allergen, DietaryPattern, UserPreferences } from "@/lib/preferences/preferences";
 import type { RecipeSummary } from "./catalogue";
@@ -34,11 +35,16 @@ export const emptyFilters: RecipeFilters = {
 export const recipeSorts = ["protein", "calories", "time", "name"] as const;
 export type RecipeSort = (typeof recipeSorts)[number];
 
-/** Every query word must appear (as a prefix or substring) in the name or an ingredient name. */
+/**
+ * Every query word must appear (as a prefix or substring) in the name or an
+ * ingredient name, in this language or English. Other languages are left
+ * out: substrings across four languages match too much (Estonian
+ * "soolasisaldusega" contains Latvian "lasis").
+ */
 export function matchesQuery(recipe: RecipeSummary, query: string): boolean {
   const words = normalizeText(query).split(" ").filter(Boolean).map(singularize);
   if (words.length === 0) return true;
-  const haystack = [recipe.name, ...recipe.ingredientNames.flat()].map((name) => tokens(name).join(" ")).join(" | ");
+  const haystack = [recipe.name, ...recipe.searchNames.flat()].map((name) => tokens(name).join(" ")).join(" | ");
   return words.every((word) => haystack.includes(word));
 }
 
@@ -58,22 +64,27 @@ export function matchesFilters(recipe: RecipeSummary, filters: RecipeFilters): b
   return matchesQuery(recipe, filters.query);
 }
 
-const byName = (a: RecipeSummary, b: RecipeSummary) =>
-  a.name.localeCompare(b.name, "en") || a.slug.localeCompare(b.slug);
+type Compare = (a: RecipeSummary, b: RecipeSummary) => number;
 
-const comparators: Record<RecipeSort, (a: RecipeSummary, b: RecipeSummary) => number> = {
-  protein: (a, b) => b.nutritionPerServing.proteinG - a.nutritionPerServing.proteinG || byName(a, b),
-  calories: (a, b) => a.nutritionPerServing.kcal - b.nutritionPerServing.kcal || byName(a, b),
-  time: (a, b) => a.totalMinutes - b.totalMinutes || byName(a, b),
-  name: byName,
-};
+/** Comparators for a locale: names sort by that language's alphabet (Lithuanian y after į, Estonian õ after w…). */
+function comparators(locale: Locale): Record<RecipeSort, Compare> {
+  const collator = new Intl.Collator(intlLocales[locale]);
+  const byName: Compare = (a, b) => collator.compare(a.name, b.name) || a.slug.localeCompare(b.slug);
+  return {
+    protein: (a, b) => b.nutritionPerServing.proteinG - a.nutritionPerServing.proteinG || byName(a, b),
+    calories: (a, b) => a.nutritionPerServing.kcal - b.nutritionPerServing.kcal || byName(a, b),
+    time: (a, b) => a.totalMinutes - b.totalMinutes || byName(a, b),
+    name: byName,
+  };
+}
 
 export function filterRecipes(
   recipes: readonly RecipeSummary[],
   filters: RecipeFilters,
   sort: RecipeSort = "protein",
+  locale: Locale = "en",
 ): RecipeSummary[] {
-  return recipes.filter((recipe) => matchesFilters(recipe, filters)).sort(comparators[sort]);
+  return recipes.filter((recipe) => matchesFilters(recipe, filters)).sort(comparators(locale)[sort]);
 }
 
 const union = <T>(a: readonly T[], b: readonly T[]): T[] => [...new Set([...a, ...b])];

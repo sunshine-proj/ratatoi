@@ -9,7 +9,7 @@ import { defaultPreferences } from "@/lib/preferences/preferences";
 import { getRecipeDetail, getRecipeSummaries } from "@/lib/recipes/catalogue";
 import { emptySettings, SETTINGS_STORAGE_KEY, withPreferences } from "@/lib/settings/settings";
 
-const recipes = getRecipeSummaries();
+const recipes = getRecipeSummaries("en");
 const snacks = recipes.filter((r) => r.mealTypes.includes("snack"));
 
 function renderBrowser(mode: "all" | "snacks" = "all") {
@@ -127,9 +127,9 @@ describe("RecipeBrowser", () => {
 });
 
 describe("RecipeDetail", () => {
-  it("shows nutrition, ingredients, method, allergens, and sources", () => {
-    const recipe = getRecipeDetail("spinach-feta-egg-scramble")!;
-    render(<RecipeDetail recipe={recipe} />);
+  it("shows nutrition, ingredients, method, allergens, and sources", async () => {
+    const recipe = getRecipeDetail("spinach-feta-egg-scramble", "en")!;
+    render(await RecipeDetail({ recipe }));
 
     expect(screen.getByRole("heading", { level: 1, name: "Spinach and feta egg scramble" })).toBeInTheDocument();
     const nutrition = screen.getByRole("region", { name: "Nutrition per serving" });

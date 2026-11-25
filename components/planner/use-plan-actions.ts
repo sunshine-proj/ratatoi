@@ -1,7 +1,7 @@
 "use client";
 
 import { useToast } from "@/components/ui/toast";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import type { MealPlan } from "@/lib/planner/schema";
 import { opContext, usePlan } from "@/lib/planner/use-plan";
 
@@ -13,7 +13,7 @@ import { opContext, usePlan } from "@/lib/planner/use-plan";
 export function usePlanActions() {
   const { state, update, reset } = usePlan();
   const toast = useToast();
-  const t = getMessages();
+  const { t } = useI18n();
 
   function apply(change: (plan: MealPlan, ctx: ReturnType<typeof opContext>) => MealPlan): boolean {
     if (state.status === "invalid") {

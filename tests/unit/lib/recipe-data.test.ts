@@ -6,7 +6,7 @@ import { calculateNutritionPerServing, roundNutrition } from "@/lib/recipes/nutr
 import { recipeSchema } from "@/lib/recipes/schema";
 
 const recipes = recipeData.map((data) => recipeSchema.parse(data));
-const details = getRecipeDetails();
+const details = getRecipeDetails("en");
 
 describe("seed recipe data", () => {
   it("every recipe passes the schema", () => {

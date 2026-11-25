@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useRef } from "react";
 import { MealNutritionChips } from "@/components/nutrition/meal-nutrition-chips";
 import { RecipeImage } from "@/components/recipes/recipe-image";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { Tag } from "@/components/ui/tag";
 import { useToast } from "@/components/ui/toast";
-import { formatMessage, getMessages, type Messages } from "@/lib/i18n";
+import { formatMessage, type Messages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { routes } from "@/lib/navigation";
 import { plannedMealNutrition } from "@/lib/nutrition/totals";
 import { moveMeal, removeMeal, restoreMeal, setServings } from "@/lib/planner/operations";
@@ -34,7 +35,7 @@ export function PlannedMealItem({ meal, isFirst, isLast, onSwap, onDuplicate }: 
   onSwap: () => void;
   onDuplicate: () => void;
 }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const toast = useToast();
   const lookup = useRecipeLookup();
   const { apply } = usePlanActions();

@@ -1,6 +1,8 @@
-import Link from "next/link";
+"use client";
+
+import { Link } from "@/components/ui/link";
 import { cn } from "@/lib/cn";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { isActivePath, type NavItem } from "@/lib/navigation";
 import { Icon } from "@/components/ui/icon";
 
@@ -38,7 +40,7 @@ const itemClasses: Record<NavVariant, { base: string; active: string; idle: stri
  * `aria-current="page"`. Pure: the caller supplies the pathname.
  */
 export function NavList({ items, variant, pathname }: NavListProps) {
-  const t = getMessages();
+  const { t } = useI18n();
   const styles = itemClasses[variant];
   return (
     <ul

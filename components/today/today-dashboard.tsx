@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { MealNutritionChips } from "@/components/nutrition/meal-nutrition-chips";
 import { ProgressPanel } from "@/components/nutrition/progress-panel";
 import { RecipeLookupProvider, useRecipeLookup } from "@/components/planner/recipe-lookup";
@@ -11,7 +11,7 @@ import { buttonClasses } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { toLocalIsoDate } from "@/lib/dates";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { formatDate, formatPlural } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import { plannedMealNutrition, sumNutrition } from "@/lib/nutrition/totals";
@@ -28,7 +28,7 @@ export function greetingFor(hour: number): "morning" | "afternoon" | "evening" {
 
 /** Today: greeting, progress against targets, today's meals, quick actions. */
 export function TodayDashboard({ recipes }: { recipes: RecipeSummary[] }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const { state, reset } = usePlan();
   return (
     <RecipeLookupProvider recipes={recipes}>
@@ -53,7 +53,7 @@ export function TodayDashboard({ recipes }: { recipes: RecipeSummary[] }) {
 }
 
 function Dashboard({ settings, plan }: { settings: UserSettings | null; plan: MealPlan }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const lookup = useRecipeLookup();
   const now = new Date();
   const today = toLocalIsoDate(now);
@@ -67,7 +67,7 @@ function Dashboard({ settings, plan }: { settings: UserSettings | null; plan: Me
     <div className="flex flex-col gap-6">
       <p className="text-lg">
         <span className="font-semibold">{t.today.greeting[greetingFor(now.getHours())]}</span>
-        <span className="text-ink-muted"> · {formatDate(today, "dayLong")}</span>
+        <span className="text-ink-muted"> · {formatDate(today, "dayLong", locale)}</span>
       </p>
 
       {needsSetup ? (
@@ -127,7 +127,7 @@ function Dashboard({ settings, plan }: { settings: UserSettings | null; plan: Me
                     )}
                     {meal.kind === "custom" ? <span className="ml-2 text-xs text-ink-muted">({t.planner.customBadge})</span> : null}
                     <span className="block text-sm text-ink-muted">
-                      {formatPlural(t.planner.servings, meal.servings, { count: formatQuantity(meal.servings) })}
+                      {formatPlural(t.planner.servings, meal.servings, locale, { count: formatQuantity(meal.servings, locale) })}
                     </span>
                   </span>
                   <MealNutritionChips nutrition={plannedMealNutrition(meal, lookup.nutrition)} />

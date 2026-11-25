@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getMessages } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n/catalogue";
 import { formatPlural } from "@/lib/i18n/format";
 import type { RecipeIngredientLine } from "@/lib/recipes/catalogue";
 import { deriveSuitability } from "@/lib/recipes/catalogue";
@@ -76,7 +76,7 @@ describe("nutrition calculation", () => {
 });
 
 describe("formatting", () => {
-  const t = getMessages();
+  const t = getMessages("en");
   const line = (overrides: Partial<RecipeIngredientLine>): RecipeIngredientLine => ({
     ingredient: "x",
     quantity: 1,
@@ -87,11 +87,11 @@ describe("formatting", () => {
   });
 
   it("formats quantities with friendly fractions", () => {
-    expect(formatQuantity(0.5)).toBe("½");
-    expect(formatQuantity(1.5)).toBe("1½");
-    expect(formatQuantity(0.25)).toBe("¼");
-    expect(formatQuantity(240)).toBe("240");
-    expect(formatQuantity(2.3)).toBe("2.3");
+    expect(formatQuantity(0.5, "en")).toBe("½");
+    expect(formatQuantity(1.5, "en")).toBe("1½");
+    expect(formatQuantity(0.25, "en")).toBe("¼");
+    expect(formatQuantity(240, "en")).toBe("240");
+    expect(formatQuantity(2.3, "en")).toBe("2.3");
   });
 
   it("formats amounts with metric units and counting words", () => {
@@ -107,18 +107,18 @@ describe("formatting", () => {
   });
 
   it("pluralises messages", () => {
-    expect(formatPlural(t.recipes.resultCount, 1)).toBe("1 recipe");
-    expect(formatPlural(t.recipes.resultCount, 0)).toBe("0 recipes");
-    expect(formatPlural(t.recipes.resultCount, 1200)).toBe("1,200 recipes");
+    expect(formatPlural(t.recipes.resultCount, 1, "en")).toBe("1 recipe");
+    expect(formatPlural(t.recipes.resultCount, 0, "en")).toBe("0 recipes");
+    expect(formatPlural(t.recipes.resultCount, 1200, "en")).toBe("1,200 recipes");
   });
 });
 
 describe("ingredient display names", () => {
   it("uses the singular name for one piece or less", async () => {
     const { getRecipeDetail } = await import("@/lib/recipes/catalogue");
-    const salmon = getRecipeDetail("lemon-salmon-traybake")!;
+    const salmon = getRecipeDetail("lemon-salmon-traybake", "en")!;
     expect(salmon.ingredients.find((line) => line.ingredient === "lemon")?.name).toBe("Lemon");
-    const chilli = getRecipeDetail("turkey-black-bean-chilli")!;
+    const chilli = getRecipeDetail("turkey-black-bean-chilli", "en")!;
     expect(chilli.ingredients.find((line) => line.ingredient === "red-pepper")?.name).toBe("Red peppers");
     expect(chilli.ingredients.find((line) => line.ingredient === "onion")?.name).toBe("Onion");
   });

@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
-import { getMessages } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
 import { Icon } from "./icon";
 
 type DialogProps = {
@@ -35,7 +35,7 @@ export function Dialog({
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
-  const t = getMessages();
+  const { t } = useI18n();
 
   useEffect(() => {
     const dialog = ref.current;

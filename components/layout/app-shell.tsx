@@ -1,9 +1,10 @@
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import type { ReactNode } from "react";
-import { getMessages } from "@/lib/i18n";
+import { getI18n } from "@/lib/i18n/server";
 import { primaryNav, profileNavItem, routes, sidebarNav } from "@/lib/navigation";
 import { ActiveNavList } from "./active-nav-list";
 import { BrandLink } from "./brand";
+import { LanguageSwitcher } from "./language-switcher";
 import { OfflineIndicator } from "./offline-indicator";
 import { Icon } from "@/components/ui/icon";
 
@@ -12,8 +13,8 @@ import { Icon } from "@/components/ui/icon";
  * - Phones: top bar (brand + profile), content, fixed bottom tab bar.
  * - md and up: left sidebar with all destinations; no bottom bar.
  */
-export function AppShell({ children }: { children: ReactNode }) {
-  const t = getMessages();
+export async function AppShell({ children }: { children: ReactNode }) {
+  const { t } = await getI18n();
 
   return (
     <>
@@ -66,6 +67,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link href={routes.privacy} className="inline-flex min-h-11 items-center font-medium text-primary underline underline-offset-2">
                   {t.footer.privacy}
                 </Link>
+                <div className="ml-auto">
+                  <LanguageSwitcher variant="footer" />
+                </div>
               </div>
             </footer>
           </main>

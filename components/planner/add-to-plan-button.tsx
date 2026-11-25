@@ -9,8 +9,9 @@ import { SelectField } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { addDays, toLocalIsoDate } from "@/lib/dates";
-import { formatMessage, getMessages } from "@/lib/i18n";
-import { formatDate } from "@/lib/i18n/format";
+import { formatMessage, localePath } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n/client";
+import { formatDate, lowercase } from "@/lib/i18n/format";
 import { routes } from "@/lib/navigation";
 import { addMeal } from "@/lib/planner/operations";
 import { mealTypes, type MealType } from "@/lib/recipes/schema";
@@ -24,7 +25,7 @@ type RecipeRef = { slug: string; name: string; mealTypes: readonly MealType[] };
  * meal, and servings. `variant="icon"` is the compact button used on cards.
  */
 export function AddToPlanButton({ recipe, variant = "full" }: { recipe: RecipeRef; variant?: "full" | "icon" }) {
-  const t = getMessages();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const label = formatMessage(t.planner.addToPlan.buttonFor, { name: recipe.name });
 
@@ -58,7 +59,7 @@ export function AddToPlanButton({ recipe, variant = "full" }: { recipe: RecipeRe
 }
 
 function AddToPlanForm({ recipe, onDone }: { recipe: RecipeRef; onDone: () => void }) {
-  const t = getMessages();
+  const { t, locale } = useI18n();
   const a = t.planner.addToPlan;
   const toast = useToast();
   const router = useRouter();
@@ -81,11 +82,11 @@ function AddToPlanForm({ recipe, onDone }: { recipe: RecipeRef; onDone: () => vo
         onDone();
         toast.show({
           message: formatMessage(a.added, {
-            meal: t.mealTypes[mealType].toLocaleLowerCase("en"),
-            day: formatDate(date, "dayShort"),
+            meal: lowercase(t.mealTypes[mealType], locale),
+            day: formatDate(date, "dayShort", locale),
           }),
           tone: "success",
-          action: { label: a.view, onClick: () => router.push(`${routes.planner}?date=${date}`) },
+          action: { label: a.view, onClick: () => router.push(localePath(locale, `${routes.planner}?date=${date}`)) },
         });
       }}
     >
@@ -93,7 +94,7 @@ function AddToPlanForm({ recipe, onDone }: { recipe: RecipeRef; onDone: () => vo
         {days.map((day) => (
           <option key={day} value={day}>
             {day === today ? `${t.planner.today} · ` : ""}
-            {formatDate(day, "dayShort")}
+            {formatDate(day, "dayShort", locale)}
           </option>
         ))}
       </SelectField>

@@ -25,6 +25,8 @@ Found and fixed:
 - **Phone top bar:** the profile link's icon repeated the link's name ("Profile and goals" twice). The name is now on the link and the icon is decorative.
 - **Recipes:** the intro said "photo-led recipes", but recipes show illustrations (decision 0003). Reworded.
 
+Languages (added in V1): every page sets `<html lang>` to its language, each language picker option has its own `lang` and `hreflang`, and axe scans run on Latvian, Lithuanian, and Estonian pages too (`tests/e2e/i18n.spec.ts`).
+
 Checked and fine: one `h1` per page with a logical heading order; landmarks (banner, main, Main navigation, Notifications); planner tabs announce the full date and meal count; nutrition is in term and definition pairs; radio groups and form fields have names; disabled buttons are exposed as disabled; the footer disclaimer is reachable.
 
 ## Manual screen-reader checklist
@@ -41,6 +43,7 @@ For each flow, check that every control is announced with a sensible name and ro
 6. **Shopping list:** checkboxes read as "450 g Chicken breast, for Ginger chicken stir-fry", and checked state is announced; editing and removing are announced.
 7. **Offline:** the offline banner is announced when the connection drops.
 8. **Account:** the delete confirmation is announced as a dialog with its description.
+9. **Languages:** on `/lv`, `/lt`, and `/et`, the screen reader switches to that language's voice (the page sets `lang`); each option in the language picker is read in its own language, and the current one is announced.
 
 | Date | Screen reader + browser | Device | Tester | Result / issues |
 |---|---|---|---|---|

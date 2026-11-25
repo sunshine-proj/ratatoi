@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { getMessages } from "@/lib/i18n";
+import { Link } from "@/components/ui/link";
+import { getI18n } from "@/lib/i18n/server";
 import { routes } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 
@@ -17,8 +17,8 @@ export function BrandMark({ className }: { className?: string }) {
   );
 }
 
-export function BrandLink({ className }: { className?: string }) {
-  const t = getMessages();
+export async function BrandLink({ className }: { className?: string }) {
+  const { t } = await getI18n();
   return (
     <Link
       href={routes.today}

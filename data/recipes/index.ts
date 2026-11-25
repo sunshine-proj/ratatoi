@@ -13,8 +13,12 @@ import type { RecipeInput } from "@/lib/recipes/schema";
 type SeedRecipe = Omit<RecipeInput, "nutritionSource" | "nutritionIsEstimated" | "image" | "contentSource" | "id"> &
   Partial<Pick<RecipeInput, "image">>;
 
-const ESTIMATED_SOURCE =
+/** Shared by every seed recipe; translated in data/translations/<locale>/recipes.ts. */
+export const ESTIMATED_SOURCE =
   "Calculated from USDA FoodData Central values for each ingredient (mostly SR Legacy food-composition data; manufacturer label data for skyr, quark, and light coconut milk), scaled to the recipe. Raw ingredient weights; cooking losses aren't modelled, so values are estimates.";
+
+/** Credit for recipes written for the app; translated like ESTIMATED_SOURCE. */
+export const ORIGINAL_CREDIT = { author: "Protein Plate team", licence: "Original recipe written for Protein Plate" } as const;
 
 function seed(recipe: SeedRecipe): RecipeInput {
   return {
@@ -22,7 +26,7 @@ function seed(recipe: SeedRecipe): RecipeInput {
     nutritionSource: ESTIMATED_SOURCE,
     nutritionIsEstimated: true,
     image: null,
-    contentSource: { author: "Protein Plate team", licence: "Original recipe written for Protein Plate" },
+    contentSource: { ...ORIGINAL_CREDIT },
     ...recipe,
   };
 }

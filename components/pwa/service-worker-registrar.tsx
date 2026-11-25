@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useI18n } from "@/lib/i18n/client";
 
 /**
  * Registers /sw.js in production builds only — a service worker in `next dev`
@@ -9,8 +10,13 @@ import { useEffect } from "react";
  * After registration, it sends the worker the same-origin assets this page
  * already loaded. Those requests happened before the worker took control, so
  * without this the very first visit would not be available offline.
+ *
+ * The worker URL carries the page's locale, so it precaches the core pages
+ * in that language. A new locale means a new worker URL, which the browser
+ * installs as an update.
  */
 export function ServiceWorkerRegistrar() {
+  const { locale } = useI18n();
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
 
@@ -18,7 +24,7 @@ export function ServiceWorkerRegistrar() {
 
     async function register() {
       try {
-        await navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" });
+        await navigator.serviceWorker.register(`/sw.js?locale=${locale}`, { scope: "/", updateViaCache: "none" });
         const registration = await navigator.serviceWorker.ready;
         if (cancelled) return;
 
@@ -37,7 +43,7 @@ export function ServiceWorkerRegistrar() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [locale]);
 
   return null;
 }

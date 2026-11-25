@@ -1,3 +1,4 @@
+import type { Locale } from "@/lib/i18n";
 import { parseNumberField, type FieldError } from "@/lib/forms/number-field";
 import { CUSTOM_NAME_MAX, type CustomMealNutrition } from "./schema";
 
@@ -10,16 +11,17 @@ export const emptyCustomMealDraft: CustomMealDraft = { name: "", kcal: "", prote
 /** Name, calories, and protein are required; carbohydrate and fat may be left unknown. */
 export function parseCustomMeal(
   draft: CustomMealDraft,
+  locale: Locale = "en",
 ): { ok: true; value: { name: string; nutritionPerServing: CustomMealNutrition } } | { ok: false; errors: CustomMealErrors } {
   const errors: CustomMealErrors = {};
   const name = draft.name.trim().replace(/\s+/g, " ");
   if (name === "") errors.name = { code: "required" };
   else if (name.length > CUSTOM_NAME_MAX) errors.name = { code: "tooLong", max: CUSTOM_NAME_MAX };
 
-  const kcal = parseNumberField(draft.kcal, { min: 0, max: 5000, required: true });
-  const protein = parseNumberField(draft.protein, { min: 0, max: 500, required: true });
-  const carbs = parseNumberField(draft.carbs, { min: 0, max: 1000 });
-  const fat = parseNumberField(draft.fat, { min: 0, max: 500 });
+  const kcal = parseNumberField(draft.kcal, { min: 0, max: 5000, required: true, locale });
+  const protein = parseNumberField(draft.protein, { min: 0, max: 500, required: true, locale });
+  const carbs = parseNumberField(draft.carbs, { min: 0, max: 1000, locale });
+  const fat = parseNumberField(draft.fat, { min: 0, max: 500, locale });
   if (!kcal.ok) errors.kcal = kcal.error;
   if (!protein.ok) errors.protein = protein.error;
   if (!carbs.ok) errors.carbs = carbs.error;

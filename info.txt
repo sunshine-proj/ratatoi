@@ -419,6 +419,40 @@ Which way do you want to go? For option 2, tell me which provider you'll use and
 ============================
 
 
+24 of the 25 recipes now show a real photo from Wikimedia Commons. Peanut-butter-banana quark still shows its illustration because I couldn't find an honest match. Nothing is committed.
+
+What changed
+
+I searched Commons for each recipe and only kept photos licensed CC0, CC BY or CC BY-SA. Licence and author were copied from each photo's Commons page.
+I looked at the candidates myself and picked the closest match for each recipe. The photos are cropped to the app's 4:3 frame and saved as 1200 × 900 WebP, about 45–185 KB each.
+The credit line on each recipe page now links to the photo's Commons page, which CC licences expect.
+Alt text describes what each photo actually shows, not the recipe name.
+Files affected
+
+New: data/recipes/images.ts (photo, alt text, author, licence and source link for each recipe) and public/images/recipes/ (24 photos).
+Changed: data/recipes/index.ts uses a recipe's photo when it has one, otherwise the illustration as before. components/recipes/recipe-detail.tsx has the credit link.
+Tests: a new check that every listed photo belongs to a real recipe and its file exists. One test that expected the illustration note on the egg scramble now checks its photo credit, and a new test covers a recipe without a photo.
+Docs: README.md and docs/content-review.md.
+Checks run
+
+Lint, typecheck, unit tests (318 passed) and production build all pass.
+End-to-end recipe tests: all 15 Chromium and Firefox runs passed. The 10 WebKit runs failed because WebKit can't start on this machine (missing system libraries). They fail the same way without my changes.
+Limitations
+
+These are similar dishes, not your recipes. The weakest matches:
+The chicken quinoa bowl photo has no chicken.
+The tuna chickpea salad photo has no tuna.
+The overnight oats photo is muesli with yoghurt.
+The curry photo is a plain chickpea curry, without tofu or spinach.
+The cottage-cheese rice cakes photo actually shows a fish pâté, which could mislead vegetarians. I'd replace this one first.
+Alt text is English only, so Latvian, Lithuanian and Estonian users hear English descriptions.
+CC BY-SA photos have share-alike terms if you edit them further.
+Decision 0003 says to launch with illustrations. The photos are fine for testing but should be reviewed before a public launch.
+Your earlier work files (the search scripts and contact sheets) are in /tmp/claude-1000/-home-has-dev-ratatoi/2c059462-1c78-4968-bd54-9261663b4f73/scratchpad/ if you want to swap a photo.
+
+
+
+============================
 
 
 

@@ -1,5 +1,7 @@
 import type { RecipeInput } from "@/lib/recipes/schema";
 
+import { recipeImages } from "./images";
+
 /**
  * Seed recipe catalogue: original recipes written for Protein Plate.
  *
@@ -7,8 +9,9 @@ import type { RecipeInput } from "@/lib/recipes/schema";
  *   FoodData Central values, cited per ingredient) and stored
  *   explicitly. tests/unit/lib/recipe-data.test.ts fails if a stored value
  *   drifts from the calculation; update the numbers it prints.
- * - No licensed photography exists yet, so `image` is null and the UI shows
- *   a designed placeholder. Add photos only with a recorded licence.
+ * - Photos come from data/recipes/images.ts (openly licensed, for testing);
+ *   a recipe without one gets `image: null` and the UI shows a designed
+ *   placeholder. Add photos only with a recorded licence.
  */
 type SeedRecipe = Omit<RecipeInput, "nutritionSource" | "nutritionIsEstimated" | "image" | "contentSource" | "id"> &
   Partial<Pick<RecipeInput, "image">>;
@@ -25,7 +28,7 @@ function seed(recipe: SeedRecipe): RecipeInput {
     id: recipe.slug,
     nutritionSource: ESTIMATED_SOURCE,
     nutritionIsEstimated: true,
-    image: null,
+    image: recipeImages[recipe.slug] ?? null,
     contentSource: { ...ORIGINAL_CREDIT },
     ...recipe,
   };

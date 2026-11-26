@@ -11,7 +11,7 @@
 | Stored nutrition matches the ingredient calculation | ✅ | Same test fails on any drift. |
 | Allergens are shown and not over-promised | ✅ Derived from ingredients (14 EU allergens), with "always check labels" on every recipe. | `lib/recipes/catalogue.ts`; copy test. |
 | Labels have stated thresholds | ✅ "High protein" (≥ 20% energy, the EU claim condition), "Under 200/450 kcal", "Quick" (≤ 15 min). Nothing is called "low calorie". | `lib/recipes/tags.ts`; rules shown on each recipe page. |
-| Images are licensed | ✅ No photos: every recipe shows a designed illustration owned by the project, and says so. Launching without photos is decision 0003. The schema requires alt text, attribution, and licence for any photo added later. | Schema; data test. |
+| Images are licensed | ✅ Test photos: 24 recipes use openly licensed Wikimedia Commons photos (CC0, CC BY, CC BY-SA) with author, licence, and a link to the source page, recorded in `data/recipes/images.ts`. They show similar dishes, not the exact recipes; review before a public launch (decision 0003). The remaining recipe shows an owned illustration and says so. | Schema; data test (licence, attribution, file exists). |
 | Nutrition values from an authoritative database | ✅ Every ingredient with nutrition cites USDA FoodData Central (SR Legacy; Branded label data for skyr, quark, and light coconut milk). Recipe values were recalculated from them. Full table: `docs/nutrition-sources.md`. | The schema requires a source; `tests/unit/lib/recipe-data.test.ts`. |
 
 ## Translations

@@ -144,6 +144,14 @@ describe("RecipeDetail", () => {
 
     expect(screen.getByText("Contains: Cereals containing gluten, Eggs, Milk.")).toBeInTheDocument();
     expect(screen.getByText(/always check the labels/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^Photo: HaJunkiyada, via Wikimedia Commons \(cropped\), CC BY-SA 4\.0\.$/ })).toHaveAttribute(
+      "href",
+      expect.stringContaining("commons.wikimedia.org"),
+    );
+  });
+
+  it("says the picture is an illustration when a recipe has no photo", async () => {
+    render(await RecipeDetail({ recipe: getRecipeDetail("peanut-butter-banana-quark", "en")! }));
     expect(screen.getByText(/the picture is an illustration/)).toBeInTheDocument();
     expect(screen.getByText(/High protein: at least 20% of the energy/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All recipes" })).toHaveAttribute("href", "/recipes");

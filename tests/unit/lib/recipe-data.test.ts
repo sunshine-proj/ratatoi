@@ -1,5 +1,8 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { recipeData } from "@/data/recipes";
+import { recipeImages } from "@/data/recipes/images";
 import { getIngredient, ingredients, requireIngredient } from "@/lib/ingredients/catalogue";
 import { getRecipeDetails } from "@/lib/recipes/catalogue";
 import { calculateNutritionPerServing, roundNutrition } from "@/lib/recipes/nutrition";
@@ -52,6 +55,16 @@ describe("seed recipe data", () => {
       if (recipe.image) {
         expect(recipe.image.licence).toBeTruthy();
         expect(recipe.image.attribution).toBeTruthy();
+      }
+    }
+  });
+
+  it("only has photos for real recipes, and every photo file exists", () => {
+    const slugs = new Set(recipes.map((r) => r.slug));
+    for (const slug of Object.keys(recipeImages)) expect(slugs.has(slug), `images.ts: unknown recipe ${slug}`).toBe(true);
+    for (const recipe of recipes) {
+      if (recipe.image) {
+        expect(existsSync(join(process.cwd(), "public", recipe.image.src)), `${recipe.slug}: missing ${recipe.image.src}`).toBe(true);
       }
     }
   });

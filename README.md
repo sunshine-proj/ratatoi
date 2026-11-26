@@ -129,7 +129,7 @@ scripts/             Icon generation and the launch-readiness check
 proxy.ts             Language routing and real 404s for unknown pages and recipes
 public/sw.js         Service worker
 public/icons/        Generated PWA icons
-public/images/       Licensed recipe images (none yet; illustrations for now)
+public/images/       Licensed recipe images (test photos from Wikimedia Commons in recipes/)
 tests/unit/          Vitest tests
 tests/e2e/           Playwright tests
 ```
@@ -283,7 +283,7 @@ Use only original, licensed, or explicitly permitted recipe content and photogra
 - **Derived, not typed in:** a recipe's allergens and its vegan/vegetarian/pescatarian suitability are computed from its ingredients, so they can't contradict the ingredient list.
 - **Nutrition** per serving is calculated from the ingredient table and stored explicitly in each recipe, labelled *estimated* with its source. `tests/unit/lib/recipe-data.test.ts` fails if a stored value drifts from the calculation. Per-100 g values come from USDA FoodData Central: SR Legacy, or Branded label data for skyr, quark, and light coconut milk. Each ingredient cites its FDC IDs, and the schema refuses nutrition without a source (`docs/nutrition-sources.md`). Carbohydrate is "by difference" and includes fibre, and cooking losses aren't modelled, so values stay labelled *estimated*.
 - **Labels** have stated thresholds, shown on each recipe page: *High protein* = at least 20% of energy from protein (the EU condition for the claim); *Under 200 kcal* (snacks) and *Under 450 kcal* (meals) per serving; *Quick* = 15 minutes or less in total; *Batch cook* = marked by the author. Nothing is labelled "low calorie".
-- **Photos:** none yet; launching with illustrations is decision 0003. `image` is `null` and a designed, decorative illustration (tinted by meal type) fills the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence` for any photo added later, and the source section of each recipe page shows them. Recipe text is translated into Latvian, Lithuanian, and Estonian (`data/translations/`).
+- **Photos (testing):** 24 of 25 recipes have an openly licensed photo from Wikimedia Commons (CC0, CC BY, or CC BY-SA), listed in `data/recipes/images.ts` and stored as 1200 × 900 WebP in `public/images/recipes/`. They show a *similar* dish, not the exact recipe, so they are stand-ins until owned photography exists (decision 0003 still applies to launch). The licence and author come from each file page, the credit on the recipe page links back to it, and alt text describes what the photo actually shows. A recipe without a photo gets `image: null` and a designed, decorative illustration (tinted by meal type) in the same 4:3 frame. The schema requires `alt`, `attribution`, and `licence`, and `tests/unit/lib/recipe-data.test.ts` checks every photo file exists. Recipe text is translated into Latvian, Lithuanian, and Estonian (`data/translations/`).
 
 ### Searching and filtering
 

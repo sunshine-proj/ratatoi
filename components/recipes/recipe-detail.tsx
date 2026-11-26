@@ -213,9 +213,17 @@ export async function RecipeDetail({ recipe }: { recipe: RecipeDetailData }) {
           </p>
           <p>{formatMessage(d.nutritionSource, { source: recipe.nutritionSource })}</p>
           <p>
-            {recipe.image
-              ? formatMessage(d.photo, { attribution: recipe.image.attribution, licence: recipe.image.licence })
-              : d.noPhoto}
+            {recipe.image ? (
+              recipe.image.sourceUrl ? (
+                <a href={recipe.image.sourceUrl} rel="noopener noreferrer" className="underline underline-offset-2">
+                  {formatMessage(d.photo, { attribution: recipe.image.attribution, licence: recipe.image.licence })}
+                </a>
+              ) : (
+                formatMessage(d.photo, { attribution: recipe.image.attribution, licence: recipe.image.licence })
+              )
+            ) : (
+              d.noPhoto
+            )}
           </p>
         </section>
       </footer>
